@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ShieldCheck, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, CheckCircle2 } from 'lucide-react';
 export function Hero() {
   return (
     <section className="pt-32 pb-24 px-6 overflow-hidden relative">
@@ -8,30 +8,29 @@ export function Hero() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-uw-gold/15 rounded-full blur-[140px] pointer-events-none"></div>
       <div className="absolute top-1/2 right-0 w-[400px] h-[400px] bg-uw-gold/10 rounded-full blur-[120px] pointer-events-none hidden lg:block"></div>
 
+      <div className="max-w-7xl mx-auto relative z-10 mb-8 flex justify-center">
+        <motion.div
+          initial={{
+            opacity: 0,
+            y: 20
+          }}
+          animate={{
+            opacity: 1,
+            y: 0
+          }}
+          transition={{
+            duration: 0.5
+          }}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-uw-gold/10 border border-uw-gold/20 rounded-full text-xs sm:text-sm font-medium text-uw-gold"
+        >
+          Concept Landing Page • Currently validating UniMarket with Waterloo
+          students
+        </motion.div>
+      </div>
+
       <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center relative z-10">
         {/* Left Content */}
         <div className="max-w-2xl">
-          <motion.div
-            initial={{
-              opacity: 0,
-              y: 20
-            }}
-            animate={{
-              opacity: 1,
-              y: 0
-            }}
-            transition={{
-              duration: 0.5
-            }}
-            className="inline-flex items-center gap-2 px-3 py-1.5 bg-uw-card border border-white/[0.05] border-t-white/10 rounded-full text-sm font-medium mb-8 shadow-3d relative overflow-hidden">
-            
-            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent pointer-events-none"></div>
-            <ShieldCheck className="w-4 h-4 text-uw-gold relative z-10" />
-            <span className="text-gray-300 relative z-10">
-              Verified student sellers only
-            </span>
-          </motion.div>
-
           <motion.h1
             initial={{
               opacity: 0,
