@@ -103,9 +103,6 @@ export function Footer() {
             <p className="text-sm text-gray-600">
               © {new Date().getFullYear()} UniMarket Inc. All rights reserved.
             </p>
-            <p className="text-xs text-gray-500 mt-1">
-              Concept landing page for market research and early access.
-            </p>
           </div>
           <div className="flex gap-4">
             <a
