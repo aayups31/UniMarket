@@ -88,10 +88,10 @@ export function Hero() {
             }}
             className="flex flex-col sm:flex-row gap-4">
             
-            <button className="bg-uw-gold text-uw-black px-6 py-3.5 rounded-xl font-bold hover:bg-[#E5BC00] transition-all flex items-center justify-center gap-2 shadow-glow hover:shadow-glow-strong shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]">
+            <a href="#waitlist" className="bg-uw-gold text-uw-black px-6 py-3.5 rounded-xl font-bold hover:bg-[#E5BC00] transition-all flex items-center justify-center gap-2 shadow-glow hover:shadow-glow-strong shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]">
               Join with @uwaterloo.ca
               <ArrowRight className="w-4 h-4" />
-            </button>
+            </a>
             <button className="bg-uw-card border border-white/[0.05] border-t-white/10 text-white px-6 py-3.5 rounded-xl font-semibold hover:bg-white/5 hover:border-uw-gold/50 hover:text-uw-gold transition-all flex items-center justify-center shadow-3d relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent pointer-events-none"></div>
               <span className="relative z-10">Browse listings</span>
