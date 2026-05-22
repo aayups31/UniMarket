@@ -99,9 +99,14 @@ export function Footer() {
         </div>
 
         <div className="pt-8 border-t border-uw-border flex flex-col md:flex-row items-center justify-between gap-6">
-          <p className="text-sm text-gray-600">
-            © {new Date().getFullYear()} UniMarket Inc. All rights reserved.
-          </p>
+          <div className="text-center md:text-left">
+            <p className="text-sm text-gray-600">
+              © {new Date().getFullYear()} UniMarket Inc. All rights reserved.
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Concept landing page for market research and early access.
+            </p>
+          </div>
           <div className="flex gap-4">
             <a
               href="#"
