@@ -1,104 +1,72 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import Link from 'next/link';
+
 const steps = [
-{
-  num: '01',
-  title: 'Verify your status',
-  desc: "Sign up with your @uwaterloo.ca email address. We'll send a quick verification link to ensure you're a real student."
-},
-{
-  num: '02',
-  title: 'Browse your campus',
-  desc: 'Find what you need from peers right on campus. Everything from textbooks to mini-fridges, just a short walk away.'
-},
-{
-  num: '03',
-  title: 'Pay securely & meet',
-  desc: 'Use our in-app escrow to pay safely, or agree to meet up for cash. Meet at the library or student center.'
-}];
+  {
+    number: '01',
+    title: 'Create and verify once',
+    description:
+      'Choose a password with your Waterloo email, then open one verification link. Future sign-ins use email and password.',
+  },
+  {
+    number: '02',
+    title: 'Find it or pass it on',
+    description:
+      'Search the marketplace or publish a listing with clear photos, condition, price, and a broad pickup area.',
+  },
+  {
+    number: '03',
+    title: 'Agree, inspect, exchange',
+    description:
+      'Contact the seller, choose a public campus-area meetup, and inspect the item before completing the exchange.',
+  },
+];
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-32 px-6 relative">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-24">
-          <motion.div
-            initial={{
-              opacity: 0,
-              y: 20
-            }}
-            whileInView={{
-              opacity: 1,
-              y: 0
-            }}
-            viewport={{
-              once: true
-            }}
-            className="text-xs font-mono uppercase tracking-widest text-uw-gold/70 mb-6">
-            
-            Process
-          </motion.div>
-          <motion.h2
-            initial={{
-              opacity: 0,
-              y: 20
-            }}
-            whileInView={{
-              opacity: 1,
-              y: 0
-            }}
-            viewport={{
-              once: true
-            }}
-            transition={{
-              delay: 0.1
-            }}
-            className="text-4xl md:text-6xl">
-            
-            How it works
-          </motion.h2>
+    <section
+      className="scroll-mt-24 border-y border-white/10 bg-um-ink-900 px-4 py-20 text-um-text-inverse sm:px-6 sm:py-24 lg:py-28"
+      id="how-it-works"
+    >
+      <div className="mx-auto max-w-um-content">
+        <div className="grid gap-7 border-b border-white/10 pb-9 md:grid-cols-[1fr_auto] md:items-end">
+          <div>
+            <p className="font-condensed text-sm font-bold uppercase tracking-[0.15em] text-um-gold-400">
+              How it works
+            </p>
+            <h2 className="um-balanced mt-4 max-w-3xl text-4xl font-black leading-[0.98] tracking-[-0.05em] sm:text-5xl">
+              From Waterloo inbox to campus pickup.
+            </h2>
+          </div>
+          <Link
+            className="inline-flex min-h-11 w-fit items-center text-sm font-bold text-um-gold-400 underline decoration-um-gold-600 underline-offset-4 transition-colors hover:text-um-gold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-400"
+            href="/signup"
+          >
+            Create an account
+          </Link>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-12 relative">
-          {/* Connecting line for desktop */}
-          <div className="hidden md:block absolute top-8 left-[15%] right-[15%] h-px bg-gradient-to-r from-transparent via-white/10 to-transparent z-0"></div>
-
-          {/* Ambient glow behind middle step */}
-          <div className="absolute top-8 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] bg-uw-gold/10 rounded-full blur-[80px] pointer-events-none"></div>
-
-          {steps.map((step, index) =>
-          <motion.div
-            key={index}
-            initial={{
-              opacity: 0,
-              y: 20
-            }}
-            whileInView={{
-              opacity: 1,
-              y: 0
-            }}
-            viewport={{
-              once: true
-            }}
-            transition={{
-              delay: index * 0.2
-            }}
-            className="relative z-10 flex flex-col items-center text-center group">
-            
-              <div className="w-16 h-16 bg-uw-card border border-white/[0.05] border-t-white/20 rounded-full flex items-center justify-center text-xl font-mono text-uw-gold mb-8 shadow-3d relative overflow-hidden group-hover:shadow-glow transition-shadow">
-                <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent pointer-events-none"></div>
-                <span className="relative z-10">{step.num}</span>
-              </div>
-              <h3 className="font-bold text-2xl mb-4 font-sans text-white">
-                {step.title}
-              </h3>
-              <p className="text-gray-400 max-w-sm leading-relaxed">
-                {step.desc}
+        <ol className="grid md:grid-cols-3">
+          {steps.map((step) => (
+            <li
+              className="border-b border-white/10 py-8 md:border-b-0 md:border-r md:px-8 md:py-10 md:first:pl-0 md:last:border-r-0 md:last:pr-0"
+              key={step.number}
+            >
+              <p className="font-condensed text-3xl font-bold tracking-[-0.02em] text-um-gold-400">
+                {step.number}
               </p>
-            </motion.div>
-          )}
-        </div>
-      </div>
-    </section>);
+              <h3 className="mt-8 text-2xl font-black tracking-[-0.03em]">{step.title}</h3>
+              <p className="mt-4 max-w-sm text-sm leading-7 text-white/56 sm:text-base">
+                {step.description}
+              </p>
+            </li>
+          ))}
+        </ol>
 
+        <p className="mt-7 max-w-3xl text-sm leading-6 text-white/55">
+          Verification confirms campus email access. It does not replace inspecting an item or
+          meeting in a public place.
+        </p>
+      </div>
+    </section>
+  );
 }

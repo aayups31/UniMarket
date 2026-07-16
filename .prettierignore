@@ -1,0 +1,7 @@
+listing.md
+unimarket.md
+next-env.d.ts
+UniMarket UI/
+.env.example
+.nvmrc
+supabase/**/*.sql

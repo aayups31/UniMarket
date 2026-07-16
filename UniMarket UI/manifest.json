@@ -1,0 +1,42 @@
+{
+  "package": "UniMarket UI Identity Starter",
+  "version": "1.0.0",
+  "created": "2026-07-15",
+  "documents": [
+    "README.md",
+    "docs/00_NORTH_STAR.md",
+    "docs/01_CURRENT_UI_AUDIT.md",
+    "docs/02_BRAND_AND_POSITIONING.md",
+    "docs/03_WATERLOO_IDENTITY.md",
+    "docs/04_DESIGN_TOKENS.md",
+    "docs/05_TYPOGRAPHY.md",
+    "docs/06_LAYOUT_AND_SPACING.md",
+    "docs/07_AUTH_EXPERIENCE.md",
+    "docs/08_MARKETPLACE_HOME.md",
+    "docs/09_CREATE_LISTING.md",
+    "docs/10_LISTING_DETAILS.md",
+    "docs/11_MESSAGING.md",
+    "docs/12_PROFILE_AND_TRUST.md",
+    "docs/13_ADMIN_AND_MODERATION.md",
+    "docs/14_MOTION_AND_TRANSITIONS.md",
+    "docs/15_COPYWRITING.md",
+    "docs/16_STATES_AND_FEEDBACK.md",
+    "docs/17_RESPONSIVE_ACCESSIBILITY_PERFORMANCE.md",
+    "docs/18_ANTI_VIBE_CODED_RULES.md",
+    "docs/19_COMPONENT_INVENTORY.md",
+    "docs/20_UNIVERSITY_THEME_ENGINE.md",
+    "docs/21_IMPLEMENTATION_ROADMAP.md",
+    "docs/22_FINAL_QA_CHECKLIST.md"
+  ],
+  "starter_code": [
+    "starter-code/copy.ts",
+    "starter-code/motion.ts",
+    "starter-code/tailwind-theme-snippet.ts",
+    "starter-code/tokens.css",
+    "starter-code/university-theme.ts"
+  ],
+  "references": [
+    "current-auth-screen.png",
+    "current-marketplace-home.png"
+  ]
+}

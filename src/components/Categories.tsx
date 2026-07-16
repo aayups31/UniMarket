@@ -1,177 +1,100 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import {
-  BookOpen,
-  Lamp,
-  Laptop,
-  Bike,
-  Armchair,
-  Ticket,
-  Utensils,
-  Shirt } from
-'lucide-react';
+import { Armchair, ArrowUpRight, BookOpen, Laptop, Shirt } from 'lucide-react';
+import Link from 'next/link';
+
 const categories = [
-{
-  name: 'Textbooks',
-  icon: <BookOpen className="w-6 h-6" />,
-  count: '342'
-},
-{
-  name: 'Dorm Essentials',
-  icon: <Lamp className="w-6 h-6" />,
-  count: '156'
-},
-{
-  name: 'Electronics',
-  icon: <Laptop className="w-6 h-6" />,
-  count: '89'
-},
-{
-  name: 'Bikes & Scooters',
-  icon: <Bike className="w-6 h-6" />,
-  count: '45'
-},
-{
-  name: 'Furniture',
-  icon: <Armchair className="w-6 h-6" />,
-  count: '210'
-},
-{
-  name: 'Event Tickets',
-  icon: <Ticket className="w-6 h-6" />,
-  count: '67'
-},
-{
-  name: 'Kitchenware',
-  icon: <Utensils className="w-6 h-6" />,
-  count: '124'
-},
-{
-  name: 'Clothing',
-  icon: <Shirt className="w-6 h-6" />,
-  count: '430'
-}];
+  {
+    name: 'Electronics',
+    slug: 'electronics',
+    description: 'Monitors, keyboards, headphones, tablets, and co-op setups.',
+    icon: Laptop,
+  },
+  {
+    name: 'Books',
+    slug: 'books',
+    description: 'Textbooks, course reads, study guides, and novels.',
+    icon: BookOpen,
+  },
+  {
+    name: 'Household',
+    slug: 'household-items',
+    description: 'Desks, lamps, kitchen basics, and things for a student place.',
+    icon: Armchair,
+  },
+  {
+    name: 'Clothing',
+    slug: 'clothing',
+    description: 'Jackets, hoodies, shoes, accessories, and everyday layers.',
+    icon: Shirt,
+  },
+];
 
 export function Categories() {
   return (
-    <section id="categories" className="py-32 px-6 relative">
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
-
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+    <section
+      className="scroll-mt-24 bg-um-canvas-soft px-4 py-20 sm:px-6 sm:py-24 lg:py-32"
+      id="categories"
+    >
+      <div className="mx-auto max-w-um-content">
+        <div className="grid gap-12 lg:grid-cols-[minmax(18rem,0.68fr)_minmax(0,1.32fr)] lg:gap-16">
           <div>
-            <motion.div
-              initial={{
-                opacity: 0,
-                y: 20
-              }}
-              whileInView={{
-                opacity: 1,
-                y: 0
-              }}
-              viewport={{
-                once: true
-              }}
-              className="text-xs font-mono uppercase tracking-widest text-uw-gold/70 mb-6">
-              
-              Categories
-            </motion.div>
-            <motion.h2
-              initial={{
-                opacity: 0,
-                y: 20
-              }}
-              whileInView={{
-                opacity: 1,
-                y: 0
-              }}
-              viewport={{
-                once: true
-              }}
-              transition={{
-                delay: 0.1
-              }}
-              className="text-4xl md:text-6xl mb-4">
-              
-              Popular on campus
-            </motion.h2>
-            <motion.p
-              initial={{
-                opacity: 0,
-                y: 20
-              }}
-              whileInView={{
-                opacity: 1,
-                y: 0
-              }}
-              viewport={{
-                once: true
-              }}
-              transition={{
-                delay: 0.2
-              }}
-              className="text-uw-gray text-lg">
-              
-              Everything you need for the semester, sold by students who don't
-              need it anymore.
-            </motion.p>
-          </div>
-          <motion.button
-            initial={{
-              opacity: 0
-            }}
-            whileInView={{
-              opacity: 1
-            }}
-            viewport={{
-              once: true
-            }}
-            className="text-white font-semibold hover:text-uw-gold transition-colors whitespace-nowrap pb-2 border-b border-transparent hover:border-uw-gold">
-            
-            View all categories →
-          </motion.button>
-        </div>
+            <p className="font-condensed text-sm font-bold uppercase tracking-[0.15em] text-um-gold-700">
+              Starting categories
+            </p>
+            <h2 className="um-balanced mt-4 text-4xl font-black leading-[0.98] tracking-[-0.055em] sm:text-5xl">
+              Built around campus life.
+            </h2>
+            <p className="mt-6 max-w-md text-base leading-7 text-um-text-muted">
+              UniMarket starts deliberately small: useful categories that cover class, co-op, and
+              the place you live.
+            </p>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          {categories.map((cat, index) =>
-          <motion.a
-            href="#"
-            key={index}
-            initial={{
-              opacity: 0,
-              scale: 0.95
-            }}
-            whileInView={{
-              opacity: 1,
-              scale: 1
-            }}
-            viewport={{
-              once: true
-            }}
-            transition={{
-              delay: index * 0.05
-            }}
-            whileHover={{
-              y: -4
-            }}
-            className="group p-8 rounded-2xl bg-uw-card border border-white/[0.05] border-t-white/10 shadow-3d hover:border-white/15 hover:border-t-white/30 hover:shadow-glow transition-all cursor-pointer flex flex-col items-center text-center relative overflow-hidden">
-            
-              <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent pointer-events-none"></div>
-              <div className="absolute inset-0 bg-uw-gold/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
-
-              <div className="relative z-10 w-14 h-14 bg-uw-elevated border border-white/10 rounded-full flex items-center justify-center text-white mb-6 group-hover:bg-uw-gold group-hover:text-uw-black group-hover:border-uw-gold transition-colors shadow-inner">
-                {cat.icon}
-              </div>
-              <h3 className="font-bold font-sans mb-2 text-white relative z-10">
-                {cat.name}
-              </h3>
-              <p className="text-sm text-gray-500 font-mono relative z-10">
-                {cat.count} listings
+            <div className="mt-9 border-y border-black/10 py-5">
+              <p className="font-condensed text-xs font-bold uppercase tracking-[0.14em] text-um-text-muted">
+                The Waterloo rhythm
               </p>
-            </motion.a>
-          )}
+              <p className="mt-3 font-mono text-[0.66rem] font-semibold uppercase leading-6 tracking-[0.13em] text-um-text">
+                Before class · Before co-op
+                <span className="block">Before move-in · Before move-out</span>
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <div className="grid gap-px border border-black/10 bg-black/10 sm:grid-cols-2">
+              {categories.map(({ description, icon: Icon, name, slug }) => (
+                <Link
+                  className="group min-h-52 bg-um-surface p-6 transition-colors hover:bg-um-surface-warm focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-um-gold-600 sm:p-7"
+                  href={`/marketplace?category=${slug}`}
+                  key={slug}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <Icon
+                      aria-hidden="true"
+                      className="size-6 text-um-text-muted transition-colors group-hover:text-um-gold-700"
+                      strokeWidth={1.8}
+                    />
+                    <ArrowUpRight
+                      aria-hidden="true"
+                      className="size-4 text-um-text-muted transition-transform duration-160 ease-um-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                    />
+                  </div>
+                  <h3 className="mt-9 text-2xl font-black tracking-[-0.035em]">{name}</h3>
+                  <p className="mt-3 max-w-sm text-sm leading-6 text-um-text-muted">
+                    {description}
+                  </p>
+                </Link>
+              ))}
+            </div>
+
+            <Link
+              className="mt-6 inline-flex min-h-11 items-center text-sm font-bold text-um-text-strong underline decoration-um-gold-600 decoration-2 underline-offset-4 transition-colors hover:text-um-gold-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-600"
+              href="/marketplace"
+            >
+              Browse the marketplace
+            </Link>
+          </div>
         </div>
       </div>
-    </section>);
-
+    </section>
+  );
 }

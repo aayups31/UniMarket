@@ -1,134 +1,79 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Shield, Map, GraduationCap, Lock } from 'lucide-react';
-const pillars = [
-{
-  icon: <Shield className="w-6 h-6" />,
-  title: 'Verified Students Only',
-  description:
-  'Every user is verified with an active university email. No bots, no scammers, just real peers.'
-},
-{
-  icon: <Map className="w-6 h-6" />,
-  title: 'Hyper-Local',
-  description:
-  'See listings only from your campus or within a 5km radius. Meetups are always a short walk away.'
-},
-{
-  icon: <GraduationCap className="w-6 h-6" />,
-  title: 'Student-Focused',
-  description:
-  'Categories built for student life: textbooks, dorm gear, sublets, and event tickets.'
-},
-{
-  icon: <Lock className="w-6 h-6" />,
-  title: 'Secure Payments',
-  description:
-  'Optional in-app escrow with QR verification. We hold the money until you get the item.'
-}];
+const reasons = [
+  {
+    number: '01',
+    title: 'Verified campus access',
+    description:
+      'Student accounts verify an @uwaterloo.ca address once before entering the private marketplace.',
+  },
+  {
+    number: '02',
+    title: 'Useful location, less exposure',
+    description:
+      'Listings use broad pickup areas such as campus, UWP, ICON, Lester, or Columbia—not an exact address.',
+  },
+  {
+    number: '03',
+    title: 'Designed around term life',
+    description:
+      'The product starts with the things students actually pass on before class, co-op, move-in, and move-out.',
+  },
+  {
+    number: '04',
+    title: 'Clear exchange expectations',
+    description:
+      'Condition, photos, price, and pickup context sit together, with guidance to meet publicly and inspect first.',
+  },
+];
 
 export function WhyBetter() {
   return (
-    <section className="py-32 px-6 relative">
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+    <section
+      className="scroll-mt-24 bg-um-canvas px-4 py-20 sm:px-6 sm:py-24 lg:py-32"
+      id="why-waterloo"
+    >
+      <div className="mx-auto max-w-um-content">
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,0.72fr)_minmax(32rem,1.28fr)] lg:gap-20">
+          <div className="lg:sticky lg:top-28 lg:self-start">
+            <p className="font-condensed text-sm font-bold uppercase tracking-[0.15em] text-um-gold-700">
+              Why Waterloo first
+            </p>
+            <h2 className="um-balanced mt-4 text-4xl font-black leading-[0.98] tracking-[-0.055em] sm:text-5xl lg:text-6xl">
+              One campus changes the marketplace.
+            </h2>
+            <p className="mt-6 max-w-lg text-lg leading-8 text-um-text">
+              UniMarket narrows the marketplace to a shared university, a verified student domain,
+              and the places that already shape everyday exchanges.
+            </p>
 
-      <div className="max-w-7xl mx-auto relative z-10">
-        <div className="text-center max-w-2xl mx-auto mb-20 relative">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[200px] bg-uw-gold/10 rounded-full blur-[120px] pointer-events-none"></div>
+            <div className="mt-9 border-l-2 border-um-gold-600 pl-5">
+              <p className="text-sm font-bold text-um-text-strong">Independent, not official</p>
+              <p className="mt-2 max-w-md text-sm leading-6 text-um-text-muted">
+                Waterloo context is part of the product experience. UniMarket does not represent the
+                University of Waterloo.
+              </p>
+            </div>
+          </div>
 
-          <motion.div
-            initial={{
-              opacity: 0,
-              y: 20
-            }}
-            whileInView={{
-              opacity: 1,
-              y: 0
-            }}
-            viewport={{
-              once: true
-            }}
-            className="text-xs font-mono uppercase tracking-widest text-uw-gold/70 mb-6">
-            
-            Why Us
-          </motion.div>
-          <motion.h2
-            initial={{
-              opacity: 0,
-              y: 20
-            }}
-            whileInView={{
-              opacity: 1,
-              y: 0
-            }}
-            viewport={{
-              once: true
-            }}
-            transition={{
-              delay: 0.1
-            }}
-            className="text-4xl md:text-6xl mb-6 relative z-10">
-            
-            Why students choose UniMarket
-          </motion.h2>
-          <motion.p
-            initial={{
-              opacity: 0,
-              y: 20
-            }}
-            whileInView={{
-              opacity: 1,
-              y: 0
-            }}
-            viewport={{
-              once: true
-            }}
-            transition={{
-              delay: 0.2
-            }}
-            className="text-uw-gray text-lg relative z-10">
-            
-            Designed around how students actually live, buy, and sell. A
-            premium, safe, and tailored experience for your campus.
-          </motion.p>
-        </div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {pillars.map((pillar, index) =>
-          <motion.div
-            key={index}
-            initial={{
-              opacity: 0,
-              y: 20
-            }}
-            whileInView={{
-              opacity: 1,
-              y: 0
-            }}
-            viewport={{
-              once: true
-            }}
-            transition={{
-              delay: index * 0.1
-            }}
-            className="p-8 rounded-2xl bg-uw-card border border-white/[0.05] border-t-white/10 shadow-3d hover:border-white/15 hover:border-t-white/20 transition-all group relative overflow-hidden">
-            
-              <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent pointer-events-none"></div>
-              <div className="relative z-10">
-                <div className="w-12 h-12 bg-uw-elevated border border-white/10 rounded-xl flex items-center justify-center text-uw-gold mb-8 group-hover:bg-uw-gold/10 group-hover:border-uw-gold/30 transition-colors shadow-inner">
-                  {pillar.icon}
-                </div>
-                <h3 className="font-bold text-xl mb-3 font-sans text-white">
-                  {pillar.title}
+          <ol className="border-t border-black/10">
+            {reasons.map((reason) => (
+              <li
+                className="grid gap-4 border-b border-black/10 py-7 sm:grid-cols-[4rem_13rem_minmax(0,1fr)] sm:items-start sm:gap-6 sm:py-9"
+                key={reason.number}
+              >
+                <span className="font-condensed text-sm font-bold tracking-[0.12em] text-um-gold-700">
+                  {reason.number}
+                </span>
+                <h3 className="text-xl font-black leading-tight tracking-[-0.025em]">
+                  {reason.title}
                 </h3>
-                <p className="text-gray-400 leading-relaxed text-sm">
-                  {pillar.description}
+                <p className="max-w-xl text-sm leading-7 text-um-text-muted sm:text-base">
+                  {reason.description}
                 </p>
-              </div>
-            </motion.div>
-          )}
+              </li>
+            ))}
+          </ol>
         </div>
       </div>
-    </section>);
-
+    </section>
+  );
 }

@@ -1,29 +1,26 @@
-import React from 'react';
-import { Nav } from './components/Nav';
-import { Hero } from './components/Hero';
-import { WhyBetter } from './components/WhyBetter';
-import { HowItWorks } from './components/HowItWorks';
 import { Categories } from './components/Categories';
-import { SecurePayments } from './components/SecurePayments';
-import { Universities } from './components/Universities';
-import { Testimonials } from './components/Testimonials';
 import { FinalCTA } from './components/FinalCTA';
 import { Footer } from './components/Footer';
+import { Hero } from './components/Hero';
+import { HowItWorks } from './components/HowItWorks';
+import { Nav } from './components/Nav';
+import { WhyBetter } from './components/WhyBetter';
+
 export function App() {
   return (
-    <div className="min-h-screen w-full flex flex-col">
+    <div className="flex min-h-screen w-full flex-col bg-um-canvas text-um-text-strong">
+      <a className="um-skip-link" href="#main-content">
+        Skip to main content
+      </a>
       <Nav />
-      <main className="flex-1">
+      <main className="flex-1" id="main-content">
         <Hero />
         <WhyBetter />
         <HowItWorks />
         <Categories />
-        <SecurePayments />
-        <Universities />
-        <Testimonials />
         <FinalCTA />
       </main>
       <Footer />
-    </div>);
-
+    </div>
+  );
 }

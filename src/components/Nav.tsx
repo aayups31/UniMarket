@@ -1,67 +1,52 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import Link from 'next/link';
+
+import { BrandMark } from '@/components/BrandMark';
+
 export function Nav() {
   return (
-    <motion.nav
-      initial={{
-        y: -20,
-        opacity: 0
-      }}
-      animate={{
-        y: 0,
-        opacity: 1
-      }}
-      transition={{
-        duration: 0.5
-      }}
-      className="fixed top-0 left-0 right-0 z-50 bg-uw-black/80 backdrop-blur-md border-b border-uw-border">
-      
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between relative">
-        <div className="flex items-center gap-6">
-          <a
-            href="#"
-            className="text-2xl font-serif font-bold tracking-tight text-white">
-            
-            UniMarket
-          </a>
-        </div>
+    <header className="sticky top-0 z-50 border-b border-black/10 bg-um-canvas-soft">
+      <nav
+        aria-label="Public navigation"
+        className="mx-auto flex h-[4.5rem] max-w-um-content items-center gap-5 px-4 sm:px-6"
+      >
+        <BrandMark className="shrink-0" />
 
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium absolute left-1/2 -translate-x-1/2">
-          <a
+        <div className="ml-auto hidden items-center gap-7 text-sm font-semibold text-um-text md:flex">
+          <Link
+            className="inline-flex min-h-11 items-center rounded-sm px-1 transition-colors hover:text-um-text-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-600"
+            href="#why-waterloo"
+          >
+            Why Waterloo
+          </Link>
+          <Link
+            className="inline-flex min-h-11 items-center rounded-sm px-1 transition-colors hover:text-um-text-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-600"
             href="#how-it-works"
-            className="text-gray-400 hover:text-white transition-colors">
-            
+          >
             How it works
-          </a>
-          <a
+          </Link>
+          <Link
+            className="inline-flex min-h-11 items-center rounded-sm px-1 transition-colors hover:text-um-text-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-600"
             href="#categories"
-            className="text-gray-400 hover:text-white transition-colors">
-            
+          >
             Categories
-          </a>
-          <a
-            href="#safety"
-            className="text-gray-400 hover:text-white transition-colors">
-            
-            Safety
-          </a>
-          <a
-            href="#universities"
-            className="text-gray-400 hover:text-white transition-colors">
-            
-            Universities
-          </a>
+          </Link>
         </div>
 
-        <div className="flex items-center gap-4">
-          <button className="hidden sm:block text-sm font-medium text-gray-300 hover:text-white transition-colors">
-            Log in
-          </button>
-          <button className="bg-uw-gold text-uw-black px-4 py-2 rounded-lg text-sm font-bold hover:bg-[#E5BC00] transition-colors shadow-glow">
-            Sign in with @uwaterloo.ca
-          </button>
+        <div className="ml-auto flex items-center gap-2 md:ml-5">
+          <Link
+            className="hidden min-h-11 items-center px-3 text-sm font-bold text-um-text transition-colors hover:text-um-text-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-600 sm:inline-flex"
+            href="/login"
+          >
+            Sign in
+          </Link>
+          <Link
+            className="inline-flex min-h-11 items-center justify-center rounded-um-sm bg-um-ink-950 px-4 text-sm font-bold text-um-text-inverse transition-colors hover:bg-um-ink-850 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-600 focus-visible:ring-offset-2"
+            href="/signup"
+          >
+            Join Waterloo
+          </Link>
         </div>
-      </div>
-    </motion.nav>);
-
+      </nav>
+    </header>
+  );
 }

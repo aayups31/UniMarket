@@ -1,0 +1,172 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+
+  /* University theme: Waterloo */
+  --um-ink-1000: #05070a;
+  --um-ink-950: #080b12;
+  --um-ink-900: #0d111a;
+  --um-ink-850: #141923;
+  --um-ink-800: #1b212c;
+
+  --um-canvas: #f7f5f0;
+  --um-canvas-soft: #fbfaf7;
+  --um-surface: #ffffff;
+  --um-surface-warm: #f1eee7;
+
+  --um-gold-300: #ffe889;
+  --um-gold-400: #ffd84f;
+  --um-gold-500: #ffc928;
+  --um-gold-600: #dfa600;
+  --um-gold-700: #8a6200;
+
+  --um-text-strong: #111318;
+  --um-text: #333842;
+  --um-text-muted: #626975;
+  --um-text-inverse: #f7f7f4;
+  --um-border: rgb(17 19 24 / 10%);
+  --um-border-dark: rgb(255 255 255 / 10%);
+  --um-gold-border: rgb(223 166 0 / 34%);
+
+  --um-success: #117448;
+  --um-warning: #8a5a00;
+  --um-danger: #b02d37;
+  --um-info: #285bbd;
+
+  --um-radius-xs: 0.5rem;
+  --um-radius-sm: 0.75rem;
+  --um-radius-md: 1rem;
+  --um-radius-lg: 1.375rem;
+  --um-radius-xl: 1.875rem;
+  --um-radius-pill: 999px;
+
+  --um-shadow-xs: 0 1px 2px rgb(12 15 20 / 5%);
+  --um-shadow-sm: 0 8px 22px rgb(12 15 20 / 8%);
+  --um-shadow-md: 0 18px 45px rgb(12 15 20 / 12%);
+  --um-shadow-gold: 0 18px 55px rgb(223 166 0 / 12%);
+  --um-focus-ring: 0 0 0 3px rgb(255 201 40 / 30%);
+  --um-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Backwards-compatible aliases for the existing UI primitives. */
+  --background: 247 245 240;
+  --foreground: 17 19 24;
+  --muted: 241 238 231;
+  --muted-foreground: 98 105 117;
+  --border: 225 223 218;
+  --gold: 255 201 40;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  border-color: rgb(var(--border));
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--um-canvas);
+  text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: var(--um-canvas);
+  color: var(--um-text-strong);
+  font-family: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  text-underline-offset: 0.18em;
+}
+
+img,
+svg {
+  display: block;
+}
+
+::selection {
+  background: var(--um-gold-300);
+  color: var(--um-ink-950);
+}
+
+:focus-visible {
+  outline: 2px solid var(--um-ink-950);
+  outline-offset: 3px;
+}
+
+@layer utilities {
+  .font-condensed {
+    font-family: var(--font-barlow-condensed), 'Arial Narrow', sans-serif;
+  }
+
+  .font-editorial {
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+
+  .um-content-container {
+    width: min(100% - 2rem, 82.5rem);
+    margin-inline: auto;
+  }
+
+  .um-balanced {
+    text-wrap: balance;
+  }
+}
+
+.um-skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  translate: 0 -160%;
+  border-radius: var(--um-radius-sm);
+  background: var(--um-gold-500);
+  color: var(--um-ink-950);
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 750;
+  box-shadow: var(--um-shadow-sm);
+  transition: translate 160ms var(--um-ease-out);
+}
+
+.um-skip-link:focus {
+  translate: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+}
