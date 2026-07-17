@@ -50,7 +50,7 @@ export function EmailVerificationStatus({ email, nextPath }: EmailVerificationSt
 
   return (
     <div className="mt-8 space-y-5">
-      <div className="border-l-2 border-[#d0a100] bg-[#fff8d9] px-5 py-4 text-sm leading-6 text-[#443700]">
+      <div className="border-l-2 border-um-gold-500 bg-um-gold-300/20 px-5 py-4 text-sm leading-6 text-um-text">
         Open the newest verification link in the same browser and device where you signed up. After
         verification, return here and sign in with your email and password.
       </div>
@@ -58,7 +58,7 @@ export function EmailVerificationStatus({ email, nextPath }: EmailVerificationSt
       {serverError ? (
         <div
           aria-live="polite"
-          className="border-l-2 border-red-600 bg-red-50 px-4 py-3 text-sm font-medium text-red-800"
+          className="border-l-2 border-red-600 bg-red-50/80 px-4 py-3 text-sm font-medium text-red-800"
           role="alert"
         >
           {serverError}
@@ -68,28 +68,28 @@ export function EmailVerificationStatus({ email, nextPath }: EmailVerificationSt
       {notice ? (
         <div
           aria-live="polite"
-          className="border-l-2 border-emerald-700 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900"
+          className="border-l-2 border-emerald-700 bg-emerald-50/80 px-4 py-3 text-sm font-medium text-emerald-900"
           role="status"
         >
           {notice}
         </div>
       ) : null}
 
-      <p className="text-sm leading-6 text-black/58">
+      <p className="text-sm leading-6 text-um-text-muted">
         If the address already has an account, use the sign-in page instead. Check spam if the
         message takes a moment to arrive.
       </p>
 
       <div className="flex flex-col items-center justify-between gap-3 pt-1 text-sm sm:flex-row">
         <Link
-          className="-mx-2 inline-flex min-h-11 items-center gap-1.5 px-2 font-semibold text-black/55 transition hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7a900]"
+          className="-mx-2 inline-flex min-h-11 items-center gap-1.5 px-2 font-semibold text-um-text-muted transition hover:text-um-text-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-500"
           href={signupHref}
         >
           <ArrowLeft aria-hidden="true" className="size-4" />
           Change email
         </Link>
         <button
-          className="-mx-2 inline-flex min-h-11 items-center gap-1.5 px-2 font-semibold text-black/55 transition hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7a900] disabled:cursor-not-allowed disabled:text-black/30"
+          className="-mx-2 inline-flex min-h-11 items-center gap-1.5 px-2 font-semibold text-um-text-muted transition hover:text-um-text-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-500 disabled:cursor-not-allowed disabled:text-black/30"
           disabled={secondsUntilResend > 0 || isResending}
           onClick={resend}
           type="button"

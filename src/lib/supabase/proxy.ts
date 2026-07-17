@@ -21,6 +21,10 @@ function isProtectedRoute(pathname: string) {
 
 function copyCookies(source: NextResponse, destination: NextResponse) {
   source.cookies.getAll().forEach((cookie) => destination.cookies.set(cookie));
+  for (const header of ['cache-control', 'expires', 'pragma']) {
+    const value = source.headers.get(header);
+    if (value) destination.headers.set(header, value);
+  }
   return destination;
 }
 
@@ -31,7 +35,7 @@ export async function updateSession(request: NextRequest) {
   const supabase = createServerClient<Database>(url, publishableKey, {
     cookies: {
       getAll: () => request.cookies.getAll(),
-      setAll(cookiesToSet) {
+      setAll(cookiesToSet, headersToSet) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
 
         response = NextResponse.next({ request });
@@ -39,6 +43,7 @@ export async function updateSession(request: NextRequest) {
         cookiesToSet.forEach(({ name, options, value }) =>
           response.cookies.set(name, value, options),
         );
+        Object.entries(headersToSet).forEach(([name, value]) => response.headers.set(name, value));
       },
     },
   });

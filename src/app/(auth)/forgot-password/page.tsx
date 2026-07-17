@@ -17,22 +17,23 @@ export default async function ForgotPasswordPage({ searchParams }: ForgotPasswor
 
   return (
     <div>
-      <p className="font-mono text-[0.64rem] font-bold uppercase tracking-[0.2em] text-[#856800]">
+      <p className="text-sm font-semibold tracking-[0.02em] text-um-gold-700">
         Waterloo access · Recovery
       </p>
       <h1
         aria-label="Reset your password"
-        className="mt-4 text-4xl font-black leading-[1.02] tracking-[-0.05em] text-[#111311] sm:text-[2.75rem]"
+        className="mt-5 text-[clamp(2.6rem,5.5vw,3.75rem)] font-bold leading-[1.02] tracking-[-0.028em] text-um-text-strong"
       >
-        Reset your password.
+        Reset your
+        <span className="block text-um-gold-600">password.</span>
       </h1>
-      <p className="mt-4 max-w-sm text-base leading-7 text-black/58">
+      <p className="mt-5 max-w-md text-base leading-7 text-um-text">
         We’ll email a private recovery link if the address belongs to an eligible account.
       </p>
 
       {requestedError === 'invalid-link' ? (
         <div
-          className="mt-6 border-l-2 border-red-600 bg-red-50 px-4 py-3 text-sm font-medium text-red-800"
+          className="mt-6 border-l-2 border-red-600 bg-red-50/80 px-4 py-3 text-sm font-medium text-red-800"
           role="alert"
         >
           That recovery link is invalid or expired. Request a new one below.

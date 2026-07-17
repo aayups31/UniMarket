@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, CircleCheckBig, MapPin, Plus, ShieldAlert, Sparkles } from 'lucide-react';
 
+import { CampusRouteGraphic } from '@/components/ui/CampusRouteGraphic';
 import { CategoryFilters } from '@/features/marketplace/components/CategoryFilters';
 import { ListingGrid } from '@/features/marketplace/components/ListingGrid';
 import { MarketplaceEmptyState } from '@/features/marketplace/components/MarketplaceEmptyState';
@@ -48,90 +49,89 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
 
   return (
     <div className="min-h-screen bg-um-canvas text-um-text-strong">
-      <div className="mx-auto max-w-um-content px-4 pb-20 pt-5 sm:px-6 sm:pt-7 lg:px-8 lg:pb-28 lg:pt-9">
-        <header>
-          <section
-            className="relative isolate overflow-hidden rounded-um-xl border border-black/10 bg-um-canvas-soft shadow-um-sm"
-            aria-labelledby="marketplace-heading"
-          >
-            <div className="absolute inset-x-0 top-0 h-1 bg-um-gold-500" aria-hidden="true" />
+      <header className="relative isolate overflow-hidden bg-um-ink-950 text-um-text-inverse">
+        <div
+          className="absolute inset-y-0 right-0 hidden w-[58%] opacity-75 lg:block"
+          aria-hidden="true"
+        >
+          <CampusRouteGraphic />
+        </div>
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-[linear-gradient(90deg,#080c13_0%,rgba(8,12,19,0.98)_42%,rgba(8,12,19,0.72)_70%,rgba(8,12,19,0.25)_100%)]"
+        />
+        <div className="absolute inset-x-0 bottom-0 h-px bg-um-gold-400/60" aria-hidden="true" />
 
-            <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_17.5rem]">
-              <div className="relative px-5 pb-6 pt-7 sm:px-9 sm:pb-8 sm:pt-10 lg:px-12 lg:pb-9 lg:pt-11">
-                <div className="max-w-[48rem]">
-                  <p className="font-condensed flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-um-gold-700">
-                    <MapPin className="size-3.5" strokeWidth={2} aria-hidden="true" />
-                    Marketplace for Waterloo students
-                  </p>
-                  <h1
-                    id="marketplace-heading"
-                    className="um-balanced mt-5 text-[clamp(2.25rem,5vw,4rem)] font-bold leading-[0.99] tracking-[-0.055em] text-um-text-strong"
-                  >
-                    {firstName ? `${greeting}, ${firstName}.` : 'Waterloo’s marketplace.'}
-                    <span className="mt-1 block text-um-text-muted">
-                      {firstName
-                        ? 'What do you need before your next co-op?'
-                        : 'Built for students, not strangers.'}
-                    </span>
-                  </h1>
-                  <p className="mt-5 max-w-2xl text-sm leading-6 text-um-text sm:text-[0.98rem] sm:leading-7">
-                    Browse useful things from verified Waterloo students, then arrange a simple
-                    pickup that works for both of you.
-                  </p>
-                </div>
+        <div className="relative mx-auto grid max-w-um-content gap-12 px-4 pb-10 pt-10 sm:px-6 sm:pb-12 sm:pt-14 lg:grid-cols-[minmax(0,1.42fr)_minmax(18rem,0.58fr)] lg:gap-16 lg:px-8 lg:pb-14 lg:pt-16">
+          <div className="max-w-[52rem]">
+            <p className="flex items-center gap-2 text-sm font-semibold tracking-[0.02em] text-um-gold-300">
+              <MapPin className="size-3.5" strokeWidth={2} aria-hidden="true" />
+              Listed for Waterloo
+            </p>
+            <h1
+              id="marketplace-heading"
+              className="um-balanced mt-6 text-[clamp(2.65rem,5vw,4.5rem)] font-bold leading-[1] tracking-[-0.03em]"
+            >
+              {firstName ? `${greeting}, ${firstName}.` : 'Waterloo’s marketplace.'}
+              <span className="mt-2 block max-w-3xl text-white/68">
+                {firstName
+                  ? 'What do you need before your next co-op?'
+                  : 'Built for students, not strangers.'}
+              </span>
+            </h1>
+            <p className="mt-6 max-w-2xl text-sm leading-6 text-white/72 sm:text-base sm:leading-7">
+              Useful things, verified Waterloo sellers, and pickup points that already make sense.
+            </p>
 
-                <div className="mt-8 max-w-[58rem] sm:mt-10">
-                  <MarketplaceSearch query={data.query} category={data.category} />
-                </div>
-
-                <div className="mt-7 border-t border-black/10 pt-5 sm:mt-9 sm:flex sm:items-center sm:gap-6 sm:pt-6">
-                  <p className="font-condensed flex shrink-0 items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-um-gold-700">
-                    <MapPin className="size-3.5" strokeWidth={1.9} aria-hidden="true" />
-                    Around Waterloo
-                  </p>
-                  <ul className="mt-3 flex flex-wrap gap-x-3 gap-y-1.5 font-condensed text-xs font-semibold tracking-[0.08em] text-um-text-muted sm:mt-0">
-                    {CAMPUS_PLACES.map((place) => (
-                      <li key={place}>{place}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              <aside className="relative hidden overflow-hidden bg-um-ink-950 p-7 text-um-text-inverse lg:flex lg:flex-col lg:justify-between">
-                <div>
-                  <p className="font-condensed text-xs font-bold uppercase tracking-[0.18em] text-um-gold-400">
-                    Black / Gold
-                  </p>
-                  <span
-                    className="mt-3 block select-none font-condensed text-[7.5rem] font-bold leading-none text-white/[0.06]"
-                    aria-hidden="true"
-                  >
-                    W
-                  </span>
-                </div>
-                <div>
-                  <div className="mb-5 space-y-1.5" aria-hidden="true">
-                    <div className="h-1.5 w-3/5 bg-um-gold-300" />
-                    <div className="h-1.5 w-4/5 bg-um-gold-400" />
-                    <div className="h-1.5 w-full bg-um-gold-500" />
-                    <div className="h-1.5 w-2/5 bg-um-gold-600" />
-                  </div>
-                  <p className="text-lg font-bold leading-6 tracking-[-0.025em]">
-                    Waterloo buys from Waterloo.
-                  </p>
-                  <p className="mt-2 text-xs leading-5 text-white/55">
-                    A verified student marketplace for everyday campus life.
-                  </p>
-                </div>
-              </aside>
+            <div className="mt-8 max-w-[50rem] sm:mt-10">
+              <MarketplaceSearch query={data.query} category={data.category} />
             </div>
-          </section>
+          </div>
 
+          <aside className="hidden self-end border-l border-white/14 pb-1 pl-7 lg:block">
+            <p className="text-sm font-semibold tracking-[0.02em] text-um-gold-300">
+              Built around Waterloo terms
+            </p>
+            <p className="mt-5 max-w-[15rem] text-2xl font-bold leading-[1.1] tracking-[-0.02em]">
+              Waterloo buys from Waterloo.
+            </p>
+            <p className="mt-3 max-w-[16rem] text-sm leading-6 text-white/68">
+              From one study term to the next, keep good things moving locally.
+            </p>
+            <div className="mt-7 space-y-1.5" aria-hidden="true">
+              <div className="h-1 w-12 bg-um-gold-200" />
+              <div className="h-1 w-20 bg-um-gold-300" />
+              <div className="h-1 w-28 bg-um-gold-400" />
+              <div className="h-1 w-16 bg-um-gold-500" />
+            </div>
+          </aside>
+        </div>
+
+        <div className="relative border-t border-white/[0.07] bg-black/20">
+          <div className="mx-auto flex max-w-um-content items-center gap-5 overflow-hidden px-4 py-3 sm:px-6 lg:px-8">
+            <p className="flex shrink-0 items-center gap-2 text-xs font-semibold tracking-[0.02em] text-um-gold-300">
+              <MapPin className="size-3" strokeWidth={2} aria-hidden="true" />
+              Around your Waterloo
+            </p>
+            <ul className="flex min-w-max items-center gap-5 text-xs font-medium tracking-normal text-white/65">
+              {CAMPUS_PLACES.map((place) => (
+                <li className="flex items-center gap-5" key={place}>
+                  <span className="size-1 rounded-full bg-um-gold-400/60" aria-hidden="true" />
+                  {place}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      {(didPublish || restrictionNotice) && (
+        <div className="mx-auto max-w-um-content px-4 pt-5 sm:px-6 lg:px-8">
           {didPublish ? (
             <div
               role="status"
               aria-live="polite"
-              className="mt-4 flex items-start gap-3 rounded-um-md border border-um-success/25 bg-um-success/10 px-4 py-3.5 text-um-success shadow-um-xs sm:px-5"
+              className="flex items-start gap-3 border-l-2 border-um-success bg-um-success/[0.07] px-4 py-3.5 text-um-success"
             >
               <CircleCheckBig
                 className="mt-0.5 size-5 shrink-0"
@@ -150,7 +150,7 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
           {restrictionNotice ? (
             <div
               aria-live="polite"
-              className="mt-4 flex items-start gap-3 rounded-um-md border border-um-warning/25 bg-um-warning/10 px-4 py-3.5 text-um-warning shadow-um-xs sm:px-5"
+              className="flex items-start gap-3 border-l-2 border-um-warning bg-um-warning/[0.07] px-4 py-3.5 text-um-warning"
               role="status"
             >
               <ShieldAlert aria-hidden="true" className="mt-0.5 size-5 shrink-0" strokeWidth={2} />
@@ -160,27 +160,29 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
               </div>
             </div>
           ) : null}
+        </div>
+      )}
 
-          <CategoryFilters
-            categories={data.categories}
-            activeCategory={data.category}
-            query={data.query}
-          />
-        </header>
+      <CategoryFilters
+        categories={data.categories}
+        activeCategory={data.category}
+        query={data.query}
+      />
 
-        <section className="mt-14 sm:mt-16 lg:mt-20" aria-labelledby="recent-heading">
-          <div className="mb-5 flex flex-col items-start gap-3 border-b border-black/[0.08] pb-5 sm:mb-6 sm:flex-row sm:items-end sm:justify-between sm:gap-5 sm:pb-6">
+      <div className="mx-auto max-w-um-content px-4 pb-20 sm:px-6 lg:px-8 lg:pb-28">
+        <section className="mt-14 sm:mt-20 lg:mt-24" aria-labelledby="recent-heading">
+          <div className="mb-6 flex flex-col items-start gap-3 sm:mb-8 sm:flex-row sm:items-end sm:justify-between sm:gap-5">
             <div>
-              <p className="font-condensed text-xs font-bold uppercase tracking-[0.16em] text-um-text-muted">
+              <p className="text-xs font-semibold tracking-[0.06em] text-um-gold-700">
                 {activeCategory
                   ? 'Category'
                   : data.query
                     ? 'Marketplace search'
-                    : 'Waterloo marketplace'}
+                    : 'Latest on campus'}
               </p>
               <h2
                 id="recent-heading"
-                className="mt-1.5 text-2xl font-bold tracking-[-0.04em] text-um-text-strong sm:text-[1.9rem]"
+                className="mt-1.5 text-[2rem] font-bold leading-[1.08] tracking-[-0.025em] text-um-text-strong sm:text-[2.5rem]"
               >
                 {data.query
                   ? `Results for “${data.query}”`
@@ -189,14 +191,14 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
                     : 'Recently listed'}
               </h2>
               {!data.query && !activeCategory ? (
-                <p className="mt-1.5 text-sm text-um-text-muted">
-                  Newly published by verified students
+                <p className="mt-1.5 text-sm text-um-text">
+                  The newest things passed on by verified students.
                 </p>
               ) : null}
             </div>
             {data.total > 0 ? (
-              <p className="shrink-0 text-xs font-medium tabular-nums text-um-text-muted sm:text-sm">
-                Showing {rangeStart}–{rangeEnd} of {data.total}
+              <p className="shrink-0 text-xs font-medium tracking-[0.02em] text-um-text sm:text-sm">
+                {rangeStart}–{rangeEnd} / {data.total}
               </p>
             ) : null}
           </div>
@@ -222,22 +224,25 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
         </section>
 
         {additionalFeatured.length > 0 && !isFiltered && data.page === 1 ? (
-          <section className="mt-14 sm:mt-16 lg:mt-20" aria-labelledby="featured-heading">
-            <div className="mb-5 flex items-end justify-between gap-4 sm:mb-6">
+          <section
+            className="mt-16 border-t border-black/[0.08] pt-12 sm:mt-20 sm:pt-14"
+            aria-labelledby="featured-heading"
+          >
+            <div className="mb-6 flex items-end justify-between gap-4 sm:mb-8">
               <div>
-                <p className="font-condensed flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.16em] text-um-gold-700">
+                <p className="flex items-center gap-1.5 text-xs font-semibold tracking-[0.06em] text-um-gold-700">
                   <Sparkles className="size-3.5" aria-hidden="true" />
                   Featured by UniMarket
                 </p>
                 <h2
                   id="featured-heading"
-                  className="mt-1.5 text-2xl font-bold tracking-[-0.04em] text-um-text-strong sm:text-[1.9rem]"
+                  className="mt-1.5 text-[2rem] font-bold leading-[1.08] tracking-[-0.025em] text-um-text-strong sm:text-[2.5rem]"
                 >
-                  Worth a closer look
+                  Worth a closer look.
                 </h2>
               </div>
-              <p className="hidden max-w-xs text-right text-sm leading-6 text-um-text-muted sm:block">
-                Selected from listings currently available to the Waterloo community
+              <p className="hidden max-w-xs text-right text-sm leading-6 text-um-text sm:block">
+                Selected from listings currently available to the Waterloo community.
               </p>
             </div>
             <ListingGrid listings={additionalFeatured} />
@@ -246,32 +251,38 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
 
         {canSell ? (
           <section
-            className="mt-14 overflow-hidden rounded-um-xl border border-black/10 bg-um-surface px-6 py-7 shadow-um-xs sm:flex sm:items-center sm:justify-between sm:px-8 sm:py-8 lg:mt-20"
+            className="relative isolate mt-16 overflow-hidden bg-um-ink-950 px-6 py-9 text-um-text-inverse shadow-[0_22px_60px_rgba(5,7,11,0.16)] sm:px-9 sm:py-10 lg:mt-24 lg:px-12"
             aria-labelledby="sell-cta-heading"
           >
-            <div className="flex items-start gap-4">
-              <span className="hidden size-11 shrink-0 items-center justify-center rounded-um-md bg-um-gold-300/45 text-um-gold-700 sm:flex">
-                <Plus className="size-5" aria-hidden="true" />
-              </span>
-              <div>
+            <CampusRouteGraphic className="absolute inset-y-0 right-0 -z-10 w-[62%] opacity-[0.45]" />
+            <div
+              className="absolute inset-0 -z-10 bg-gradient-to-r from-um-ink-950 via-um-ink-950/95 to-um-ink-950/45"
+              aria-hidden="true"
+            />
+            <div className="sm:flex sm:items-center sm:justify-between sm:gap-8">
+              <div className="max-w-xl">
+                <p className="text-xs font-semibold tracking-[0.06em] text-um-gold-300">
+                  Heading out for co-op?
+                </p>
                 <h2
                   id="sell-cta-heading"
-                  className="text-xl font-bold tracking-[-0.03em] text-um-text-strong"
+                  className="mt-2 text-3xl font-bold leading-[1.08] tracking-[-0.025em] sm:text-4xl"
                 >
-                  Ready to pass something on?
+                  Pass on what you won’t need.
                 </h2>
-                <p className="mt-1.5 text-sm leading-6 text-um-text-muted">
-                  Create a clear listing and reach other Waterloo students.
+                <p className="mt-2 text-sm leading-6 text-white/70">
+                  A clear photo and a familiar pickup point is enough to get started.
                 </p>
               </div>
+              <Link
+                href="/listings/new"
+                className="mt-6 inline-flex min-h-12 shrink-0 items-center gap-2 rounded-um-sm bg-um-gold-400 px-5 py-2.5 text-sm font-bold text-um-ink-950 transition duration-160 ease-um-out hover:-translate-y-0.5 hover:bg-um-gold-300 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-um-ink-950 sm:mt-0"
+              >
+                <Plus className="size-4" aria-hidden="true" />
+                Create a listing
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
             </div>
-            <Link
-              href="/listings/new"
-              className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-um-sm bg-um-ink-950 px-4 py-2.5 text-sm font-bold text-um-text-inverse shadow-um-xs transition duration-160 ease-um-out hover:-translate-y-0.5 hover:bg-um-ink-850 focus-visible:ring-2 focus-visible:ring-um-ink-950 focus-visible:ring-offset-2 sm:mt-0"
-            >
-              Create a listing
-              <ArrowRight className="size-4" aria-hidden="true" />
-            </Link>
           </section>
         ) : null}
       </div>

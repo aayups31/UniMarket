@@ -81,7 +81,7 @@ export function ModeratorRemoveDialog({ listingId, listingTitle }: ModeratorRemo
     <Dialog.Root open={open} onOpenChange={handleOpenChange}>
       <Dialog.Trigger asChild>
         <button
-          className="mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 text-sm font-semibold text-red-700 transition hover:border-red-300 hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+          className="mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-um-sm bg-red-50 px-4 text-sm font-semibold text-red-700 transition hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
           type="button"
         >
           <Trash2 aria-hidden="true" className="h-4 w-4" />
@@ -90,22 +90,23 @@ export function ModeratorRemoveDialog({ listingId, listingTitle }: ModeratorRemo
       </Dialog.Trigger>
 
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-[2px] data-[state=closed]:animate-out data-[state=open]:animate-in" />
+        <Dialog.Overlay className="fixed inset-0 z-50 bg-um-ink-950/75 backdrop-blur-[2px] data-[state=closed]:animate-out data-[state=open]:animate-in" />
         <Dialog.Content
           aria-describedby="moderator-remove-description"
-          className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-black/10 bg-white p-6 shadow-2xl focus:outline-none sm:p-7"
+          className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-um-md border border-black/10 bg-um-canvas p-6 shadow-2xl focus:outline-none sm:p-7"
         >
+          <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-red-700" />
           <div className="flex items-start gap-3.5 pr-10">
-            <span className="grid size-10 shrink-0 place-items-center rounded-full bg-red-100 text-red-700">
+            <span className="grid size-10 shrink-0 place-items-center bg-red-100 text-red-700">
               <AlertTriangle aria-hidden="true" className="size-5" />
             </span>
             <div>
-              <Dialog.Title className="text-lg font-semibold tracking-[-0.02em] text-stone-950">
+              <Dialog.Title className="text-lg font-semibold tracking-[-0.02em] text-um-text-strong">
                 Remove this listing?
               </Dialog.Title>
               <Dialog.Description
                 id="moderator-remove-description"
-                className="mt-1.5 text-sm leading-6 text-stone-600"
+                className="mt-1.5 text-sm leading-6 text-um-text-muted"
               >
                 “{listingTitle}” will disappear from the marketplace. The reason is saved in the
                 moderation audit log.
@@ -114,14 +115,17 @@ export function ModeratorRemoveDialog({ listingId, listingTitle }: ModeratorRemo
           </div>
 
           <form className="mt-6" onSubmit={handleSubmit}>
-            <label className="text-sm font-semibold text-stone-900" htmlFor="moderation-reason">
+            <label
+              className="text-sm font-semibold text-um-text-strong"
+              htmlFor="moderation-reason"
+            >
               Reason for removal
             </label>
             <Textarea
               aria-describedby="moderation-reason-help moderation-reason-count moderator-remove-feedback"
               aria-invalid={feedback.kind === 'error'}
               autoFocus
-              className="mt-2 min-h-28"
+              className="mt-2 min-h-28 rounded-um-sm border-black/10 bg-um-surface"
               disabled={isPending || succeeded}
               id="moderation-reason"
               maxLength={MAX_REASON_LENGTH}
@@ -135,7 +139,7 @@ export function ModeratorRemoveDialog({ listingId, listingTitle }: ModeratorRemo
               required
               value={reason}
             />
-            <div className="mt-1.5 flex items-start justify-between gap-4 text-xs text-stone-500">
+            <div className="mt-1.5 flex items-start justify-between gap-4 text-xs text-um-text-muted">
               <p id="moderation-reason-help">At least {MIN_REASON_LENGTH} characters required.</p>
               <p id="moderation-reason-count" className="tabular-nums">
                 {trimmedReasonLength}/{MAX_REASON_LENGTH}
@@ -188,7 +192,7 @@ export function ModeratorRemoveDialog({ listingId, listingTitle }: ModeratorRemo
           <Dialog.Close asChild>
             <button
               aria-label="Close removal dialog"
-              className="absolute right-2 top-2 grid size-11 place-items-center rounded-lg text-stone-500 transition hover:bg-stone-100 hover:text-stone-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 disabled:pointer-events-none disabled:opacity-40 sm:right-3 sm:top-3"
+              className="absolute right-2 top-2 grid size-11 place-items-center rounded-um-sm text-um-text-muted transition hover:bg-um-surface-warm hover:text-um-text-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-ink-950 disabled:pointer-events-none disabled:opacity-40 sm:right-3 sm:top-3"
               disabled={isPending || succeeded}
               type="button"
             >

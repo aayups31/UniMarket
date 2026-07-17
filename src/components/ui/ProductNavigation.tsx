@@ -60,7 +60,7 @@ export function ProductNavigation({ canSell, isModerator }: ProductNavigationPro
       : [browseItem];
 
   return (
-    <nav aria-label="Primary" className="hidden items-center gap-1 lg:flex">
+    <nav aria-label="Primary" className="hidden items-center gap-7 lg:flex">
       {items.map((item) => {
         const Icon = item.icon;
         const isCurrent = item.current(pathname);
@@ -69,10 +69,10 @@ export function ProductNavigation({ canSell, isModerator }: ProductNavigationPro
           <Link
             aria-current={isCurrent ? 'page' : undefined}
             className={cn(
-              'inline-flex min-h-11 items-center gap-2 rounded-um-sm px-3.5 text-sm font-semibold transition-colors duration-160 ease-um-out',
+              'relative inline-flex min-h-11 items-center gap-2 px-0.5 text-sm font-semibold transition-colors duration-160 ease-um-out after:absolute after:inset-x-0 after:bottom-0 after:h-px after:origin-left after:bg-um-gold-400 after:transition-transform after:duration-220 after:ease-um-out',
               isCurrent
-                ? 'bg-um-surface-warm text-um-text-strong'
-                : 'text-um-text-muted hover:bg-um-canvas-soft hover:text-um-text-strong',
+                ? 'text-white after:scale-x-100'
+                : 'text-white/55 after:scale-x-0 hover:text-white after:hover:scale-x-100',
             )}
             href={item.href}
             key={item.href}
@@ -94,8 +94,10 @@ export function CreateListingNavigationButton() {
     <Link
       aria-current={isCurrent ? 'page' : undefined}
       className={cn(
-        'hidden min-h-11 shrink-0 items-center justify-center gap-2 rounded-um-sm px-4 text-sm font-bold text-um-ink-950 shadow-um-xs transition duration-160 ease-um-out hover:-translate-y-0.5 lg:inline-flex',
-        isCurrent ? 'bg-um-gold-300 ring-2 ring-um-ink-950' : 'bg-um-gold-500 hover:bg-um-gold-400',
+        'hidden min-h-11 shrink-0 items-center justify-center gap-2 rounded-um-sm border px-4 text-sm font-bold transition duration-160 ease-um-out hover:-translate-y-0.5 lg:inline-flex',
+        isCurrent
+          ? 'border-um-gold-300 bg-um-gold-300 text-um-ink-950'
+          : 'border-um-gold-500/80 bg-um-gold-500 text-um-ink-950 shadow-[0_8px_28px_rgba(201,152,18,0.14)] hover:bg-um-gold-400',
       )}
       href={createItem.href}
     >
@@ -116,7 +118,7 @@ export function MobileTabBar({ canSell, isModerator }: ProductNavigationProps) {
   return (
     <nav
       aria-label="Mobile primary"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-black/10 bg-white/95 px-3 pb-[max(0.45rem,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-10px_35px_rgba(8,11,18,0.08)] backdrop-blur-md lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-white/[0.08] bg-um-ink-950/95 px-3 pb-[max(0.45rem,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-14px_40px_rgba(5,7,11,0.24)] backdrop-blur-md lg:hidden"
     >
       <div
         className={cn(
@@ -134,7 +136,7 @@ export function MobileTabBar({ canSell, isModerator }: ProductNavigationProps) {
               aria-current={isCurrent ? 'page' : undefined}
               className={cn(
                 'relative flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-um-sm px-2 text-[0.69rem] font-semibold transition-colors duration-160 ease-um-out',
-                isCurrent ? 'text-um-ink-950' : 'text-um-text-muted hover:text-um-text-strong',
+                isCurrent ? 'text-white' : 'text-white/48 hover:text-white',
                 isCreate && 'text-um-ink-950',
               )}
               href={item.href}
@@ -145,13 +147,13 @@ export function MobileTabBar({ canSell, isModerator }: ProductNavigationProps) {
                   aria-hidden="true"
                   className={cn(
                     'absolute inset-x-2 inset-y-0.5 -z-10 rounded-um-sm bg-um-gold-500',
-                    isCurrent && 'ring-2 ring-inset ring-um-ink-950',
+                    isCurrent && 'bg-um-gold-300 ring-1 ring-inset ring-white/35',
                   )}
                 />
               ) : isCurrent ? (
                 <span
                   aria-hidden="true"
-                  className="absolute top-0 h-0.5 w-8 rounded-full bg-um-gold-600"
+                  className="absolute top-0 h-0.5 w-8 rounded-full bg-um-gold-400"
                 />
               ) : null}
               <Icon aria-hidden="true" className="size-5" strokeWidth={isCurrent ? 2.2 : 1.8} />

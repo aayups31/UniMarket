@@ -2,29 +2,41 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react';
 import Link from 'next/link';
-import { Archive, Eye, Loader2, Pencil, Trash2, X } from 'lucide-react';
+import { Archive, BadgeCheck, Eye, Loader2, Pencil, Trash2, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-import { archiveOwnListingAction, deleteOwnListingAction } from '../actions';
+import {
+  archiveOwnListingAction,
+  deleteOwnListingAction,
+  markOwnListingSoldAction,
+} from '../actions';
 import type { ManagedListing } from '../editor-queries';
 
 type ListingManagementActionsProps = {
   listingId: string;
   status: ManagedListing['status'];
+  redirectAfterAction?: string;
+  showView?: boolean;
 };
 
-type Confirmation = 'archive' | 'delete' | null;
+type Confirmation = 'archive' | 'delete' | 'sold' | null;
 
 const actionClassName =
-  'inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-stone-200 bg-white px-3 text-xs font-semibold text-stone-700 transition hover:border-stone-300 hover:bg-stone-50 hover:text-stone-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 disabled:cursor-not-allowed disabled:opacity-50';
+  'inline-flex min-h-11 items-center justify-center gap-1.5 rounded-um-sm bg-um-surface-warm px-3 text-xs font-semibold text-um-text transition hover:bg-um-ink-950 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-ink-950 disabled:cursor-not-allowed disabled:opacity-50';
 
-export function ListingManagementActions({ listingId, status }: ListingManagementActionsProps) {
+export function ListingManagementActions({
+  listingId,
+  status,
+  redirectAfterAction,
+  showView = true,
+}: ListingManagementActionsProps) {
   const router = useRouter();
   const [confirmation, setConfirmation] = useState<Confirmation>(null);
   const [message, setMessage] = useState('');
   const [isPending, startTransition] = useTransition();
   const archiveTriggerRef = useRef<HTMLButtonElement>(null);
   const deleteTriggerRef = useRef<HTMLButtonElement>(null);
+  const soldTriggerRef = useRef<HTMLButtonElement>(null);
   const confirmationActionRef = useRef<HTMLButtonElement>(null);
   const restoreFocusRef = useRef<Exclude<Confirmation, null> | null>(null);
 
@@ -39,7 +51,11 @@ export function ListingManagementActions({ listingId, status }: ListingManagemen
 
     restoreFocusRef.current = null;
     const trigger =
-      restoreTarget === 'archive' ? archiveTriggerRef.current : deleteTriggerRef.current;
+      restoreTarget === 'archive'
+        ? archiveTriggerRef.current
+        : restoreTarget === 'sold'
+          ? soldTriggerRef.current
+          : deleteTriggerRef.current;
     trigger?.focus();
   }, [confirmation]);
 
@@ -50,7 +66,9 @@ export function ListingManagementActions({ listingId, status }: ListingManagemen
         const result =
           kind === 'archive'
             ? await archiveOwnListingAction(listingId)
-            : await deleteOwnListingAction(listingId);
+            : kind === 'sold'
+              ? await markOwnListingSoldAction(listingId)
+              : await deleteOwnListingAction(listingId);
 
         if (!result.ok) {
           setMessage(result.message);
@@ -58,13 +76,25 @@ export function ListingManagementActions({ listingId, status }: ListingManagemen
         }
 
         setConfirmation(null);
-        setMessage(kind === 'archive' ? 'Listing archived.' : 'Listing deleted.');
-        router.refresh();
+        setMessage(
+          kind === 'archive'
+            ? 'Listing archived.'
+            : kind === 'sold'
+              ? 'Listing marked as sold.'
+              : 'Listing deleted.',
+        );
+        if (redirectAfterAction) {
+          router.push(redirectAfterAction);
+        } else {
+          router.refresh();
+        }
       } catch {
         setMessage(
           kind === 'archive'
             ? 'The listing could not be archived. Check your connection and try again.'
-            : 'The listing could not be deleted. Check your connection and try again.',
+            : kind === 'sold'
+              ? 'The listing could not be marked as sold. Check your connection and try again.'
+              : 'The listing could not be deleted. Check your connection and try again.',
         );
       }
     });
@@ -81,29 +111,46 @@ export function ListingManagementActions({ listingId, status }: ListingManagemen
     setConfirmation(null);
   };
 
-  const canDelete = status === 'draft' || status === 'archived';
+  const canEdit = status === 'draft' || status === 'published';
+  const canDelete = true;
 
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2">
-        {status === 'published' ? (
+        {showView && status === 'published' ? (
           <Link className={actionClassName} href={`/listings/${listingId}`}>
             <Eye aria-hidden="true" className="size-3.5" />
             View
           </Link>
         ) : null}
 
-        {status !== 'archived' ? (
+        {canEdit ? (
           <Link className={actionClassName} href={`/listings/${listingId}/edit`}>
             <Pencil aria-hidden="true" className="size-3.5" />
             Edit
           </Link>
         ) : (
           <p className="inline-flex h-9 items-center gap-1.5 text-xs font-semibold text-stone-400">
-            <Archive aria-hidden="true" className="size-3.5" />
-            Archived
+            {status === 'sold' ? (
+              <BadgeCheck aria-hidden="true" className="size-3.5" />
+            ) : (
+              <Archive aria-hidden="true" className="size-3.5" />
+            )}
+            {status === 'sold' ? 'Sold' : 'Archived'}
           </p>
         )}
+
+        {status === 'published' && confirmation === null ? (
+          <button
+            ref={soldTriggerRef}
+            className={actionClassName}
+            onClick={() => requestConfirmation('sold')}
+            type="button"
+          >
+            <BadgeCheck aria-hidden="true" className="size-3.5" />
+            Mark as sold
+          </button>
+        ) : null}
 
         {status === 'published' && confirmation === null ? (
           <button
@@ -120,7 +167,7 @@ export function ListingManagementActions({ listingId, status }: ListingManagemen
         {canDelete && confirmation === null ? (
           <button
             ref={deleteTriggerRef}
-            className={`${actionClassName} hover:border-red-200 hover:bg-red-50 hover:text-red-700`}
+            className={`${actionClassName} hover:bg-red-700 hover:text-white`}
             onClick={() => requestConfirmation('delete')}
             type="button"
           >
@@ -132,8 +179,8 @@ export function ListingManagementActions({ listingId, status }: ListingManagemen
         {confirmation ? (
           <div
             aria-label={`Confirm ${confirmation}`}
-            className={`flex items-center gap-1.5 rounded-xl p-1.5 ring-1 ${
-              confirmation === 'delete' ? 'bg-red-50 ring-red-200' : 'bg-amber-50 ring-amber-200'
+            className={`flex items-center gap-1.5 rounded-um-sm p-1.5 ${
+              confirmation === 'delete' ? 'bg-red-50' : 'bg-um-surface-warm'
             }`}
             onKeyDown={(event) => {
               if (event.key === 'Escape') {
@@ -145,10 +192,10 @@ export function ListingManagementActions({ listingId, status }: ListingManagemen
           >
             <button
               ref={confirmationActionRef}
-              className={`inline-flex min-h-11 items-center gap-1 rounded-lg px-3 text-xs font-semibold text-white transition disabled:opacity-50 ${
+              className={`inline-flex min-h-11 items-center gap-1 rounded-um-xs px-3 text-xs font-semibold text-white transition disabled:opacity-50 ${
                 confirmation === 'delete'
                   ? 'bg-red-700 hover:bg-red-800'
-                  : 'bg-stone-950 hover:bg-stone-800'
+                  : 'bg-um-ink-950 hover:bg-um-ink-800'
               }`}
               disabled={isPending}
               onClick={() => runAction(confirmation)}
@@ -158,14 +205,20 @@ export function ListingManagementActions({ listingId, status }: ListingManagemen
                 <Loader2 aria-hidden="true" className="size-3 animate-spin" />
               ) : confirmation === 'delete' ? (
                 <Trash2 aria-hidden="true" className="size-3" />
+              ) : confirmation === 'sold' ? (
+                <BadgeCheck aria-hidden="true" className="size-3" />
               ) : (
                 <Archive aria-hidden="true" className="size-3" />
               )}
-              {confirmation === 'delete' ? 'Delete permanently' : 'Archive listing'}
+              {confirmation === 'delete'
+                ? 'Delete permanently'
+                : confirmation === 'sold'
+                  ? 'Mark as sold'
+                  : 'Archive listing'}
             </button>
             <button
               aria-label={`Cancel ${confirmation}`}
-              className="grid size-11 place-items-center rounded-lg text-stone-500 transition hover:bg-white hover:text-stone-950 disabled:opacity-50"
+              className="grid size-11 place-items-center rounded-um-xs text-um-text-muted transition hover:bg-white hover:text-um-text-strong disabled:opacity-50"
               disabled={isPending}
               onClick={cancelConfirmation}
               type="button"

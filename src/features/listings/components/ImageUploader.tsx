@@ -250,11 +250,23 @@ export function ImageUploader({
     () => images.filter((image) => image.status === 'uploaded').length,
     [images],
   );
+  const failedCount = useMemo(
+    () => images.filter((image) => image.status === 'failed').length,
+    [images],
+  );
+  const isWaitingForUpload = images.some((image) => image.status === 'uploading');
+  const uploadHelp = message
+    ? message
+    : failedCount > 0
+      ? `${failedCount} photo${failedCount === 1 ? ' needs' : 's need'} attention. Remove the failed photo${failedCount === 1 ? '' : 's'} before publishing.`
+      : isWaitingForUpload
+        ? 'Finishing your photo upload… keep this page open until it is ready.'
+        : 'JPEG, PNG, or WebP · up to 5 MB each · drag to reorder';
 
   return (
     <section id="images" aria-labelledby="images-heading" className="scroll-mt-32 pb-12 sm:pb-14">
       <div className="mb-6 grid gap-4 sm:grid-cols-[3.25rem_1fr_auto] sm:items-start">
-        <span className="font-condensed grid size-10 place-items-center rounded-full border border-um-gold-600/30 bg-um-gold-300/25 text-xs font-bold text-um-gold-700">
+        <span className="font-condensed flex h-10 items-start border-l-2 border-um-gold-500 pl-3 pt-0.5 text-xs font-bold tracking-[0.1em] text-um-gold-700">
           01
         </span>
         <div>
@@ -274,13 +286,22 @@ export function ImageUploader({
         <span
           aria-atomic="true"
           aria-live="polite"
-          className="inline-flex h-8 w-fit shrink-0 items-center gap-1.5 rounded-full bg-white px-3 text-xs font-semibold tabular-nums text-um-text-muted shadow-um-xs ring-1 ring-black/10 sm:mt-1"
+          className={cn(
+            'inline-flex h-8 w-fit shrink-0 items-center gap-1.5 border-l-2 px-3 text-xs font-semibold tabular-nums sm:mt-1',
+            failedCount > 0
+              ? 'border-red-400 bg-red-400/[0.10] text-red-200'
+              : 'border-um-gold-400 bg-white/[0.06] text-um-text-muted',
+          )}
           role="status"
         >
-          {uploadedCount > 0 ? (
+          {failedCount > 0 ? (
+            <RotateCcw aria-hidden="true" className="size-3.5" />
+          ) : uploadedCount > 0 ? (
             <CheckCircle2 aria-hidden="true" className="size-3.5 text-um-success" />
           ) : null}
-          {uploadedCount} / {LISTING_IMAGE_MAX_COUNT} ready
+          {failedCount > 0
+            ? `${failedCount} needs attention`
+            : `${uploadedCount} / ${LISTING_IMAGE_MAX_COUNT} ready`}
         </span>
       </div>
 
@@ -300,26 +321,28 @@ export function ImageUploader({
           void uploadFiles(Array.from(event.dataTransfer.files));
         }}
         className={cn(
-          'rounded-um-lg border border-dashed border-black/20 bg-um-surface-warm/60 p-3 transition duration-160 ease-um-out sm:p-5',
-          isDraggingFiles && 'border-um-gold-600 bg-um-gold-300/20 shadow-um-gold',
+          'relative overflow-hidden rounded-um-md border border-dashed border-white/[0.22] bg-um-ink-950 p-3 text-white shadow-[0_20px_55px_rgba(8,12,19,0.28)] transition duration-160 ease-um-out sm:p-5',
+          isDraggingFiles && 'border-um-gold-400 bg-um-ink-850 shadow-um-gold',
         )}
       >
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-24 -top-28 size-96 rounded-full bg-um-gold-400/[0.07] blur-[88px]"
+        />
         {images.length === 0 ? (
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="flex min-h-64 w-full flex-col items-center justify-center rounded-um-md px-5 text-center outline-none transition duration-160 ease-um-out hover:bg-white/75 focus-visible:ring-2 focus-visible:ring-um-ink-950 focus-visible:ring-offset-2"
+            className="relative flex min-h-72 w-full flex-col items-center justify-center px-5 text-center outline-none transition duration-160 ease-um-out hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-um-gold-400 focus-visible:ring-offset-2 focus-visible:ring-offset-um-ink-900"
           >
-            <span className="grid size-14 place-items-center rounded-um-md bg-um-ink-950 text-um-gold-400 shadow-um-sm">
+            <span className="grid size-14 place-items-center border border-white/10 bg-white/[0.06] text-um-gold-400 shadow-um-sm">
               <ImagePlus aria-hidden="true" className="size-6" strokeWidth={1.8} />
             </span>
-            <span className="mt-5 text-base font-bold text-um-text-strong">
+            <span className="mt-5 text-lg font-bold tracking-[-0.02em] text-white">
               Drop your photos here
             </span>
-            <span className="mt-1.5 text-sm text-um-text-muted">
-              or choose them from your device
-            </span>
-            <span className="mt-5 inline-flex min-h-11 items-center rounded-um-sm bg-white px-4 text-sm font-bold text-um-text-strong shadow-um-xs ring-1 ring-black/10">
+            <span className="mt-1.5 text-sm text-white/52">or choose them from your device</span>
+            <span className="mt-5 inline-flex min-h-11 items-center rounded-um-sm bg-um-gold-400 px-4 text-sm font-bold text-um-ink-950 shadow-um-xs">
               Choose photos
             </span>
           </button>
@@ -330,7 +353,7 @@ export function ImageUploader({
             onDragEnd={handleDragEnd}
           >
             <SortableContext items={images.map((image) => image.id)} strategy={rectSortingStrategy}>
-              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3">
+              <div className="relative grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3">
                 {images.map((image, index) => (
                   <SortableImage
                     key={image.id}
@@ -345,7 +368,7 @@ export function ImageUploader({
                   <button
                     type="button"
                     onClick={() => inputRef.current?.click()}
-                    className="flex aspect-[4/3] min-h-28 flex-col items-center justify-center rounded-um-md border border-dashed border-black/20 bg-white text-sm font-bold text-um-text-muted transition duration-160 ease-um-out hover:border-um-ink-800 hover:text-um-text-strong focus-visible:ring-2 focus-visible:ring-um-ink-950 focus-visible:ring-offset-2"
+                    className="flex aspect-[4/3] min-h-28 flex-col items-center justify-center rounded-um-sm border border-dashed border-white/20 bg-white/[0.05] text-sm font-bold text-white/55 transition duration-160 ease-um-out hover:border-um-gold-400 hover:text-white focus-visible:ring-2 focus-visible:ring-um-gold-400 focus-visible:ring-offset-2 focus-visible:ring-offset-um-ink-900"
                   >
                     <ImagePlus aria-hidden="true" className="mb-2 size-5" strokeWidth={1.8} />
                     Add photos
@@ -375,11 +398,11 @@ export function ImageUploader({
         aria-live="polite"
         className={cn(
           'mt-3 min-h-5 text-sm leading-5',
-          message ? 'font-medium text-um-danger' : 'text-um-text-muted',
+          message || failedCount > 0 ? 'font-medium text-red-200' : 'text-um-text-muted',
         )}
         id="image-upload-help"
       >
-        {message || 'JPEG, PNG, or WebP · up to 5 MB each · drag to reorder'}
+        {uploadHelp}
       </p>
     </section>
   );
@@ -406,8 +429,9 @@ function SortableImage({
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={cn(
-        'group relative aspect-[4/3] overflow-hidden rounded-um-md bg-um-surface-warm shadow-um-xs ring-1 ring-black/10',
+        'group relative aspect-[4/3] overflow-hidden rounded-um-sm bg-um-ink-800 shadow-um-xs ring-1 ring-white/[0.14]',
         isDragging && 'z-20 opacity-80 shadow-um-md',
+        image.status === 'failed' && 'ring-2 ring-red-400/70',
       )}
     >
       <Image
@@ -421,15 +445,21 @@ function SortableImage({
         <span className="font-condensed rounded-full bg-um-ink-950/80 px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-[0.1em] text-white">
           {index === 0 ? 'Cover' : index + 1}
         </span>
-        <button
-          type="button"
-          className="grid size-11 touch-none place-items-center rounded-um-sm bg-black/[0.55] transition hover:bg-black/75 focus-visible:ring-2 focus-visible:ring-white"
-          aria-label={`Drag ${image.name} to reorder`}
-          {...attributes}
-          {...listeners}
-        >
-          <GripVertical aria-hidden="true" className="size-4" />
-        </button>
+        {image.status === 'failed' ? (
+          <span className="rounded-full bg-red-500/90 px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-white">
+            Needs attention
+          </span>
+        ) : (
+          <button
+            type="button"
+            className="grid size-11 touch-none place-items-center rounded-um-sm bg-black/[0.55] transition hover:bg-black/75 focus-visible:ring-2 focus-visible:ring-white"
+            aria-label={`Drag ${image.name} to reorder`}
+            {...attributes}
+            {...listeners}
+          >
+            <GripVertical aria-hidden="true" className="size-4" />
+          </button>
+        )}
       </div>
       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent p-2 pt-8">
         {image.status === 'uploading' ? (
@@ -448,20 +478,20 @@ function SortableImage({
             </div>
           </div>
         ) : image.status === 'failed' ? (
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center justify-between gap-2 rounded-um-xs border border-red-300/30 bg-um-ink-950/85 px-2 py-1.5">
             <span
               className="inline-flex items-center gap-1 text-xs font-semibold text-red-100"
               role="alert"
             >
-              <RotateCcw aria-hidden="true" className="size-3" /> Upload failed
+              <RotateCcw aria-hidden="true" className="size-3" /> Upload did not finish
             </span>
             <button
               type="button"
               onClick={() => onRemove(image)}
               aria-label={`Remove failed upload ${image.name}`}
-              className="grid size-11 shrink-0 place-items-center rounded-um-sm bg-black/[0.55] text-white transition hover:bg-um-danger focus-visible:ring-2 focus-visible:ring-white"
+              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-um-xs bg-red-500 px-2.5 text-xs font-bold text-white transition hover:bg-red-400 focus-visible:ring-2 focus-visible:ring-white"
             >
-              <Trash2 aria-hidden="true" className="size-3.5" />
+              <Trash2 aria-hidden="true" className="size-3.5" /> Remove
             </button>
           </div>
         ) : (

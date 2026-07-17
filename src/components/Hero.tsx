@@ -1,156 +1,255 @@
-import { Armchair, ArrowRight, BookOpen, Laptop, Search, Shirt } from 'lucide-react';
-import Link from 'next/link';
+'use client';
 
-const previewCategories = [
-  { icon: Laptop, label: 'Electronics' },
-  { icon: BookOpen, label: 'Books' },
-  { icon: Armchair, label: 'Household' },
-  { icon: Shirt, label: 'Clothing' },
-];
+import { ArrowDown, ArrowRight, BadgeCheck, ImagePlus, MapPin, Search } from 'lucide-react';
+import { motion, useReducedMotion } from 'framer-motion';
+import Image from 'next/image';
+import Link from 'next/link';
+import type { ReactNode } from 'react';
+
+const easeOut = [0.22, 1, 0.36, 1] as const;
 
 export function Hero() {
+  const reduceMotion = useReducedMotion();
+
   return (
-    <section className="relative overflow-hidden bg-um-ink-950 text-um-text-inverse">
-      <CampaignLinework />
+    <section className="relative isolate min-h-svh overflow-hidden bg-um-ink-950 text-um-text-inverse">
+      <motion.div
+        animate={reduceMotion ? undefined : { scale: 1 }}
+        className="absolute inset-0"
+        initial={reduceMotion ? false : { scale: 1.045 }}
+        transition={{ duration: 1.8, ease: easeOut }}
+      >
+        <Image
+          alt="The University of Waterloo Student Life Centre and campus lawn in autumn"
+          className="object-cover object-[62%_center] brightness-[0.64] saturate-[0.78] contrast-[1.08] sm:object-[58%_center]"
+          fill
+          priority
+          sizes="100vw"
+          src="/waterloo/slc-exterior.webp"
+        />
+      </motion.div>
 
-      <div className="relative mx-auto grid max-w-um-content gap-14 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,0.92fr)_minmax(28rem,1.08fr)] lg:items-center lg:gap-16 lg:py-24 xl:py-28">
-        <div className="max-w-[44rem]">
-          <p className="font-condensed text-sm font-bold uppercase tracking-[0.16em] text-um-gold-400">
-            Independent student-built project · Waterloo, Ontario
-          </p>
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,7,11,0.98)_0%,rgba(5,7,11,0.92)_31%,rgba(5,7,11,0.61)_62%,rgba(5,7,11,0.28)_100%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,7,11,0.64)_0%,transparent_30%,transparent_62%,rgba(5,7,11,0.95)_100%)]"
+      />
+      <MarketplaceSignals reduceMotion={reduceMotion} />
 
-          <h1 className="um-balanced mt-6 text-[clamp(3.25rem,7vw,6.75rem)] font-black leading-[0.89] tracking-[-0.07em]">
-            A marketplace built for{' '}
-            <span className="font-editorial font-normal tracking-[-0.055em] text-um-gold-400">
-              students,
-            </span>{' '}
-            not strangers.
-          </h1>
-
-          <p className="mt-7 max-w-xl text-lg leading-8 text-white/66 sm:text-xl">
-            Buy and sell with verified Waterloo students, arrange nearby pickup, and move useful
-            things through another term.
-          </p>
-
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Link
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-um-sm bg-um-gold-500 px-5 text-sm font-black text-um-ink-950 transition-colors hover:bg-um-gold-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-um-ink-950"
-              href="/signup"
+      <div className="relative mx-auto flex min-h-svh max-w-um-content flex-col px-4 pb-6 pt-28 sm:px-6 sm:pb-8 sm:pt-32 lg:pt-36">
+        <div className="flex flex-1 items-center py-12 sm:py-16 lg:py-20">
+          <div className="max-w-[59rem]">
+            <motion.div
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-4"
+              initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+              transition={{ delay: 0.12, duration: 0.6, ease: easeOut }}
             >
-              Continue with @uwaterloo.ca
-              <ArrowRight aria-hidden="true" className="size-4" />
-            </Link>
-            <Link
-              className="inline-flex min-h-12 items-center justify-center px-5 text-sm font-bold text-white/72 underline decoration-white/28 underline-offset-4 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-400"
-              href="/login"
+              <motion.span
+                aria-hidden="true"
+                animate={{ scaleX: 1 }}
+                className="h-px w-10 origin-left bg-um-gold-400"
+                initial={reduceMotion ? false : { scaleX: 0 }}
+                transition={{ delay: 0.2, duration: 0.65, ease: easeOut }}
+              />
+              <p className="text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-um-gold-300">
+                For verified Waterloo students
+              </p>
+            </motion.div>
+
+            <motion.h1
+              animate={{ opacity: 1, y: 0 }}
+              className="um-balanced mt-7 max-w-[58rem] text-[clamp(3rem,6.8vw,6.8rem)] font-bold leading-[0.96] tracking-[-0.028em] text-[#f2eee6]"
+              initial={reduceMotion ? false : { opacity: 0, y: 30 }}
+              transition={{ delay: 0.18, duration: 0.85, ease: easeOut }}
             >
-              I already have an account
-            </Link>
+              Your university.
+              <span className="block">Your people.</span>
+              <span className="block text-um-gold-300">Just for you.</span>
+            </motion.h1>
+
+            <motion.div
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-8 grid max-w-[47rem] gap-6 border-t border-white/[0.13] pt-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start"
+              initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+              transition={{ delay: 0.34, duration: 0.7, ease: easeOut }}
+            >
+              <p className="max-w-xl text-base leading-7 text-[#e5dfd5]/82 sm:text-lg sm:leading-8">
+                Buy, sell, and pass useful things between study terms, co-op moves, and nearby
+                campus pickup—with a verified Waterloo email.
+              </p>
+              <p className="text-xs font-medium leading-5 tracking-[0.03em] text-[#ddd7cc]/68 sm:text-right">
+                Built for term life
+                <span className="block text-[#f0ebe2]/82">Winter · Spring · Fall</span>
+              </p>
+            </motion.div>
+
+            <motion.div
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center"
+              initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+              transition={{ delay: 0.44, duration: 0.65, ease: easeOut }}
+            >
+              <Link
+                className="group inline-flex min-h-12 items-center justify-center gap-3 rounded-sm bg-um-gold-400 px-5 text-sm font-black text-um-ink-950 shadow-[0_18px_50px_rgba(5,7,11,0.24)] transition-colors hover:bg-um-gold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-um-ink-950"
+                href="/signup"
+              >
+                Enter with @uwaterloo.ca
+                <ArrowRight
+                  aria-hidden="true"
+                  className="size-4 transition-transform duration-220 ease-um-out group-hover:translate-x-1"
+                />
+              </Link>
+              <Link
+                className="inline-flex min-h-12 items-center justify-center px-5 text-sm font-bold text-white/72 underline decoration-white/28 underline-offset-4 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-400"
+                href="/login"
+              >
+                Sign in to your account
+              </Link>
+            </motion.div>
           </div>
+        </div>
 
-          <div className="mt-12 border-t border-white/10 pt-5">
-            <p className="font-condensed text-xs font-semibold uppercase tracking-[0.15em] text-white/55">
+        <motion.div
+          animate={{ opacity: 1 }}
+          className="grid gap-5 border-t border-white/[0.11] pt-5 md:grid-cols-[1fr_auto] md:items-end"
+          initial={reduceMotion ? false : { opacity: 0 }}
+          transition={{ delay: 0.65, duration: 0.7 }}
+        >
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-um-gold-300">
               Around your Waterloo
             </p>
-            <p className="mt-2 font-mono text-[0.66rem] font-semibold uppercase tracking-[0.17em] text-white/62">
+            <p className="mt-1.5 text-xs font-medium leading-5 tracking-[0.04em] text-white/68">
               DC · SLC · E7 · UWP · ICON · LESTER · COLUMBIA · PHILLIP
             </p>
           </div>
-        </div>
 
-        <CommercePreview />
-      </div>
-
-      <div className="relative border-t border-white/10">
-        <div className="mx-auto flex max-w-um-content flex-col gap-2 px-4 py-4 text-xs leading-5 text-white/55 sm:px-6 md:flex-row md:items-center md:justify-between">
-          <p>Built independently by students for the Waterloo community.</p>
-          <p>Not affiliated with or endorsed by the University of Waterloo.</p>
-        </div>
-      </div>
-
-      <div aria-hidden="true" className="grid h-1.5 grid-cols-4">
-        <span className="bg-um-gold-300" />
-        <span className="bg-um-gold-400" />
-        <span className="bg-um-gold-500" />
-        <span className="bg-um-gold-600" />
+          <div className="flex flex-col gap-3 md:items-end">
+            <Link
+              className="group inline-flex min-h-11 w-fit items-center gap-2 text-sm font-semibold text-white/72 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-400"
+              href="#why-waterloo"
+            >
+              See why one campus works
+              <ArrowDown
+                aria-hidden="true"
+                className="size-3.5 transition-transform duration-220 ease-um-out group-hover:translate-y-1"
+              />
+            </Link>
+            <p className="max-w-lg text-xs leading-5 text-white/55 md:text-right">
+              Independent and student-built. Not affiliated with or endorsed by the University of
+              Waterloo.
+            </p>
+          </div>
+        </motion.div>
       </div>
     </section>
   );
 }
 
-function CommercePreview() {
+function MarketplaceSignals({ reduceMotion }: { reduceMotion: boolean | null }) {
   return (
-    <figure className="relative lg:pl-4">
-      <div className="border border-black/10 bg-um-canvas p-3 text-um-text-strong shadow-um-md sm:p-4">
-        <div className="border border-black/10 bg-um-surface px-4 py-4 sm:px-5">
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 hidden lg:block">
+      <FloatingSignal
+        className="right-[5%] top-[17%] w-[21rem]"
+        delay={0.42}
+        drift={-5}
+        reduceMotion={reduceMotion}
+      >
+        <div className="flex min-h-14 items-center gap-3 bg-um-ink-950/82 px-4 text-[#ece8df] shadow-[0_20px_55px_rgba(0,0,0,0.34)] ring-1 ring-white/[0.1] backdrop-blur-xl">
+          <Search className="size-4 text-um-gold-300" />
+          <div className="min-w-0 flex-1">
+            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.09em] text-white/58">
+              Waterloo marketplace
+            </p>
+            <p className="mt-0.5 truncate text-xs font-semibold text-white/76">
+              Search monitors, textbooks, furniture…
+            </p>
+          </div>
+          <span className="border border-white/15 px-2 py-1 font-mono text-[0.52rem] text-white/40">
+            ⌘ K
+          </span>
+        </div>
+      </FloatingSignal>
+
+      <FloatingSignal
+        className="bottom-[24%] right-[7%] w-[15rem]"
+        delay={0.62}
+        drift={6}
+        reduceMotion={reduceMotion}
+      >
+        <div className="bg-[#111720]/94 p-4 text-[#ece8df] shadow-[0_24px_65px_rgba(0,0,0,0.36)] ring-1 ring-white/[0.1] backdrop-blur-xl">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="font-condensed text-xs font-bold uppercase tracking-[0.14em] text-um-gold-700">
-                Marketplace preview
+              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.09em] text-um-gold-300">
+                Pass it on
               </p>
-              <p className="mt-1 text-sm font-bold">Waterloo marketplace</p>
+              <p className="mt-1.5 text-sm font-black tracking-[-0.025em]">Create a listing</p>
             </div>
-            <p className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-um-text-muted">
-              Verified access
-            </p>
+            <ImagePlus className="size-5 text-um-gold-600" />
           </div>
-
-          <div className="mt-5 flex min-h-12 items-center gap-3 rounded-um-sm border border-black/12 bg-um-canvas-soft px-4 text-sm text-um-text-muted">
-            <Search aria-hidden="true" className="size-4 shrink-0" />
-            <span>Search monitors, textbooks, furniture…</span>
-          </div>
-
-          <div className="mt-4 grid grid-cols-2 gap-px border border-black/10 bg-black/10 sm:grid-cols-4">
-            {previewCategories.map(({ icon: Icon, label }) => (
-              <div className="bg-um-surface px-3 py-3" key={label}>
-                <Icon aria-hidden="true" className="size-4 text-um-text-muted" strokeWidth={1.8} />
-                <p className="mt-2 text-xs font-bold">{label}</p>
-              </div>
+          <div className="mt-4 grid grid-cols-3 gap-px bg-white/[0.08] font-mono text-[0.48rem] uppercase tracking-[0.1em] text-[#aaa49a]">
+            {['Photos', 'Details', 'Pickup'].map((label) => (
+              <span className="bg-[#171f2a] px-1 py-2 text-center" key={label}>
+                {label}
+              </span>
             ))}
           </div>
-
-          <div className="my-8 border-y border-black/10 px-3 py-10 text-center sm:my-10 sm:py-12">
-            <p className="font-editorial text-3xl tracking-[-0.035em] sm:text-4xl">
-              Waterloo starts here.
-            </p>
-            <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-um-text-muted">
-              Real listings appear only after verified students publish them. No invented inventory.
-            </p>
-            <Link
-              className="mt-6 inline-flex min-h-11 items-center justify-center rounded-um-sm bg-um-ink-950 px-4 text-sm font-bold text-um-text-inverse transition-colors hover:bg-um-ink-850 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-600 focus-visible:ring-offset-2"
-              href="/signup"
-            >
-              Create an account
-            </Link>
-          </div>
         </div>
-      </div>
-      <figcaption className="mt-3 text-xs leading-5 text-white/55">
-        An illustrative view of the product interface—not marketplace activity.
-      </figcaption>
-    </figure>
+      </FloatingSignal>
+
+      <FloatingSignal
+        className="bottom-[31%] left-[63%] w-[13.5rem]"
+        delay={0.78}
+        drift={-4}
+        reduceMotion={reduceMotion}
+      >
+        <div className="flex items-center gap-3 bg-um-ink-950/78 px-3.5 py-3 text-white shadow-[0_16px_45px_rgba(0,0,0,0.3)] ring-1 ring-white/[0.12] backdrop-blur-xl">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-um-gold-400 text-um-ink-950">
+            <MapPin className="size-4" />
+          </span>
+          <div>
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.09em] text-um-gold-300">
+              Pickup nearby
+            </p>
+            <p className="mt-0.5 text-[0.68rem] font-semibold text-white/66">DC · SLC · E7 · UWP</p>
+          </div>
+          <BadgeCheck className="ml-auto size-4 text-um-gold-300" />
+        </div>
+      </FloatingSignal>
+    </div>
   );
 }
 
-function CampaignLinework() {
+function FloatingSignal({
+  children,
+  className,
+  delay,
+  drift,
+  reduceMotion,
+}: {
+  children: ReactNode;
+  className: string;
+  delay: number;
+  drift: number;
+  reduceMotion: boolean | null;
+}) {
   return (
-    <svg
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-0 h-full w-full text-white"
-      preserveAspectRatio="xMidYMid slice"
-      viewBox="0 0 1440 900"
+    <motion.div
+      animate={{ opacity: 1, y: 0 }}
+      className={`absolute ${className}`}
+      initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+      transition={{ delay, duration: 0.75, ease: easeOut }}
     >
-      <g fill="none" stroke="currentColor" strokeWidth="1">
-        <path
-          d="M0 120H1440M0 240H1440M0 360H1440M0 480H1440M0 600H1440M0 720H1440M0 840H1440M120 0V900M240 0V900M360 0V900M480 0V900M600 0V900M720 0V900M840 0V900M960 0V900M1080 0V900M1200 0V900M1320 0V900"
-          opacity="0.026"
-        />
-        <path d="M40 164h260v142h174v116h238" opacity="0.075" strokeDasharray="5 9" />
-        <path d="M1060 80v184H930v158h390v214h80" opacity="0.07" />
-        <circle cx="300" cy="306" r="7" opacity="0.14" />
-        <circle cx="930" cy="422" r="7" opacity="0.14" />
-        <path d="M62 790h84M104 748v84M1280 128h84M1322 86v84" opacity="0.12" />
-      </g>
-    </svg>
+      <motion.div
+        animate={reduceMotion ? undefined : { y: [0, drift, 0] }}
+        transition={{ delay: delay + 0.8, duration: 5.5, ease: 'easeInOut', repeat: Infinity }}
+      >
+        {children}
+      </motion.div>
+    </motion.div>
   );
 }

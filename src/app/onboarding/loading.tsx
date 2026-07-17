@@ -2,10 +2,10 @@ import { WaterlooCampaignPanel } from '@/features/auth/components/waterloo-campa
 
 export default function OnboardingLoading() {
   return (
-    <main className="min-h-screen bg-[#f4f1e9] text-[#111311]">
+    <main className="min-h-screen bg-um-surface-warm text-um-text-strong">
       <div className="mx-auto grid min-h-screen max-w-[1600px] lg:grid-cols-[minmax(28rem,0.88fr)_minmax(38rem,1.12fr)]">
         <WaterlooCampaignPanel />
-        <div className="min-h-screen bg-[#f4f1e9]">
+        <div className="min-h-screen bg-um-surface-warm">
           <WaterlooCampaignPanel compact className="lg:hidden" />
           <div
             aria-label="Loading profile setup"
@@ -17,11 +17,11 @@ export default function OnboardingLoading() {
             <div className="mt-5 h-5 w-full bg-black/[0.07]" />
             <div className="mt-2 h-5 w-4/5 bg-black/[0.07]" />
             <div className="mt-10 grid gap-6 sm:grid-cols-2">
-              <div className="h-12 rounded-lg bg-black/10 sm:col-span-2" />
-              <div className="h-12 rounded-lg bg-black/10 sm:col-span-2" />
-              <div className="h-12 rounded-lg bg-black/10" />
-              <div className="h-12 rounded-lg bg-black/10" />
-              <div className="h-12 rounded-lg bg-black/10 sm:col-span-2" />
+              <div className="h-12 border-b border-black/10 sm:col-span-2" />
+              <div className="h-12 border-b border-black/10 sm:col-span-2" />
+              <div className="h-12 border-b border-black/10" />
+              <div className="h-12 border-b border-black/10" />
+              <div className="h-12 border-b border-black/10 sm:col-span-2" />
             </div>
             <span className="sr-only">Loading profile setup…</span>
           </div>

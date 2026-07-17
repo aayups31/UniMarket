@@ -13,6 +13,7 @@ import {
   moderationRemovalSchema,
   type ListingDraftInput,
 } from './schemas';
+import { publishErrorMessage } from './publish-error-message';
 
 const IMAGE_BUCKET = 'listing-images';
 
@@ -21,6 +22,12 @@ export type ListingActionResult<T = undefined> =
 
 type SavedDraft = { id: string; version: number };
 type RegisteredImage = { id: string; path: string; position: number };
+type SupabaseActionError = {
+  code?: string;
+  message?: string;
+  details?: string;
+  hint?: string;
+};
 
 function toFieldErrors(issues: { path: PropertyKey[]; message: string }[]) {
   return Object.fromEntries(
@@ -35,10 +42,29 @@ function untyped(client: Awaited<ReturnType<typeof createClient>>) {
   return client as unknown as SupabaseClient;
 }
 
+function logSupabaseActionError(operation: string, error: SupabaseActionError) {
+  console.error(`[listings] ${operation} failed`, {
+    code: error.code,
+    message: error.message,
+    details: error.details,
+    hint: error.hint,
+  });
+}
+
+function safeRevalidatePath(path: string) {
+  try {
+    revalidatePath(path);
+  } catch (error) {
+    // The database write has already committed. Do not turn a cache refresh
+    // failure into a failed save that the client may retry as a second draft.
+    console.error(`[listings] revalidation failed for ${path}`, error);
+  }
+}
+
 export async function saveListingDraftAction(
   input: ListingDraftInput,
 ): Promise<ListingActionResult<SavedDraft>> {
-  const viewer = await requireStudentSeller('/listings/new');
+  await requireStudentSeller('/listings/new');
   const parsed = listingDraftSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -50,48 +76,25 @@ export async function saveListingDraftAction(
   }
 
   const supabase = untyped(await createClient());
-  const values = {
-    seller_id: viewer.id,
-    title: parsed.data.title,
-    description: parsed.data.description,
-    price_cents: parsed.data.priceCents,
-    category_id: parsed.data.categoryId,
-    condition: parsed.data.condition,
-    open_to_offers: parsed.data.openToOffers,
-    pickup_area: parsed.data.pickupArea,
-  };
-
-  if (parsed.data.listingId) {
-    const { data, error } = await supabase
-      .from('listings')
-      .update(values)
-      .eq('id', parsed.data.listingId)
-      .eq('seller_id', viewer.id)
-      .in('status', ['draft', 'published'])
-      .select('id,version')
-      .maybeSingle();
-
-    if (error || !data) {
-      return { ok: false, message: 'This draft could not be saved. Refresh and try again.' };
-    }
-
-    revalidatePath('/my-listings');
-    revalidatePath('/marketplace');
-    revalidatePath(`/listings/${parsed.data.listingId}`);
-    return { ok: true, data: data as SavedDraft };
-  }
-
-  const { data, error } = await supabase
-    .from('listings')
-    .insert(values)
-    .select('id,version')
-    .single();
+  const { data, error } = await supabase.rpc('save_listing_draft', {
+    p_listing_id: parsed.data.listingId ?? null,
+    p_title: parsed.data.title,
+    p_description: parsed.data.description,
+    p_price_cents: parsed.data.priceCents,
+    p_category_id: parsed.data.categoryId,
+    p_condition: parsed.data.condition,
+    p_open_to_offers: parsed.data.openToOffers,
+    p_pickup_area: parsed.data.pickupArea,
+  });
 
   if (error || !data) {
+    if (error) logSupabaseActionError('save draft RPC', error);
     return { ok: false, message: 'Your draft could not be created. Please try again.' };
   }
 
-  revalidatePath('/my-listings');
+  safeRevalidatePath('/my-listings');
+  safeRevalidatePath('/marketplace');
+  safeRevalidatePath(`/listings/${data.id}`);
   return { ok: true, data: data as SavedDraft };
 }
 
@@ -118,19 +121,13 @@ export async function publishListingAction(
   });
 
   if (error) {
-    const message = error.message.toLowerCase();
-    if (message.includes('image')) {
-      return { ok: false, message: 'Please add at least one finished image before publishing.' };
-    }
-    return {
-      ok: false,
-      message: 'We could not publish the listing yet. Your work is still saved as a draft.',
-    };
+    logSupabaseActionError('publish RPC', error);
+    return { ok: false, message: publishErrorMessage(error) };
   }
 
-  revalidatePath('/marketplace');
-  revalidatePath('/my-listings');
-  revalidatePath(`/listings/${saved.data.id}`);
+  safeRevalidatePath('/marketplace');
+  safeRevalidatePath('/my-listings');
+  safeRevalidatePath(`/listings/${saved.data.id}`);
   return { ok: true, data: { id: saved.data.id } };
 }
 
@@ -371,6 +368,33 @@ export async function archiveOwnListingAction(
   return { ok: true, data: { id: parsedId.data } };
 }
 
+export async function markOwnListingSoldAction(
+  listingId: unknown,
+): Promise<ListingActionResult<{ id: string }>> {
+  const viewer = await requireStudentSeller('/my-listings');
+  const parsedId = listingIdSchema.safeParse(listingId);
+  if (!parsedId.success) return { ok: false, message: 'That listing ID is invalid.' };
+
+  const supabase = untyped(await createClient());
+  const { data, error } = await supabase
+    .from('listings')
+    .update({ status: 'sold' })
+    .eq('id', parsedId.data)
+    .eq('seller_id', viewer.id)
+    .eq('status', 'published')
+    .select('id')
+    .maybeSingle();
+
+  if (error || !data) {
+    return { ok: false, message: 'Only a live listing can be marked as sold.' };
+  }
+
+  revalidatePath('/marketplace');
+  revalidatePath('/my-listings');
+  revalidatePath(`/listings/${parsedId.data}`);
+  return { ok: true, data: { id: parsedId.data } };
+}
+
 export async function deleteOwnListingAction(
   listingId: unknown,
 ): Promise<ListingActionResult<{ id: string }>> {
@@ -384,14 +408,29 @@ export async function deleteOwnListingAction(
     .select('id,status')
     .eq('id', parsedId.data)
     .eq('seller_id', viewer.id)
-    .in('status', ['draft', 'sold', 'archived'])
     .maybeSingle();
 
   if (listingError || !listing) {
-    return {
-      ok: false,
-      message: 'Only drafts and listings that are no longer live can be deleted.',
-    };
+    return { ok: false, message: 'This listing could not be found.' };
+  }
+
+  if (listing.status === 'removed') {
+    return { ok: false, message: 'This listing has already been removed.' };
+  }
+
+  if (listing.status === 'published') {
+    const { data: archived, error: archiveError } = await supabase
+      .from('listings')
+      .update({ status: 'archived' })
+      .eq('id', parsedId.data)
+      .eq('seller_id', viewer.id)
+      .eq('status', 'published')
+      .select('id')
+      .maybeSingle();
+
+    if (archiveError || !archived) {
+      return { ok: false, message: 'The live listing could not be removed from the marketplace.' };
+    }
   }
 
   const { data: images, error: imageReadError } = await supabase

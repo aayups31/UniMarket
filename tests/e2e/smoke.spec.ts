@@ -4,11 +4,12 @@ test('landing page presents the real Waterloo-only product', async ({ page }) =>
   await page.goto('/');
 
   await expect(
-    page.getByRole('heading', { level: 1, name: /marketplace built for students/i }),
+    page.getByRole('heading', {
+      level: 1,
+      name: /your university.*your people.*just for you/i,
+    }),
   ).toBeVisible();
-  await expect(
-    page.getByRole('link', { name: /continue with @uwaterloo\.ca/i }).first(),
-  ).toBeVisible();
+  await expect(page.getByRole('link', { name: /enter with @uwaterloo\.ca/i })).toBeVisible();
   await expect(page.getByText(/in-app escrow/i)).toHaveCount(0);
   await expect(page.getByText(/coming to your campus/i)).toHaveCount(0);
 });

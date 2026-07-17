@@ -20,7 +20,7 @@ type OnboardingFormProps = {
 };
 
 const inputClassName =
-  'h-12 w-full rounded-lg border border-black/18 bg-white px-4 text-base text-[#111311] outline-none transition placeholder:text-black/55 hover:border-black/30 focus:border-[#8b6b00] focus:ring-4 focus:ring-[#ffd54f]/30 disabled:cursor-not-allowed disabled:bg-black/[0.03]';
+  'h-12 w-full rounded-none border-0 border-b border-black/20 bg-transparent px-0 text-base text-um-text-strong outline-none transition placeholder:text-um-text-muted hover:border-black/40 focus:border-um-gold-600 focus:ring-0 disabled:cursor-not-allowed disabled:text-um-text-muted';
 
 export function OnboardingForm({ email, initialValues, nextPath }: OnboardingFormProps) {
   const [serverError, setServerError] = useState<string | null>(null);
@@ -53,29 +53,34 @@ export function OnboardingForm({ email, initialValues, nextPath }: OnboardingFor
   });
 
   return (
-    <form className="mt-9 space-y-7" noValidate onSubmit={onSubmit}>
+    <form className="mt-10 space-y-9" noValidate onSubmit={onSubmit}>
       <input type="hidden" {...register('next')} />
 
-      <div className="grid gap-6 sm:grid-cols-2">
-        <div className="space-y-2 sm:col-span-2">
-          <label className="text-sm font-bold text-[#20221f]" htmlFor="email">
-            University email
-          </label>
+      <div className="grid gap-x-7 gap-y-8 sm:grid-cols-2">
+        <div className="border-l-2 border-um-gold-500 bg-white/35 px-4 py-3 sm:col-span-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <label
+              className="font-condensed text-xs font-bold uppercase tracking-[0.14em] text-um-text-muted"
+              htmlFor="email"
+            >
+              University email
+            </label>
+            <p className="flex items-center gap-1.5 font-condensed text-[0.68rem] font-bold uppercase tracking-[0.12em] text-um-success">
+              <BadgeCheck aria-hidden="true" className="size-3.5" />
+              Verified Waterloo account
+            </p>
+          </div>
           <input
-            className={`${inputClassName} font-medium text-black/55`}
+            className="mt-1 w-full border-0 bg-transparent p-0 text-sm font-semibold text-um-text-muted outline-none"
             disabled
             id="email"
             type="email"
             value={email}
           />
-          <p className="flex items-center gap-1.5 font-mono text-[0.62rem] font-bold uppercase tracking-[0.14em] text-emerald-800">
-            <BadgeCheck aria-hidden="true" className="size-3.5" />
-            Verified Waterloo account
-          </p>
         </div>
 
-        <div className="space-y-2 sm:col-span-2">
-          <label className="text-sm font-bold text-[#20221f]" htmlFor="full-name">
+        <div className="sm:col-span-2">
+          <label className="text-sm font-bold text-um-text-strong" htmlFor="full-name">
             Full name
           </label>
           <input
@@ -96,8 +101,8 @@ export function OnboardingForm({ email, initialValues, nextPath }: OnboardingFor
           ) : null}
         </div>
 
-        <div className="space-y-2">
-          <label className="text-sm font-bold text-[#20221f]" htmlFor="program">
+        <div>
+          <label className="text-sm font-bold text-um-text-strong" htmlFor="program">
             Program
           </label>
           <input
@@ -118,8 +123,8 @@ export function OnboardingForm({ email, initialValues, nextPath }: OnboardingFor
           ) : null}
         </div>
 
-        <div className="space-y-2">
-          <label className="text-sm font-bold text-[#20221f]" htmlFor="year">
+        <div>
+          <label className="text-sm font-bold text-um-text-strong" htmlFor="year">
             Academic year
           </label>
           <select
@@ -144,9 +149,9 @@ export function OnboardingForm({ email, initialValues, nextPath }: OnboardingFor
           ) : null}
         </div>
 
-        <div className="space-y-2 sm:col-span-2">
-          <label className="text-sm font-bold text-[#20221f]" htmlFor="residence-area">
-            Residence or area <span className="font-normal text-black/55">(optional)</span>
+        <div className="sm:col-span-2">
+          <label className="text-sm font-bold text-um-text-strong" htmlFor="residence-area">
+            Residence or area <span className="font-normal text-um-text-muted">(optional)</span>
           </label>
           <select
             aria-describedby="residence-hint"
@@ -162,7 +167,7 @@ export function OnboardingForm({ email, initialValues, nextPath }: OnboardingFor
               </option>
             ))}
           </select>
-          <p className="text-xs leading-5 text-black/58" id="residence-hint">
+          <p className="mt-2 text-xs leading-5 text-um-text-muted" id="residence-hint">
             This stays private. Sellers choose a separate, broad pickup area for each listing.
           </p>
         </div>
@@ -171,30 +176,35 @@ export function OnboardingForm({ email, initialValues, nextPath }: OnboardingFor
       {serverError ? (
         <div
           aria-live="polite"
-          className="border-l-2 border-red-600 bg-red-50 px-4 py-3 text-sm font-medium text-red-800"
+          className="border-l-2 border-red-600 bg-red-50/70 px-4 py-3 text-sm font-medium text-red-800"
           role="alert"
         >
           {serverError}
         </div>
       ) : null}
 
-      <button
-        className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#111311] px-5 text-sm font-bold text-white transition hover:bg-black focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#ffd54f]/70 disabled:cursor-not-allowed disabled:opacity-60"
-        disabled={isPending}
-        type="submit"
-      >
-        {isPending ? (
-          <>
-            <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
-            Saving profile…
-          </>
-        ) : (
-          <>
-            Enter the marketplace
-            <ArrowRight aria-hidden="true" className="size-4" />
-          </>
-        )}
-      </button>
+      <div className="border-t border-black/10 pt-6 sm:flex sm:items-center sm:justify-between sm:gap-6">
+        <p className="mb-4 max-w-xs text-xs leading-5 text-um-text-muted sm:mb-0">
+          One profile. Verified access to listings from Waterloo students.
+        </p>
+        <button
+          className="flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-um-sm bg-um-ink-950 px-6 text-sm font-bold text-white shadow-um-sm transition hover:-translate-y-0.5 hover:bg-um-ink-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-um-gold-400/50 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+          disabled={isPending}
+          type="submit"
+        >
+          {isPending ? (
+            <>
+              <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
+              Saving profile…
+            </>
+          ) : (
+            <>
+              Enter the marketplace
+              <ArrowRight aria-hidden="true" className="size-4 text-um-gold-400" />
+            </>
+          )}
+        </button>
+      </div>
     </form>
   );
 }

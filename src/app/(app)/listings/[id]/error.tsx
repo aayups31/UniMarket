@@ -2,32 +2,40 @@
 
 import Link from 'next/link';
 import { AlertCircle, ArrowLeft, RotateCcw } from 'lucide-react';
+import { CampusRouteGraphic } from '@/components/ui/CampusRouteGraphic';
 
 export default function ListingError({ reset }: { reset: () => void }) {
   return (
     <div className="flex min-h-[70vh] items-center justify-center bg-um-canvas px-4 py-16 text-um-text-strong">
-      <div className="w-full max-w-lg overflow-hidden rounded-um-xl border border-black/10 bg-white text-center shadow-um-sm">
-        <div className="h-1.5 bg-um-gold-500" aria-hidden="true" />
-        <div className="px-6 py-12 sm:px-10">
-          <AlertCircle className="mx-auto size-8 text-um-gold-700" aria-hidden="true" />
-          <h1 className="mt-5 text-2xl font-semibold tracking-[-0.035em]">
+      <div className="relative isolate w-full max-w-3xl overflow-hidden bg-um-ink-900 px-7 py-14 text-left text-um-text-inverse shadow-[0_22px_60px_rgba(5,7,11,0.17)] sm:px-12">
+        <CampusRouteGraphic className="absolute inset-y-0 right-0 -z-10 w-[62%] opacity-[0.42]" />
+        <div
+          className="absolute inset-0 -z-10 bg-gradient-to-r from-um-ink-900 via-um-ink-900/96 to-um-ink-900/42"
+          aria-hidden="true"
+        />
+        <div className="max-w-md">
+          <AlertCircle className="size-7 text-um-gold-300" aria-hidden="true" />
+          <p className="font-condensed mt-6 text-xs font-bold uppercase tracking-[0.18em] text-um-gold-300">
+            Listing unavailable
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.045em]">
             This listing didn’t load
           </h1>
-          <p className="mt-2 text-sm leading-6 text-um-text-muted">
+          <p className="mt-3 text-sm leading-6 text-white/52">
             It may be a temporary connection issue. Try once more or head back to the marketplace.
           </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <div className="mt-7 flex flex-wrap gap-3">
             <button
               type="button"
               onClick={reset}
-              className="inline-flex min-h-11 items-center gap-2 rounded-um-sm bg-um-ink-950 px-4 py-2.5 text-sm font-bold text-white"
+              className="inline-flex min-h-11 items-center gap-2 rounded-um-sm bg-um-gold-400 px-4 py-2.5 text-sm font-bold text-um-ink-950"
             >
               <RotateCcw className="h-4 w-4" aria-hidden="true" />
               Try again
             </button>
             <Link
               href="/marketplace"
-              className="inline-flex min-h-11 items-center gap-2 rounded-um-sm border border-black/10 px-4 py-2.5 text-sm font-semibold"
+              className="inline-flex min-h-11 items-center gap-2 rounded-um-sm border border-white/12 px-4 py-2.5 text-sm font-semibold text-white/68 hover:bg-white/[0.06]"
             >
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
               Marketplace

@@ -33,9 +33,9 @@ export function UpdatePasswordForm() {
   });
 
   return (
-    <form className="mt-9 space-y-5" noValidate onSubmit={onSubmit}>
+    <form className="mt-10 space-y-5" noValidate onSubmit={onSubmit}>
       <div className="space-y-2">
-        <label className="text-sm font-bold text-[#20221f]" htmlFor="new-password">
+        <label className="text-sm font-bold text-um-text-strong" htmlFor="new-password">
           New password
         </label>
         <input
@@ -43,7 +43,7 @@ export function UpdatePasswordForm() {
           aria-invalid={Boolean(errors.password)}
           autoComplete="new-password"
           autoFocus
-          className="h-12 w-full rounded-lg border border-black/18 bg-white px-4 text-base text-[#111311] outline-none transition placeholder:text-black/55 hover:border-black/30 focus:border-[#8b6b00] focus:ring-4 focus:ring-[#ffd54f]/30 disabled:cursor-not-allowed disabled:bg-black/[0.03]"
+          className="h-[3.35rem] w-full rounded-sm border border-black/[0.12] bg-um-surface px-4 text-base text-um-text-strong outline-none transition placeholder:text-um-text-muted hover:border-black/25 focus:border-um-gold-600 focus:ring-4 focus:ring-um-gold-400/20 disabled:cursor-not-allowed disabled:bg-black/[0.03]"
           disabled={isPending}
           id="new-password"
           placeholder="Create a new password"
@@ -55,21 +55,21 @@ export function UpdatePasswordForm() {
             {errors.password.message}
           </p>
         ) : (
-          <p className="text-sm text-black/58" id="new-password-hint">
+          <p className="text-sm text-um-text-muted" id="new-password-hint">
             Use 8–72 characters with uppercase, lowercase, and a number.
           </p>
         )}
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-bold text-[#20221f]" htmlFor="confirm-new-password">
+        <label className="text-sm font-bold text-um-text-strong" htmlFor="confirm-new-password">
           Confirm new password
         </label>
         <input
           aria-describedby={errors.confirmPassword ? 'confirm-new-password-error' : undefined}
           aria-invalid={Boolean(errors.confirmPassword)}
           autoComplete="new-password"
-          className="h-12 w-full rounded-lg border border-black/18 bg-white px-4 text-base text-[#111311] outline-none transition placeholder:text-black/55 hover:border-black/30 focus:border-[#8b6b00] focus:ring-4 focus:ring-[#ffd54f]/30 disabled:cursor-not-allowed disabled:bg-black/[0.03]"
+          className="h-[3.35rem] w-full rounded-sm border border-black/[0.12] bg-um-surface px-4 text-base text-um-text-strong outline-none transition placeholder:text-um-text-muted hover:border-black/25 focus:border-um-gold-600 focus:ring-4 focus:ring-um-gold-400/20 disabled:cursor-not-allowed disabled:bg-black/[0.03]"
           disabled={isPending}
           id="confirm-new-password"
           placeholder="Repeat your new password"
@@ -86,7 +86,7 @@ export function UpdatePasswordForm() {
       {serverError ? (
         <div
           aria-live="polite"
-          className="border-l-2 border-red-600 bg-red-50 px-4 py-3 text-sm font-medium text-red-800"
+          className="border-l-2 border-red-600 bg-red-50/80 px-4 py-3 text-sm font-medium text-red-800"
           role="alert"
         >
           {serverError}
@@ -94,7 +94,7 @@ export function UpdatePasswordForm() {
       ) : null}
 
       <button
-        className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#111311] px-5 text-sm font-bold text-white transition hover:bg-black focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#ffd54f]/70 disabled:cursor-not-allowed disabled:opacity-60"
+        className="group flex h-[3.35rem] w-full items-center justify-center gap-3 rounded-sm bg-um-ink-950 px-5 text-sm font-black text-white transition hover:bg-um-ink-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-um-gold-400/45 disabled:cursor-not-allowed disabled:opacity-60"
         disabled={isPending}
         type="submit"
       >
@@ -106,7 +106,10 @@ export function UpdatePasswordForm() {
         ) : (
           <>
             Save new password
-            <ArrowRight aria-hidden="true" className="size-4" />
+            <ArrowRight
+              aria-hidden="true"
+              className="size-4 text-um-gold-400 transition-transform group-hover:translate-x-1"
+            />
           </>
         )}
       </button>

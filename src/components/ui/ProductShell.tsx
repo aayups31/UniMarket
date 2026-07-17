@@ -23,17 +23,21 @@ export function ProductShell({ canSell, children, fullName, role }: ProductShell
   const initial = identityName.charAt(0).toLocaleUpperCase();
 
   return (
-    <div className="min-h-screen bg-um-canvas text-um-text-strong">
+    <div className="um-product-dark min-h-screen bg-um-canvas text-um-text-strong">
       <a className="um-skip-link" href="#main-content">
         Skip to content
       </a>
 
-      <header className="sticky top-0 z-40">
+      <header className="sticky top-0 z-40 bg-um-ink-950 text-white shadow-[0_1px_0_rgba(255,255,255,0.06)]">
         <CampusStrip />
 
-        <div className="border-b border-black/10 bg-white/[0.97] shadow-[0_1px_0_rgba(255,255,255,0.72)] backdrop-blur-md">
+        <div className="border-b border-white/[0.07] bg-um-ink-950/[0.97] backdrop-blur-md">
           <div className="mx-auto flex h-[4.25rem] max-w-um-shell items-center gap-4 px-4 sm:px-6 lg:px-8">
-            <BrandMark className="shrink-0" href="/marketplace" label="UniMarket marketplace" />
+            <BrandMark
+              className="shrink-0 [&_.text-um-text-muted]:text-white/45 [&_.text-um-text-strong]:text-white [&>span:first-child]:bg-white/[0.04] [&>span:first-child]:ring-white/10"
+              href="/marketplace"
+              label="UniMarket marketplace"
+            />
 
             <div className="ml-auto hidden lg:block">
               <ProductNavigation canSell={canSell} isModerator={role === 'moderator'} />
@@ -41,18 +45,18 @@ export function ProductShell({ canSell, children, fullName, role }: ProductShell
 
             {canSell ? <CreateListingNavigationButton /> : null}
 
-            <div className="hidden min-w-0 items-center gap-2.5 border-l border-black/10 pl-4 sm:flex">
+            <div className="hidden min-w-0 items-center gap-2.5 border-l border-white/10 pl-4 sm:flex">
               <span
                 aria-hidden="true"
-                className="grid size-9 shrink-0 place-items-center rounded-full bg-um-ink-950 text-xs font-bold text-um-gold-400"
+                className="grid size-9 shrink-0 place-items-center rounded-full bg-white/[0.07] text-xs font-bold text-um-gold-400 ring-1 ring-white/10"
               >
                 {initial}
               </span>
               <span className="hidden min-w-0 xl:block">
-                <span className="block max-w-40 truncate text-xs font-bold text-um-text-strong">
+                <span className="block max-w-40 truncate text-xs font-bold text-white">
                   {identityName}
                 </span>
-                <span className="mt-0.5 flex items-center gap-1 text-[0.67rem] font-medium text-um-text-muted">
+                <span className="mt-0.5 flex items-center gap-1 text-[0.67rem] font-medium text-white/45">
                   <ShieldCheck
                     aria-hidden="true"
                     className="size-3 text-um-gold-700"
@@ -64,7 +68,7 @@ export function ProductShell({ canSell, children, fullName, role }: ProductShell
             </div>
 
             <SignOutButton
-              className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-um-sm px-3 text-sm font-semibold text-um-text-muted transition-colors duration-160 ease-um-out hover:bg-um-surface-warm hover:text-um-text-strong"
+              className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-um-sm px-3 text-sm font-semibold text-white/48 transition-colors duration-160 ease-um-out hover:bg-white/[0.07] hover:text-white"
               label="Sign out"
             />
           </div>
@@ -82,7 +86,7 @@ export function ProductShell({ canSell, children, fullName, role }: ProductShell
 
 function CampusStrip() {
   return (
-    <div className="h-7 border-b border-white/10 bg-um-ink-950 text-um-text-inverse">
+    <div className="h-7 border-b border-white/[0.07] bg-um-ink-1000 text-um-text-inverse">
       <div className="mx-auto flex h-full max-w-um-shell items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <p className="font-condensed flex min-w-0 items-center gap-1.5 truncate text-[0.66rem] font-semibold uppercase tracking-[0.13em] text-white/[0.72]">
           <MapPin aria-hidden="true" className="size-3 shrink-0 text-um-gold-400" strokeWidth={2} />

@@ -34,7 +34,7 @@ export function ModerationAuditLog({
 
   return (
     <div>
-      <div className="overflow-hidden rounded-um-lg border border-black/10 bg-um-surface shadow-um-xs">
+      <div className="overflow-hidden border-y border-black/10 bg-um-surface shadow-um-xs">
         <div className="border-b border-black/10 bg-um-canvas-soft px-5 py-4 sm:flex sm:items-center sm:justify-between sm:gap-4 sm:px-6">
           <p className="flex items-center gap-2 text-sm font-semibold text-um-text-strong">
             <LockKeyhole aria-hidden="true" className="size-4 text-um-gold-700" strokeWidth={1.9} />
@@ -132,7 +132,7 @@ function AuditCard({
         <ActionBadge action={event.action} />
       </div>
 
-      <div className="mt-4 rounded-um-sm bg-um-surface-warm px-4 py-3 text-sm leading-6 text-um-text">
+      <div className="mt-4 border-l-2 border-um-gold-500 bg-um-surface-warm px-4 py-3 text-sm leading-6 text-um-text">
         {event.reason}
       </div>
 
@@ -201,8 +201,8 @@ function AuditPagination({ page, totalPages }: { page: number; totalPages: numbe
 
 function EmptyAuditLog() {
   return (
-    <div className="rounded-um-lg border border-black/10 bg-um-surface px-6 py-14 text-center shadow-um-xs sm:py-16">
-      <span className="mx-auto grid size-12 place-items-center rounded-um-md bg-um-surface-warm text-um-text-muted">
+    <div className="border-y border-black/10 bg-um-surface px-6 py-14 text-center shadow-um-xs sm:py-16">
+      <span className="mx-auto grid size-12 place-items-center border-l-2 border-um-gold-500 bg-um-surface-warm text-um-text-muted">
         <FileClock aria-hidden="true" className="size-5" strokeWidth={1.8} />
       </span>
       <h3 className="mt-5 text-xl font-bold tracking-[-0.03em] text-um-text-strong">
@@ -218,8 +218,8 @@ function EmptyAuditLog() {
 
 function EmptyAuditPage() {
   return (
-    <div className="rounded-um-lg border border-black/10 bg-um-surface px-6 py-14 text-center shadow-um-xs sm:py-16">
-      <span className="mx-auto grid size-12 place-items-center rounded-um-md bg-um-surface-warm text-um-text-muted">
+    <div className="border-y border-black/10 bg-um-surface px-6 py-14 text-center shadow-um-xs sm:py-16">
+      <span className="mx-auto grid size-12 place-items-center border-l-2 border-um-gold-500 bg-um-surface-warm text-um-text-muted">
         <ListRestart aria-hidden="true" className="size-5" strokeWidth={1.8} />
       </span>
       <h3 className="mt-5 text-xl font-bold tracking-[-0.03em] text-um-text-strong">

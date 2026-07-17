@@ -15,16 +15,17 @@ export default async function UpdatePasswordPage() {
 
   return (
     <div>
-      <p className="font-mono text-[0.64rem] font-bold uppercase tracking-[0.2em] text-emerald-800">
+      <p className="text-sm font-semibold tracking-[0.02em] text-emerald-800">
         Recovery link verified
       </p>
-      <h1 className="mt-4 text-4xl font-black leading-[1.02] tracking-[-0.05em] text-[#111311] sm:text-[2.75rem]">
-        Choose a new password.
+      <h1 className="mt-5 text-[clamp(2.6rem,5.5vw,3.75rem)] font-bold leading-[1.02] tracking-[-0.028em] text-um-text-strong">
+        Choose a new
+        <span className="block text-um-gold-600">password.</span>
       </h1>
-      <p className="mt-4 max-w-sm text-base leading-7 text-black/58">
+      <p className="mt-5 max-w-md text-base leading-7 text-um-text">
         This updates the password for{' '}
-        <span className="font-bold text-black/80">{identity.email}</span> and returns you to sign
-        in.
+        <span className="font-bold text-um-text-strong">{identity.email}</span> and returns you to
+        sign in.
       </p>
 
       <UpdatePasswordForm />

@@ -10,6 +10,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 
+import { CampusRouteGraphic } from '@/components/ui/CampusRouteGraphic';
 import { ModerationAuditLog } from '@/features/moderation/components/ModerationAuditLog';
 import { getModerationWorkspace } from '@/features/moderation/queries';
 import { requireModerator } from '@/lib/auth/session';
@@ -34,24 +35,25 @@ export default async function ModerationPage({ searchParams }: ModerationPagePro
 
   return (
     <div className="mx-auto max-w-um-content px-4 pb-24 pt-6 sm:px-6 sm:pt-9 lg:px-8 lg:pb-28 lg:pt-12">
-      <header className="relative isolate overflow-hidden rounded-um-xl border border-black/10 bg-um-canvas-soft shadow-um-sm">
-        <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-um-gold-500" />
+      <header className="relative isolate overflow-hidden rounded-um-lg bg-um-ink-950 text-white shadow-um-md">
+        <CampusRouteGraphic className="pointer-events-none absolute inset-0 opacity-[0.16]" />
+        <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-um-gold-400" />
         <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_21rem]">
           <div className="px-6 pb-8 pt-9 sm:px-9 sm:pb-10 sm:pt-11 lg:px-11 lg:py-12">
-            <p className="font-condensed flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-um-gold-700">
+            <p className="font-condensed flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-um-gold-400">
               <ShieldCheck aria-hidden="true" className="size-3.5" strokeWidth={2} />
               Moderator workspace
             </p>
-            <h1 className="um-balanced mt-5 max-w-4xl text-[clamp(2.65rem,7vw,5.25rem)] font-bold leading-[0.92] tracking-[-0.06em] text-um-text-strong">
+            <h1 className="um-balanced mt-5 max-w-4xl text-[clamp(2.65rem,7vw,5.25rem)] font-bold leading-[0.92] tracking-[-0.06em] text-white">
               Keep the marketplace useful.
-              <span className="mt-1 block text-um-text-muted">Leave a clear record.</span>
+              <span className="mt-1 block text-white/48">Leave a clear record.</span>
             </h1>
-            <p className="mt-6 max-w-2xl text-sm leading-7 text-um-text sm:text-base">
+            <p className="mt-6 max-w-2xl text-sm leading-7 text-white/60 sm:text-base">
               Review current listings in context. When removal is necessary, the database requires a
               reason and writes an audit entry that cannot be edited or deleted.
             </p>
             <Link
-              className="mt-7 inline-flex min-h-11 items-center gap-2 rounded-um-sm bg-um-ink-950 px-5 text-sm font-bold text-um-text-inverse shadow-um-xs transition duration-160 ease-um-out hover:-translate-y-0.5 hover:bg-um-ink-850"
+              className="mt-7 inline-flex min-h-11 items-center gap-2 rounded-um-sm bg-um-gold-400 px-5 text-sm font-bold text-um-ink-950 shadow-um-xs transition duration-160 ease-um-out hover:-translate-y-0.5 hover:bg-um-gold-300"
               href="/marketplace"
             >
               Review current listings
@@ -59,7 +61,7 @@ export default async function ModerationPage({ searchParams }: ModerationPagePro
             </Link>
           </div>
 
-          <aside className="relative hidden overflow-hidden bg-um-ink-950 p-8 text-um-text-inverse lg:flex lg:flex-col lg:justify-between">
+          <aside className="relative hidden overflow-hidden border-l border-white/10 bg-white/[0.025] p-8 text-um-text-inverse backdrop-blur-[1px] lg:flex lg:flex-col lg:justify-between">
             <div>
               <p className="font-condensed text-xs font-bold uppercase tracking-[0.17em] text-um-gold-400">
                 Enforcement boundary
@@ -105,7 +107,7 @@ export default async function ModerationPage({ searchParams }: ModerationPagePro
           </h2>
         </div>
 
-        <div className="grid divide-y divide-black/10 overflow-hidden rounded-um-lg border border-black/10 bg-um-surface shadow-um-xs md:grid-cols-3 md:divide-x md:divide-y-0">
+        <div className="grid divide-y divide-black/10 border-y border-black/10 md:grid-cols-[1.2fr_1fr_1fr] md:divide-x md:divide-y-0">
           <OverviewCard
             description="Published inventory available for direct review."
             icon={Eye}
@@ -172,7 +174,7 @@ function OverviewCard({ description, icon: Icon, label, value }: OverviewCardPro
   return (
     <article className="p-5 sm:p-6">
       <div className="flex items-start justify-between gap-4">
-        <span className="grid size-10 shrink-0 place-items-center rounded-um-md bg-um-surface-warm text-um-text-muted">
+        <span className="grid size-10 shrink-0 place-items-center border-l-2 border-um-gold-500 bg-um-surface-warm text-um-text-muted">
           <Icon aria-hidden="true" className="size-[1.15rem]" strokeWidth={1.8} />
         </span>
         <strong className="text-right text-xl font-bold tabular-nums tracking-[-0.035em] text-um-text-strong">

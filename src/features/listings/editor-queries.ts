@@ -48,7 +48,7 @@ export type ManagedListing = {
   id: string;
   title: string;
   priceCents: number | null;
-  status: Extract<ListingStatus, 'draft' | 'published' | 'archived'>;
+  status: Extract<ListingStatus, 'draft' | 'published' | 'sold' | 'archived'>;
   updatedAt: string;
   publishedAt: string | null;
   coverUrl: string | null;
@@ -151,7 +151,7 @@ export async function getManagedListings(sellerId: string): Promise<ManagedListi
     .from('listings')
     .select('id,title,price_cents,category_id,status,updated_at,published_at')
     .eq('seller_id', sellerId)
-    .in('status', ['draft', 'published', 'archived'])
+    .in('status', ['draft', 'published', 'sold', 'archived'])
     .order('updated_at', { ascending: false });
 
   if (error) throw new ListingEditorDataError('We could not load your listings.');

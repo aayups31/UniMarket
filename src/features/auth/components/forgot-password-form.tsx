@@ -38,9 +38,9 @@ export function ForgotPasswordForm() {
   });
 
   return (
-    <form className="mt-9 space-y-5" noValidate onSubmit={onSubmit}>
+    <form className="mt-10 space-y-5" noValidate onSubmit={onSubmit}>
       <div className="space-y-2">
-        <label className="text-sm font-bold text-[#20221f]" htmlFor="recovery-email">
+        <label className="text-sm font-bold text-um-text-strong" htmlFor="recovery-email">
           Waterloo email
         </label>
         <input
@@ -48,7 +48,7 @@ export function ForgotPasswordForm() {
           aria-invalid={Boolean(errors.email)}
           autoComplete="email"
           autoFocus
-          className="h-12 w-full rounded-lg border border-black/18 bg-white px-4 text-base text-[#111311] outline-none transition placeholder:text-black/55 hover:border-black/30 focus:border-[#8b6b00] focus:ring-4 focus:ring-[#ffd54f]/30 disabled:cursor-not-allowed disabled:bg-black/[0.03]"
+          className="h-[3.35rem] w-full rounded-sm border border-black/[0.12] bg-um-surface px-4 text-base text-um-text-strong outline-none transition placeholder:text-um-text-muted hover:border-black/25 focus:border-um-gold-600 focus:ring-4 focus:ring-um-gold-400/20 disabled:cursor-not-allowed disabled:bg-black/[0.03]"
           disabled={isPending}
           id="recovery-email"
           inputMode="email"
@@ -66,7 +66,7 @@ export function ForgotPasswordForm() {
       {serverError ? (
         <div
           aria-live="polite"
-          className="border-l-2 border-red-600 bg-red-50 px-4 py-3 text-sm font-medium text-red-800"
+          className="border-l-2 border-red-600 bg-red-50/80 px-4 py-3 text-sm font-medium text-red-800"
           role="alert"
         >
           {serverError}
@@ -76,7 +76,7 @@ export function ForgotPasswordForm() {
       {notice ? (
         <div
           aria-live="polite"
-          className="border-l-2 border-emerald-700 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900"
+          className="border-l-2 border-emerald-700 bg-emerald-50/80 px-4 py-3 text-sm font-medium text-emerald-900"
           role="status"
         >
           {notice}
@@ -84,7 +84,7 @@ export function ForgotPasswordForm() {
       ) : null}
 
       <button
-        className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#111311] px-5 text-sm font-bold text-white transition hover:bg-black focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#ffd54f]/70 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex h-[3.35rem] w-full items-center justify-center gap-3 rounded-sm bg-um-ink-950 px-5 text-sm font-black text-white transition hover:bg-um-ink-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-um-gold-400/45 disabled:cursor-not-allowed disabled:opacity-60"
         disabled={isPending}
         type="submit"
       >
@@ -99,7 +99,7 @@ export function ForgotPasswordForm() {
       </button>
 
       <Link
-        className="mx-auto flex min-h-11 w-fit items-center gap-1.5 px-2 text-sm font-semibold text-black/55 transition hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7a900]"
+        className="mx-auto flex min-h-11 w-fit items-center gap-1.5 px-2 text-sm font-semibold text-um-text-muted transition hover:text-um-text-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-500"
         href="/login"
       >
         <ArrowLeft aria-hidden="true" className="size-4" />

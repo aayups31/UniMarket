@@ -11,6 +11,8 @@ import {
   Tag,
 } from 'lucide-react';
 
+import { CampusRouteGraphic } from '@/components/ui/CampusRouteGraphic';
+import { ListingManagementActions } from '@/features/listings/components/ListingManagementActions';
 import { ModeratorRemoveDialog } from '@/features/listings/components/ModeratorRemoveDialog';
 import { ListingGallery } from './ListingGallery';
 import { formatCondition, formatPostedDate, formatPrice, getInitials } from '../format';
@@ -39,10 +41,10 @@ export function ListingDetail({
 
   return (
     <div className="min-h-screen bg-um-canvas text-um-text-strong">
-      <div className="mx-auto max-w-um-content px-4 pb-32 pt-5 sm:px-6 lg:px-8 lg:pb-24 lg:pt-8">
+      <div className="mx-auto max-w-um-content px-4 pb-32 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
         <Link
           href="/marketplace"
-          className="inline-flex min-h-11 items-center gap-2 rounded-um-sm px-1 text-sm font-semibold text-um-text-muted transition-colors duration-160 ease-um-out hover:text-um-text-strong"
+          className="font-condensed inline-flex min-h-11 items-center gap-2 px-1 text-xs font-bold uppercase tracking-[0.15em] text-um-text-muted transition-colors duration-160 ease-um-out hover:text-um-text-strong"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           Back to marketplace
@@ -50,16 +52,10 @@ export function ListingDetail({
 
         {publishSuccess ? (
           <div
-            className="mt-4 overflow-hidden rounded-um-md border border-um-success/25 bg-white shadow-um-xs"
+            className="mt-4 overflow-hidden border-l-2 border-um-success bg-um-success/[0.07]"
             role="status"
             aria-live="polite"
           >
-            <div className="grid h-1 grid-cols-4" aria-hidden="true">
-              <span className="bg-um-gold-300" />
-              <span className="bg-um-gold-400" />
-              <span className="bg-um-gold-500" />
-              <span className="bg-um-gold-600" />
-            </div>
             <div className="flex items-start gap-3 px-4 py-3.5 sm:px-5">
               <BadgeCheck className="mt-0.5 size-5 shrink-0 text-um-success" aria-hidden="true" />
               <div>
@@ -74,45 +70,46 @@ export function ListingDetail({
 
         {contactUnavailable ? (
           <div
-            className="mt-4 rounded-um-md border border-um-gold-600/35 bg-um-gold-300/25 px-4 py-3 text-sm text-um-text"
+            className="mt-4 border-l-2 border-um-gold-500 bg-um-gold-300/20 px-4 py-3 text-sm text-um-text"
             role="status"
           >
             Seller contact is temporarily unavailable. Your listing view is still here.
           </div>
         ) : null}
 
-        <div className="mt-5 grid items-start gap-7 lg:grid-cols-[minmax(0,1.38fr)_minmax(21rem,0.62fr)] lg:gap-x-12 lg:gap-y-11">
+        <div className="mt-6 grid items-start gap-8 lg:grid-cols-[minmax(0,1.42fr)_minmax(21rem,0.58fr)] lg:gap-x-14 lg:gap-y-12">
           <div className="min-w-0 lg:col-start-1 lg:row-start-1">
             <ListingGallery listing={listing} />
           </div>
 
           <aside className="min-w-0 lg:sticky lg:top-28 lg:col-start-2 lg:row-span-2 lg:row-start-1">
-            <div className="overflow-hidden rounded-um-xl border border-black/10 bg-um-surface shadow-um-sm">
-              <div className="h-1.5 bg-um-gold-500" aria-hidden="true" />
-              <div className="p-5 sm:p-7">
-                <div className="flex flex-wrap items-center gap-2 font-condensed text-xs font-bold uppercase tracking-[0.13em] text-um-text-muted">
+            <div className="relative isolate overflow-hidden bg-um-ink-900 text-um-text-inverse shadow-[0_22px_58px_rgba(5,7,11,0.18)]">
+              <div className="absolute inset-x-0 top-0 h-px bg-um-gold-400" aria-hidden="true" />
+              <CampusRouteGraphic className="absolute -right-32 -top-28 -z-10 h-72 w-[32rem] opacity-[0.22]" />
+              <div className="p-6 sm:p-8">
+                <div className="flex flex-wrap items-center gap-2 font-condensed text-xs font-bold uppercase tracking-[0.15em] text-white/44">
                   <span>{listing.category?.label ?? 'Marketplace'}</span>
                   {listing.featuredAt ? (
                     <>
                       <span aria-hidden="true">/</span>
-                      <span className="text-um-gold-700">Campus pick</span>
+                      <span className="text-um-gold-300">Campus pick</span>
                     </>
                   ) : null}
                 </div>
 
-                <h1 className="mt-3 text-[clamp(1.8rem,5vw,2.7rem)] font-semibold leading-[1.03] tracking-[-0.05em]">
+                <h1 className="mt-4 text-[clamp(2rem,5vw,3rem)] font-semibold leading-[1.01] tracking-[-0.058em] text-white">
                   {listing.title}
                 </h1>
                 <div className="mt-5 flex flex-wrap items-end gap-x-3 gap-y-1">
-                  <p className="text-[2rem] font-bold tracking-[-0.05em]">
+                  <p className="text-[2.15rem] font-bold tracking-[-0.055em] text-white">
                     {formatPrice(listing.priceCents)}
                   </p>
                   {listing.openToOffers ? (
-                    <p className="pb-1 text-sm font-medium text-um-text-muted">Offers welcome</p>
+                    <p className="pb-1 text-sm font-medium text-um-gold-300">Offers welcome</p>
                   ) : null}
                 </div>
 
-                <dl className="mt-6 grid grid-cols-2 gap-x-4 gap-y-5 border-y border-black/10 py-5 text-sm">
+                <dl className="mt-6 grid grid-cols-2 gap-x-4 gap-y-5 border-y border-white/10 py-5 text-sm [&_dd]:text-white [&_dt]:text-white/42">
                   <DetailItem
                     icon={<Tag className="size-4" />}
                     label="Condition"
@@ -137,14 +134,35 @@ export function ListingDetail({
 
                 <SellerSummary listing={listing} />
 
-                <div className="mt-6 hidden lg:block">
-                  <PrimaryAction
-                    canContact={canContact}
-                    contactHref={contactHref}
-                    editHref={editHref}
-                    isOwner={isOwner}
-                  />
-                </div>
+                {isOwner ? (
+                  <div className="mt-6 border-t border-white/10 pt-5">
+                    <p className="font-condensed text-[0.68rem] font-bold uppercase tracking-[0.15em] text-um-gold-300">
+                      Listing controls
+                    </p>
+                    <p className="mt-1.5 text-xs leading-5 text-white/52">
+                      Mark it sold once it is gone, or permanently delete it when you no longer need
+                      the record.
+                    </p>
+                    <div className="mt-3">
+                      <ListingManagementActions
+                        listingId={listing.id}
+                        redirectAfterAction="/my-listings"
+                        showView={false}
+                        status="published"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-6 hidden lg:block">
+                    <PrimaryAction
+                      canContact={canContact}
+                      contactHref={contactHref}
+                      editHref={editHref}
+                      isOwner={false}
+                      inverted
+                    />
+                  </div>
+                )}
 
                 {isModerator && !isOwner ? (
                   <ModeratorRemoveDialog listingId={listing.id} listingTitle={listing.title} />
@@ -155,7 +173,7 @@ export function ListingDetail({
 
           <div className="min-w-0 lg:col-start-1 lg:row-start-2">
             <section
-              className="border-t border-black/10 pt-8"
+              className="border-t border-black/[0.08] pt-9"
               aria-labelledby="description-heading"
             >
               <p className="font-condensed text-xs font-bold uppercase tracking-[0.15em] text-um-gold-700">
@@ -163,7 +181,7 @@ export function ListingDetail({
               </p>
               <h2
                 id="description-heading"
-                className="mt-2 text-2xl font-semibold tracking-[-0.035em]"
+                className="mt-2 text-3xl font-semibold tracking-[-0.045em]"
               >
                 About this item
               </h2>
@@ -173,19 +191,23 @@ export function ListingDetail({
             </section>
 
             <section
-              className="mt-8 overflow-hidden rounded-um-lg border border-um-gold-600/30 bg-um-gold-300/20"
+              className="relative isolate mt-10 overflow-hidden bg-um-ink-900 text-um-text-inverse"
               aria-labelledby="meet-safely-heading"
             >
-              <div className="h-1 bg-um-gold-500" aria-hidden="true" />
-              <div className="flex gap-4 p-5 sm:p-6">
-                <span className="grid size-10 shrink-0 place-items-center rounded-um-sm bg-um-ink-950 text-um-gold-400">
+              <CampusRouteGraphic className="absolute inset-y-0 right-0 -z-10 w-[58%] opacity-[0.38]" />
+              <div
+                className="absolute inset-0 -z-10 bg-gradient-to-r from-um-ink-900 via-um-ink-900/96 to-um-ink-900/55"
+                aria-hidden="true"
+              />
+              <div className="flex gap-4 p-6 sm:p-8">
+                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white/[0.07] text-um-gold-300 ring-1 ring-white/10">
                   <ShieldCheck className="size-5" aria-hidden="true" />
                 </span>
                 <div>
                   <h2 id="meet-safely-heading" className="font-semibold">
                     Meet where campus is busy
                   </h2>
-                  <p className="mt-1.5 max-w-2xl text-sm leading-6 text-um-text">
+                  <p className="mt-1.5 max-w-2xl text-sm leading-6 text-white/55">
                     Meet in a public campus location and inspect the item before completing the
                     exchange. Share an exact meetup point only after you agree on the sale.
                   </p>
@@ -196,16 +218,18 @@ export function ListingDetail({
         </div>
       </div>
 
-      <div className="fixed inset-x-3 bottom-[5.15rem] z-30 lg:hidden">
-        <div className="mx-auto max-w-lg rounded-um-md border border-black/10 bg-white/96 p-2 shadow-um-md backdrop-blur-md">
-          <PrimaryAction
-            canContact={canContact}
-            contactHref={contactHref}
-            editHref={editHref}
-            isOwner={isOwner}
-          />
+      {!isOwner ? (
+        <div className="fixed inset-x-3 bottom-[5.15rem] z-30 lg:hidden">
+          <div className="mx-auto max-w-lg rounded-um-md border border-black/10 bg-um-surface/96 p-2 shadow-um-md backdrop-blur-md">
+            <PrimaryAction
+              canContact={canContact}
+              contactHref={contactHref}
+              editHref={editHref}
+              isOwner={false}
+            />
+          </div>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }
@@ -214,18 +238,24 @@ function PrimaryAction({
   canContact,
   contactHref,
   editHref,
+  inverted = false,
   isOwner,
 }: {
   canContact: boolean;
   contactHref: string;
   editHref: string;
+  inverted?: boolean;
   isOwner: boolean;
 }) {
   if (isOwner) {
     return (
       <Link
         href={editHref}
-        className="flex min-h-12 w-full items-center justify-center gap-2 rounded-um-sm bg-um-ink-950 px-4 text-sm font-bold text-white transition duration-160 ease-um-out hover:-translate-y-0.5 hover:bg-um-ink-850"
+        className={`flex min-h-12 w-full items-center justify-center gap-2 rounded-um-sm px-4 text-sm font-bold transition duration-160 ease-um-out hover:-translate-y-0.5 ${
+          inverted
+            ? 'bg-white text-um-ink-950 hover:bg-um-surface-warm'
+            : 'bg-um-ink-950 text-white hover:bg-um-ink-850'
+        }`}
       >
         <Pencil className="size-4" aria-hidden="true" />
         Edit your listing
@@ -246,7 +276,11 @@ function PrimaryAction({
   }
 
   return (
-    <p className="rounded-um-sm bg-um-surface-warm px-4 py-3 text-center text-sm text-um-text-muted">
+    <p
+      className={`rounded-um-sm px-4 py-3 text-center text-sm ${
+        inverted ? 'bg-white/[0.06] text-white/48' : 'bg-um-surface-warm text-um-text-muted'
+      }`}
+    >
       Seller contact is available to verified student accounts.
     </p>
   );
@@ -274,21 +308,21 @@ function SellerSummary({ listing }: { listing: MarketplaceListing }) {
   const joined = listing.seller?.joinedAt ? formatJoinedDate(listing.seller.joinedAt) : null;
 
   return (
-    <div className="mt-6 rounded-um-md bg-um-canvas-soft p-4">
+    <div className="mt-6 bg-white/[0.055] p-4 ring-1 ring-white/[0.07]">
       <div className="flex items-center gap-3.5">
-        <div className="grid size-11 shrink-0 place-items-center rounded-full bg-um-ink-950 text-sm font-bold text-um-gold-400">
+        <div className="grid size-11 shrink-0 place-items-center rounded-full bg-white/[0.08] text-sm font-bold text-um-gold-300 ring-1 ring-white/10">
           {getInitials(sellerName) || 'UW'}
         </div>
         <div className="min-w-0">
-          <p className="truncate text-sm font-bold">{sellerName}</p>
-          <p className="mt-0.5 flex items-center gap-1.5 text-xs font-semibold text-um-gold-700">
+          <p className="truncate text-sm font-bold text-white">{sellerName}</p>
+          <p className="mt-0.5 flex items-center gap-1.5 text-xs font-semibold text-um-gold-300">
             <BadgeCheck className="size-3.5" aria-hidden="true" />
             Verified Waterloo student
           </p>
         </div>
       </div>
       {sellerDetails || joined ? (
-        <div className="mt-3 border-t border-black/10 pt-3 text-xs leading-5 text-um-text-muted">
+        <div className="mt-3 border-t border-white/10 pt-3 text-xs leading-5 text-white/42">
           {sellerDetails ? <p>{sellerDetails}</p> : null}
           {joined ? <p>Member since {joined}</p> : null}
         </div>

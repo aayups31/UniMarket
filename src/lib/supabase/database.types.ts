@@ -372,6 +372,19 @@ export type Database = {
         Args: { p_listing_id: string };
         Returns: Listing;
       };
+      save_listing_draft: {
+        Args: {
+          p_listing_id?: string | null;
+          p_title?: string;
+          p_description?: string;
+          p_price_cents?: number | null;
+          p_category_id?: number | null;
+          p_condition?: ListingCondition | null;
+          p_open_to_offers?: boolean;
+          p_pickup_area?: string;
+        };
+        Returns: Listing;
+      };
       reorder_listing_images: {
         Args: { p_listing_id: string; p_image_ids: string[] };
         Returns: ListingImage[];

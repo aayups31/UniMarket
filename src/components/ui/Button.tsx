@@ -4,15 +4,17 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-um-sm text-sm font-semibold tracking-[-0.01em] transition-all duration-160 ease-um-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
-        primary: 'bg-stone-950 text-white shadow-sm hover:bg-stone-800',
-        gold: 'bg-[#FFD54F] text-stone-950 shadow-sm hover:bg-[#f4c842]',
-        secondary: 'border border-stone-200 bg-white text-stone-900 hover:bg-stone-50',
-        ghost: 'text-stone-700 hover:bg-stone-100 hover:text-stone-950',
-        danger: 'bg-red-600 text-white hover:bg-red-700',
+        primary:
+          'bg-um-ink-950 text-um-text-inverse shadow-um-xs hover:-translate-y-0.5 hover:bg-um-ink-800 hover:shadow-um-sm',
+        gold: 'bg-um-gold-400 text-um-ink-1000 shadow-um-xs hover:-translate-y-0.5 hover:bg-um-gold-300 hover:shadow-um-gold',
+        secondary:
+          'border border-black/[0.08] bg-um-surface text-um-text-strong shadow-um-xs hover:bg-um-surface-warm',
+        ghost: 'text-um-text hover:bg-black/[0.05] hover:text-um-text-strong',
+        danger: 'bg-um-danger text-white shadow-um-xs hover:bg-red-700',
       },
       size: {
         sm: 'h-9 px-3',

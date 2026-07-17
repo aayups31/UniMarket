@@ -42,11 +42,11 @@ export function LoginForm({ nextPath }: LoginFormProps) {
     nextPath === '/marketplace' ? '/signup' : `/signup?next=${encodeURIComponent(nextPath)}`;
 
   return (
-    <form className="mt-9 space-y-5" noValidate onSubmit={onSubmit}>
+    <form className="mt-10 space-y-5" noValidate onSubmit={onSubmit}>
       <input type="hidden" {...register('next')} />
 
       <div className="space-y-2">
-        <label className="text-sm font-bold text-[#20221f]" htmlFor="login-email">
+        <label className="text-sm font-bold text-um-text-strong" htmlFor="login-email">
           Email
         </label>
         <input
@@ -54,7 +54,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
           aria-invalid={Boolean(errors.email)}
           autoComplete="email"
           autoFocus
-          className="h-12 w-full rounded-lg border border-black/18 bg-white px-4 text-base text-[#111311] outline-none transition placeholder:text-black/55 hover:border-black/30 focus:border-[#8b6b00] focus:ring-4 focus:ring-[#ffd54f]/30 disabled:cursor-not-allowed disabled:bg-black/[0.03]"
+          className="h-[3.35rem] w-full rounded-sm border border-black/[0.12] bg-um-surface px-4 text-base text-um-text-strong outline-none transition placeholder:text-um-text-muted hover:border-black/25 focus:border-um-gold-600 focus:ring-4 focus:ring-um-gold-400/20 disabled:cursor-not-allowed disabled:bg-black/[0.03]"
           disabled={isPending}
           id="login-email"
           inputMode="email"
@@ -71,11 +71,11 @@ export function LoginForm({ nextPath }: LoginFormProps) {
 
       <div className="space-y-2">
         <div className="flex items-center justify-between gap-3">
-          <label className="text-sm font-bold text-[#20221f]" htmlFor="login-password">
+          <label className="text-sm font-bold text-um-text-strong" htmlFor="login-password">
             Password
           </label>
           <Link
-            className="-my-3 inline-flex min-h-11 items-center text-xs font-bold text-[#725900] underline decoration-[#d7a900] underline-offset-4 transition hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7a900]"
+            className="-my-3 inline-flex min-h-11 items-center text-xs font-bold text-um-gold-700 underline decoration-um-gold-500 underline-offset-4 transition hover:text-um-text-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-500"
             href="/forgot-password"
           >
             Forgot password?
@@ -85,7 +85,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
           aria-describedby={errors.password ? 'login-password-error' : undefined}
           aria-invalid={Boolean(errors.password)}
           autoComplete="current-password"
-          className="h-12 w-full rounded-lg border border-black/18 bg-white px-4 text-base text-[#111311] outline-none transition placeholder:text-black/55 hover:border-black/30 focus:border-[#8b6b00] focus:ring-4 focus:ring-[#ffd54f]/30 disabled:cursor-not-allowed disabled:bg-black/[0.03]"
+          className="h-[3.35rem] w-full rounded-sm border border-black/[0.12] bg-um-surface px-4 text-base text-um-text-strong outline-none transition placeholder:text-um-text-muted hover:border-black/25 focus:border-um-gold-600 focus:ring-4 focus:ring-um-gold-400/20 disabled:cursor-not-allowed disabled:bg-black/[0.03]"
           disabled={isPending}
           id="login-password"
           placeholder="Your password"
@@ -102,7 +102,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
       {serverError ? (
         <div
           aria-live="polite"
-          className="border-l-2 border-red-600 bg-red-50 px-4 py-3 text-sm font-medium text-red-800"
+          className="border-l-2 border-red-600 bg-red-50/80 px-4 py-3 text-sm font-medium text-red-800"
           role="alert"
         >
           {serverError}
@@ -110,7 +110,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
       ) : null}
 
       <button
-        className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#111311] px-5 text-sm font-bold text-white transition hover:bg-black focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#ffd54f]/70 disabled:cursor-not-allowed disabled:opacity-60"
+        className="group flex h-[3.35rem] w-full items-center justify-center gap-3 rounded-sm bg-um-ink-950 px-5 text-sm font-black text-white transition hover:bg-um-ink-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-um-gold-400/45 disabled:cursor-not-allowed disabled:opacity-60"
         disabled={isPending}
         type="submit"
       >
@@ -122,15 +122,18 @@ export function LoginForm({ nextPath }: LoginFormProps) {
         ) : (
           <>
             Sign in
-            <ArrowRight aria-hidden="true" className="size-4" />
+            <ArrowRight
+              aria-hidden="true"
+              className="size-4 text-um-gold-400 transition-transform group-hover:translate-x-1"
+            />
           </>
         )}
       </button>
 
-      <p className="text-center text-sm text-black/55">
+      <p className="text-center text-sm text-um-text-muted">
         New to UniMarket?{' '}
         <Link
-          className="-my-3 inline-flex min-h-11 items-center align-middle font-bold text-[#111311] underline decoration-[#d7a900] decoration-2 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7a900]"
+          className="-my-3 inline-flex min-h-11 items-center align-middle font-bold text-um-text-strong underline decoration-um-gold-500 decoration-2 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-500"
           href={signupHref}
         >
           Create an account

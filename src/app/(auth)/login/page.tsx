@@ -52,22 +52,23 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <div>
-      <p className="font-mono text-[0.64rem] font-bold uppercase tracking-[0.2em] text-[#856800]">
-        Waterloo access · Returning
+      <p className="text-sm font-semibold tracking-[0.02em] text-um-gold-700">
+        02 / Waterloo access · Returning
       </p>
       <h1
         aria-label="Sign in with Waterloo"
-        className="mt-4 text-4xl font-black leading-[1.02] tracking-[-0.05em] text-[#111311] sm:text-[2.75rem]"
+        className="mt-5 text-[clamp(2.6rem,5.5vw,3.75rem)] font-bold leading-[1.02] tracking-[-0.028em] text-um-text-strong"
       >
-        Welcome back, Warrior.
+        Welcome back,
+        <span className="block text-um-gold-600">Warrior.</span>
       </h1>
-      <p className="mt-4 max-w-sm text-base leading-7 text-black/58">
+      <p className="mt-5 max-w-md text-base leading-7 text-um-text">
         Sign in with your verified Waterloo email and password. No new email is sent.
       </p>
 
       {authError ? (
         <div
-          className="mt-6 border-l-2 border-red-600 bg-red-50 px-4 py-3 text-sm font-medium text-red-800"
+          className="mt-6 border-l-2 border-red-600 bg-red-50/80 px-4 py-3 text-sm font-medium text-red-800"
           role="alert"
         >
           {authError}
@@ -76,7 +77,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
       {authNotice ? (
         <div
-          className="mt-6 border-l-2 border-emerald-700 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900"
+          className="mt-6 border-l-2 border-emerald-700 bg-emerald-50/80 px-4 py-3 text-sm font-medium text-emerald-900"
           role="status"
         >
           {authNotice}

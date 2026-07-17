@@ -37,11 +37,11 @@ export function SignupForm({ nextPath }: { nextPath: string }) {
     nextPath === '/marketplace' ? '/login' : `/login?next=${encodeURIComponent(nextPath)}`;
 
   return (
-    <form className="mt-9 space-y-5" noValidate onSubmit={onSubmit}>
+    <form className="mt-10 space-y-5" noValidate onSubmit={onSubmit}>
       <input type="hidden" {...register('next')} />
 
       <div className="space-y-2">
-        <label className="text-sm font-bold text-[#20221f]" htmlFor="signup-email">
+        <label className="text-sm font-bold text-um-text-strong" htmlFor="signup-email">
           Waterloo email
         </label>
         <input
@@ -49,7 +49,7 @@ export function SignupForm({ nextPath }: { nextPath: string }) {
           aria-invalid={Boolean(errors.email)}
           autoComplete="email"
           autoFocus
-          className="h-12 w-full rounded-lg border border-black/18 bg-white px-4 text-base text-[#111311] outline-none transition placeholder:text-black/55 hover:border-black/30 focus:border-[#8b6b00] focus:ring-4 focus:ring-[#ffd54f]/30 disabled:cursor-not-allowed disabled:bg-black/[0.03]"
+          className="h-[3.35rem] w-full rounded-sm border border-black/[0.12] bg-um-surface px-4 text-base text-um-text-strong outline-none transition placeholder:text-um-text-muted hover:border-black/25 focus:border-um-gold-600 focus:ring-4 focus:ring-um-gold-400/20 disabled:cursor-not-allowed disabled:bg-black/[0.03]"
           disabled={isPending}
           id="signup-email"
           inputMode="email"
@@ -62,21 +62,21 @@ export function SignupForm({ nextPath }: { nextPath: string }) {
             {errors.email.message}
           </p>
         ) : (
-          <p className="text-sm text-black/58" id="signup-email-hint">
+          <p className="text-sm text-um-text-muted" id="signup-email-hint">
             Only verified @uwaterloo.ca students can join.
           </p>
         )}
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-bold text-[#20221f]" htmlFor="signup-password">
+        <label className="text-sm font-bold text-um-text-strong" htmlFor="signup-password">
           Password
         </label>
         <input
           aria-describedby={errors.password ? 'signup-password-error' : 'signup-password-hint'}
           aria-invalid={Boolean(errors.password)}
           autoComplete="new-password"
-          className="h-12 w-full rounded-lg border border-black/18 bg-white px-4 text-base text-[#111311] outline-none transition placeholder:text-black/55 hover:border-black/30 focus:border-[#8b6b00] focus:ring-4 focus:ring-[#ffd54f]/30 disabled:cursor-not-allowed disabled:bg-black/[0.03]"
+          className="h-[3.35rem] w-full rounded-sm border border-black/[0.12] bg-um-surface px-4 text-base text-um-text-strong outline-none transition placeholder:text-um-text-muted hover:border-black/25 focus:border-um-gold-600 focus:ring-4 focus:ring-um-gold-400/20 disabled:cursor-not-allowed disabled:bg-black/[0.03]"
           disabled={isPending}
           id="signup-password"
           placeholder="Create a password"
@@ -88,21 +88,21 @@ export function SignupForm({ nextPath }: { nextPath: string }) {
             {errors.password.message}
           </p>
         ) : (
-          <p className="text-sm text-black/58" id="signup-password-hint">
+          <p className="text-sm text-um-text-muted" id="signup-password-hint">
             Use 8–72 characters with uppercase, lowercase, and a number.
           </p>
         )}
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-bold text-[#20221f]" htmlFor="confirm-password">
+        <label className="text-sm font-bold text-um-text-strong" htmlFor="confirm-password">
           Confirm password
         </label>
         <input
           aria-describedby={errors.confirmPassword ? 'confirm-password-error' : undefined}
           aria-invalid={Boolean(errors.confirmPassword)}
           autoComplete="new-password"
-          className="h-12 w-full rounded-lg border border-black/18 bg-white px-4 text-base text-[#111311] outline-none transition placeholder:text-black/55 hover:border-black/30 focus:border-[#8b6b00] focus:ring-4 focus:ring-[#ffd54f]/30 disabled:cursor-not-allowed disabled:bg-black/[0.03]"
+          className="h-[3.35rem] w-full rounded-sm border border-black/[0.12] bg-um-surface px-4 text-base text-um-text-strong outline-none transition placeholder:text-um-text-muted hover:border-black/25 focus:border-um-gold-600 focus:ring-4 focus:ring-um-gold-400/20 disabled:cursor-not-allowed disabled:bg-black/[0.03]"
           disabled={isPending}
           id="confirm-password"
           placeholder="Repeat your password"
@@ -119,7 +119,7 @@ export function SignupForm({ nextPath }: { nextPath: string }) {
       {serverError ? (
         <div
           aria-live="polite"
-          className="border-l-2 border-red-600 bg-red-50 px-4 py-3 text-sm font-medium text-red-800"
+          className="border-l-2 border-red-600 bg-red-50/80 px-4 py-3 text-sm font-medium text-red-800"
           role="alert"
         >
           {serverError}
@@ -127,7 +127,7 @@ export function SignupForm({ nextPath }: { nextPath: string }) {
       ) : null}
 
       <button
-        className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#111311] px-5 text-sm font-bold text-white transition hover:bg-black focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#ffd54f]/70 disabled:cursor-not-allowed disabled:opacity-60"
+        className="group flex h-[3.35rem] w-full items-center justify-center gap-3 rounded-sm bg-um-ink-950 px-5 text-sm font-black text-white transition hover:bg-um-ink-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-um-gold-400/45 disabled:cursor-not-allowed disabled:opacity-60"
         disabled={isPending}
         type="submit"
       >
@@ -139,15 +139,18 @@ export function SignupForm({ nextPath }: { nextPath: string }) {
         ) : (
           <>
             Create account
-            <ArrowRight aria-hidden="true" className="size-4" />
+            <ArrowRight
+              aria-hidden="true"
+              className="size-4 text-um-gold-400 transition-transform group-hover:translate-x-1"
+            />
           </>
         )}
       </button>
 
-      <p className="text-center text-sm text-black/55">
+      <p className="text-center text-sm text-um-text-muted">
         Already have an account?{' '}
         <Link
-          className="-my-3 inline-flex min-h-11 items-center align-middle font-bold text-[#111311] underline decoration-[#d7a900] decoration-2 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7a900]"
+          className="-my-3 inline-flex min-h-11 items-center align-middle font-bold text-um-text-strong underline decoration-um-gold-500 decoration-2 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-500"
           href={loginHref}
         >
           Sign in

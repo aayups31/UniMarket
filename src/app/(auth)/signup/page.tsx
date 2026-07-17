@@ -30,13 +30,14 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
 
   return (
     <div>
-      <p className="font-mono text-[0.64rem] font-bold uppercase tracking-[0.2em] text-[#856800]">
-        Waterloo access · 01
+      <p className="text-sm font-semibold tracking-[0.02em] text-um-gold-700">
+        01 / Waterloo access
       </p>
-      <h1 className="mt-4 text-4xl font-black leading-[1.02] tracking-[-0.05em] text-[#111311] sm:text-[2.75rem]">
-        Create your Waterloo account.
+      <h1 className="mt-5 text-[clamp(2.6rem,5.5vw,3.75rem)] font-bold leading-[1.02] tracking-[-0.028em] text-um-text-strong">
+        Your Waterloo
+        <span className="block text-um-gold-600">marketplace.</span>
       </h1>
-      <p className="mt-4 max-w-sm text-base leading-7 text-black/58">
+      <p className="mt-5 max-w-md text-base leading-7 text-um-text">
         Join with your Waterloo email and a password. You’ll verify the address once, then use your
         password whenever you return.
       </p>
