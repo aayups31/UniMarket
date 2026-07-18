@@ -484,6 +484,252 @@ svg {
   translate: 0;
 }
 
+/* Homepage product stories are CSS-timed so the first rendered frame and the hydrated loop agree. */
+.um-access-signin-panel {
+  transform-origin: center;
+  animation: um-access-signin-panel 9.75s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.um-access-signin-button {
+  animation: um-access-signin-button 9.75s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.um-access-click-ripple {
+  opacity: 0;
+  animation: um-access-click-ripple 9.75s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.um-access-cursor {
+  opacity: 0;
+  animation: um-access-cursor 9.75s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.um-access-welcome-panel {
+  opacity: 0;
+  transform-origin: center;
+  animation: um-access-welcome-panel 9.75s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.um-network-line {
+  opacity: 0;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: um-network-line 7.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.um-network-id-link {
+  opacity: 0;
+  transform: scaleY(0);
+  animation: um-network-id-link 7.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.um-network-core,
+.um-network-id,
+.um-network-node {
+  transform-origin: center;
+  animation: um-network-node 7.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+@keyframes um-access-signin-panel {
+  0% {
+    opacity: 1;
+    transform: perspective(900px) translateY(0) rotateX(0) rotateY(-1.5deg) scale(0.97);
+  }
+
+  12% {
+    opacity: 1;
+    transform: perspective(900px) translateY(-2px) rotateX(0) rotateY(1.5deg) scale(1);
+  }
+
+  42% {
+    opacity: 1;
+    transform: perspective(900px) translateY(-4px) rotateX(0) rotateY(1deg) scale(1.01);
+  }
+
+  50% {
+    opacity: 0;
+    transform: perspective(900px) translateY(-28px) rotateX(-8deg) rotateY(-2.5deg) scale(0.94);
+  }
+
+  84%,
+  92% {
+    opacity: 0;
+    transform: perspective(900px) translateY(28px) rotateX(-8deg) rotateY(-2.5deg) scale(0.94);
+  }
+
+  100% {
+    opacity: 1;
+    transform: perspective(900px) translateY(0) rotateX(0) rotateY(-1.5deg) scale(0.97);
+  }
+}
+
+@keyframes um-access-signin-button {
+  0%,
+  30%,
+  100% {
+    box-shadow: 0 0 0 rgb(231 188 53 / 0%);
+    transform: scale(1);
+  }
+
+  35% {
+    box-shadow: 0 0 28px rgb(231 188 53 / 28%);
+    transform: scale(1);
+  }
+
+  40% {
+    box-shadow: 0 0 28px rgb(231 188 53 / 22%);
+    transform: scale(0.94);
+  }
+
+  46% {
+    box-shadow: 0 0 0 rgb(231 188 53 / 0%);
+    transform: scale(1);
+  }
+}
+
+@keyframes um-access-click-ripple {
+  0%,
+  35% {
+    opacity: 0;
+    transform: scale(0.1);
+  }
+
+  43% {
+    opacity: 0.48;
+    transform: scale(4.8);
+  }
+
+  49%,
+  100% {
+    opacity: 0;
+    transform: scale(5.4);
+  }
+}
+
+@keyframes um-access-cursor {
+  0%,
+  16% {
+    opacity: 0;
+    transform: translate(48px, 44px) scale(1);
+  }
+
+  25% {
+    opacity: 1;
+    transform: translate(12px, 12px) scale(1);
+  }
+
+  35% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+
+  40% {
+    opacity: 1;
+    transform: translate(0, 0) scale(0.74);
+  }
+
+  44% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+
+  49%,
+  100% {
+    opacity: 0;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes um-access-welcome-panel {
+  0%,
+  46% {
+    opacity: 0;
+    transform: perspective(900px) translateY(40px) rotateX(7deg) rotateY(2deg) scale(0.88);
+  }
+
+  56% {
+    opacity: 1;
+    transform: perspective(900px) translateY(0) rotateX(-1deg) rotateY(-1.5deg) scale(1.055);
+  }
+
+  64%,
+  84% {
+    opacity: 1;
+    transform: perspective(900px) translateY(0) rotateX(0) rotateY(0) scale(1);
+  }
+
+  93% {
+    opacity: 0;
+    transform: perspective(900px) translateY(-22px) rotateX(-4deg) rotateY(1deg) scale(0.96);
+  }
+
+  100% {
+    opacity: 0;
+    transform: perspective(900px) translateY(40px) rotateX(7deg) rotateY(2deg) scale(0.88);
+  }
+}
+
+@keyframes um-network-node {
+  0% {
+    opacity: 0.42;
+    transform: translateY(7px) scale(0.74);
+  }
+
+  14% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1.14);
+  }
+
+  24%,
+  82% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 0.5;
+    transform: translateY(4px) scale(0.88);
+  }
+}
+
+@keyframes um-network-line {
+  0%,
+  28% {
+    opacity: 0;
+    stroke-dashoffset: 1;
+  }
+
+  50%,
+  82% {
+    opacity: 0.72;
+    stroke-dashoffset: 0;
+  }
+
+  100% {
+    opacity: 0;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes um-network-id-link {
+  0%,
+  28% {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+
+  50%,
+  82% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scaleY(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -501,5 +747,30 @@ svg {
   .um-marketing-ambient__field {
     animation: none !important;
     transform: none !important;
+  }
+
+  .um-access-signin-panel,
+  .um-access-signin-button,
+  .um-network-core,
+  .um-network-id,
+  .um-network-node {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .um-access-welcome-panel,
+  .um-access-cursor,
+  .um-access-click-ripple {
+    opacity: 0 !important;
+  }
+
+  .um-network-line {
+    opacity: 0.62 !important;
+    stroke-dashoffset: 0 !important;
+  }
+
+  .um-network-id-link {
+    opacity: 1 !important;
+    transform: scaleY(1) !important;
   }
 }
