@@ -18,10 +18,7 @@ import {
   UserRound,
   type LucideIcon,
 } from 'lucide-react';
-import { motion, useInView, useReducedMotion } from 'framer-motion';
-import { useRef } from 'react';
-
-const EASE_OUT = [0.22, 1, 0.36, 1] as const;
+import { useEffect, useRef, useState } from 'react';
 
 const marketplaceItems: {
   color: string;
@@ -76,9 +73,20 @@ const marketplaceItems: {
 
 export function HowItWorks() {
   const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef, { amount: 0.16 });
-  const reduceMotion = useReducedMotion();
-  const motionIsLive = isInView && !reduceMotion;
+  const [motionIsLive, setMotionIsLive] = useState(false);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const observer = new IntersectionObserver(([entry]) => setMotionIsLive(entry.isIntersecting), {
+      rootMargin: '10% 0px 10%',
+      threshold: 0.12,
+    });
+
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <section
@@ -111,7 +119,7 @@ export function HowItWorks() {
           </MotionCard>
 
           <MotionCard line="Find what Waterloo already has." number="02">
-            <BrowseSequence motionIsLive={motionIsLive} reduceMotion={Boolean(reduceMotion)} />
+            <BrowseSequence motionIsLive={motionIsLive} />
           </MotionCard>
 
           <MotionCard line="One university identity brings everyone closer." number="03">
@@ -133,7 +141,7 @@ function MotionCard({
   number: string;
 }) {
   return (
-    <article className="group relative min-w-0 overflow-hidden rounded-[1.65rem] border border-white/[0.12] bg-[#09100f]/92 shadow-[0_30px_90px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,255,255,0.055)] backdrop-blur-2xl transition-[transform,border-color,box-shadow] duration-500 ease-um-out hover:-translate-y-1 hover:border-white/[0.18] hover:shadow-[0_40px_110px_rgba(0,0,0,0.5),0_10px_36px_rgba(201,152,18,0.06),inset_0_1px_0_rgba(255,255,255,0.08)] sm:rounded-[2rem]">
+    <article className="um-motion-card group relative min-w-0 overflow-hidden rounded-[1.65rem] border border-white/[0.12] bg-[#09100f] shadow-[0_30px_80px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,0.055)] transition-[transform,border-color] duration-500 ease-um-out hover:-translate-y-1 hover:border-white/[0.18] sm:rounded-[2rem]">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-[1px] z-30 rounded-[calc(1.65rem-1px)] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),inset_1px_0_0_rgba(255,255,255,0.025),inset_-1px_0_0_rgba(255,255,255,0.025)] sm:rounded-[calc(2rem-1px)]"
@@ -143,7 +151,7 @@ function MotionCard({
         className="pointer-events-none absolute inset-x-[8%] top-0 z-40 h-px bg-gradient-to-r from-transparent via-[#fff7d8]/70 to-transparent"
       />
       <div className="relative h-[29rem] overflow-hidden sm:h-[31rem] lg:h-[32rem]">{children}</div>
-      <div className="relative flex min-h-[6.5rem] items-center gap-4 border-t border-white/[0.09] bg-[linear-gradient(145deg,rgba(18,24,27,0.82),rgba(7,10,14,0.96))] px-6 py-5 backdrop-blur-2xl sm:px-7">
+      <div className="relative flex min-h-[6.5rem] items-center gap-4 border-t border-white/[0.09] bg-[linear-gradient(145deg,#12181b,#070a0e)] px-6 py-5 sm:px-7">
         <span className="font-mono text-[0.58rem] font-semibold tracking-[0.18em] text-um-gold-400/72">
           {number}
         </span>
@@ -163,29 +171,12 @@ function AmbientStage({
   motionIsLive: boolean;
 }) {
   return (
-    <div className="relative flex h-full items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_50%_38%,rgba(206,162,35,0.13),transparent_34%),linear-gradient(160deg,#0d1917_0%,#080d11_54%,#07090d_100%)] p-5 sm:p-7">
-      <motion.div
-        animate={
-          motionIsLive
-            ? {
-                opacity: [0.3, 0.58, 0.3],
-                scale: [0.88, 1.16, 0.88],
-                x: ['-12%', '28%', '-12%'],
-                y: ['-8%', '18%', '-8%'],
-              }
-            : { opacity: 0.4, scale: 1, x: '0%', y: '0%' }
-        }
-        aria-hidden="true"
-        className="absolute -left-[16%] -top-[8%] h-[68%] w-[78%] rounded-[45%] bg-[radial-gradient(circle,rgba(255,240,176,0.12),rgba(203,159,34,0.045)_42%,transparent_72%)] blur-[38px]"
-        transition={{ duration: 12, ease: 'easeInOut', repeat: motionIsLive ? Infinity : 0 }}
-      />
+    <div
+      className={`relative flex h-full items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_50%_38%,rgba(206,162,35,0.13),transparent_34%),linear-gradient(160deg,#0d1917_0%,#080d11_54%,#07090d_100%)] p-5 sm:p-7 ${motionIsLive ? 'um-motion-live' : ''}`}
+    >
       <div
         aria-hidden="true"
-        className="absolute left-[10%] top-[8%] size-40 rounded-full bg-um-gold-500/[0.075] blur-[55px]"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute bottom-[8%] right-[4%] size-52 rounded-full bg-[#4a8b7e]/[0.085] blur-[65px]"
+        className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(242,213,111,0.075),transparent_27%),radial-gradient(circle_at_86%_86%,rgba(74,139,126,0.07),transparent_30%)]"
       />
       <div
         aria-hidden="true"
@@ -201,7 +192,7 @@ function AccessSequence({ motionIsLive }: { motionIsLive: boolean }) {
     <AmbientStage motionIsLive={motionIsLive}>
       <div aria-hidden="true" className="relative mx-auto h-full max-w-[22rem]">
         <div
-          className="um-access-signin-panel absolute inset-x-0 top-[11%] z-20 mx-auto w-full max-w-[19rem] overflow-hidden rounded-[1.45rem] border border-white/[0.2] bg-[linear-gradient(145deg,rgba(39,50,54,0.76),rgba(10,15,20,0.84))] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),inset_0_-1px_0_rgba(255,255,255,0.025),0_34px_85px_rgba(0,0,0,0.58),0_10px_28px_rgba(201,152,18,0.08)] backdrop-blur-2xl"
+          className="um-access-signin-panel absolute inset-x-0 top-[11%] z-20 mx-auto w-full max-w-[19rem] overflow-hidden rounded-[1.45rem] border border-white/[0.2] bg-[linear-gradient(145deg,#273236,#0a0f14)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_30px_72px_rgba(0,0,0,0.52)]"
           data-motion="signin-panel"
         >
           <GlassSpecular />
@@ -242,7 +233,7 @@ function AccessSequence({ motionIsLive }: { motionIsLive: boolean }) {
         </div>
 
         <div
-          className="um-access-welcome-panel absolute inset-x-0 top-[29%] z-30 mx-auto w-full max-w-[19rem] overflow-hidden rounded-[1.45rem] border border-[#fff2ba]/25 bg-[linear-gradient(145deg,rgba(36,47,35,0.78),rgba(10,16,13,0.86))] shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(255,255,255,0.03),0_36px_95px_rgba(0,0,0,0.64),0_12px_36px_rgba(201,152,18,0.13)] backdrop-blur-2xl"
+          className="um-access-welcome-panel absolute inset-x-0 top-[29%] z-30 mx-auto w-full max-w-[19rem] overflow-hidden rounded-[1.45rem] border border-[#fff2ba]/25 bg-[linear-gradient(145deg,#242f23,#0a100d)] shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_32px_78px_rgba(0,0,0,0.58)]"
           data-motion="welcome-panel"
         >
           <GlassSpecular />
@@ -272,13 +263,7 @@ function AccessSequence({ motionIsLive }: { motionIsLive: boolean }) {
           </div>
         </div>
 
-        <motion.div
-          animate={
-            motionIsLive ? { opacity: [0.18, 0.5, 0.18], scale: [0.92, 1.06, 0.92] } : undefined
-          }
-          className="absolute inset-x-[14%] bottom-[10%] h-10 rounded-[50%] bg-black/60 blur-xl"
-          transition={{ duration: 5.2, ease: 'easeInOut', repeat: Infinity }}
-        />
+        <div className="absolute inset-x-[14%] bottom-[10%] h-10 rounded-[50%] bg-black/50 blur-lg" />
       </div>
     </AmbientStage>
   );
@@ -286,7 +271,7 @@ function AccessSequence({ motionIsLive }: { motionIsLive: boolean }) {
 
 function DemoField({ icon: Icon, value }: { icon: LucideIcon; value: string }) {
   return (
-    <div className="flex h-11 items-center gap-3 rounded-xl border border-white/[0.11] bg-white/[0.035] px-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.055)] backdrop-blur-xl">
+    <div className="flex h-11 items-center gap-3 rounded-xl border border-white/[0.11] bg-white/[0.045] px-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.055)]">
       <Icon className="size-3.5 text-um-gold-400" strokeWidth={1.8} />
       <span className="truncate text-xs text-white/62">{value}</span>
     </div>
@@ -308,31 +293,11 @@ function GlassSpecular() {
   );
 }
 
-function BrowseSequence({
-  motionIsLive,
-  reduceMotion,
-}: {
-  motionIsLive: boolean;
-  reduceMotion: boolean;
-}) {
+function BrowseSequence({ motionIsLive }: { motionIsLive: boolean }) {
   return (
     <AmbientStage motionIsLive={motionIsLive}>
       <div aria-hidden="true" className="flex h-full items-center justify-center">
-        <motion.div
-          animate={
-            motionIsLive
-              ? {
-                  rotateX: [4, -1, 2.5],
-                  rotateY: [-4, 2.5, -4],
-                  scale: [0.97, 1.025, 0.97],
-                  y: [3, -8, 3],
-                }
-              : { rotateX: 0, rotateY: 0, scale: 1, y: 0 }
-          }
-          className="relative h-[25.5rem] w-full max-w-[21rem] overflow-hidden rounded-[1.45rem] border border-white/[0.19] bg-[linear-gradient(145deg,rgba(31,42,46,0.74),rgba(8,13,18,0.88))] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),inset_0_-1px_0_rgba(255,255,255,0.025),0_36px_95px_rgba(0,0,0,0.6),0_12px_34px_rgba(201,152,18,0.075)] backdrop-blur-2xl"
-          style={{ transformPerspective: 1100 }}
-          transition={{ duration: 8, ease: 'easeInOut', repeat: motionIsLive ? Infinity : 0 }}
-        >
+        <div className="um-browse-device relative h-[25.5rem] w-full max-w-[21rem] overflow-hidden rounded-[1.45rem] border border-white/[0.19] bg-[linear-gradient(145deg,#1f2a2e,#080d12)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_32px_78px_rgba(0,0,0,0.56)]">
           <GlassSpecular />
           <div className="border-b border-white/[0.07] px-4 pb-3 pt-4">
             <div className="flex items-center justify-between">
@@ -347,58 +312,30 @@ function BrowseSequence({
             <div className="mt-3 flex h-9 items-center gap-2 rounded-lg border border-white/[0.07] bg-[#080b10] px-3 text-[0.64rem] text-white/35">
               <Search className="size-3 text-um-gold-400" strokeWidth={2} />
               Search Waterloo
-              <motion.span
-                animate={motionIsLive ? { opacity: [0.15, 0.9, 0.15] } : { opacity: 0.6 }}
-                className="h-3 w-px bg-um-gold-300"
-                transition={{ duration: 1.05, repeat: motionIsLive ? Infinity : 0 }}
-              />
+              <span className="um-browse-caret h-3 w-px bg-um-gold-300" />
             </div>
             <div className="mt-2.5 flex gap-1.5 overflow-hidden">
               {['For you', 'Electronics', 'Books'].map((label, index) => (
-                <motion.span
-                  animate={
-                    motionIsLive
-                      ? { opacity: index === 0 ? [1, 0.45, 1] : [0.38, 0.95, 0.38] }
-                      : { opacity: index === 0 ? 1 : 0.42 }
-                  }
+                <span
                   className={
                     index === 0
                       ? 'shrink-0 rounded-full bg-um-gold-300 px-2.5 py-1 text-[0.52rem] font-bold text-um-ink-950'
                       : 'shrink-0 rounded-full border border-white/[0.08] px-2.5 py-1 text-[0.52rem] font-semibold text-white/55'
                   }
                   key={label}
-                  transition={{
-                    delay: index * 0.55,
-                    duration: 4.6,
-                    repeat: motionIsLive ? Infinity : 0,
-                  }}
                 >
                   {label}
-                </motion.span>
+                </span>
               ))}
             </div>
           </div>
 
           <div className="relative h-[18.25rem] overflow-hidden p-3">
-            <motion.div
-              animate={
-                motionIsLive
-                  ? { y: [0, 0, -78, -78, -150, -150, 0] }
-                  : { y: reduceMotion ? -42 : 0 }
-              }
-              className="grid grid-cols-2 gap-2.5"
-              transition={{
-                duration: 10.5,
-                ease: EASE_OUT,
-                repeat: motionIsLive ? Infinity : 0,
-                repeatDelay: 0.4,
-                times: [0, 0.17, 0.29, 0.48, 0.61, 0.84, 1],
-              }}
-            >
+            <div className="um-browse-grid grid grid-cols-2 gap-2.5">
               {marketplaceItems.map((item) => (
                 <ListingTile item={item} key={item.title} />
               ))}
-            </motion.div>
+            </div>
 
             <div
               aria-hidden="true"
@@ -406,28 +343,10 @@ function BrowseSequence({
             />
           </div>
 
-          <motion.div
-            animate={
-              motionIsLive
-                ? {
-                    opacity: [0, 1, 1, 0, 0],
-                    x: [48, 8, 8, -70, 48],
-                    y: [132, 84, 84, 190, 132],
-                  }
-                : { opacity: 0.9, x: 8, y: 84 }
-            }
-            className="pointer-events-none absolute left-1/2 top-1/2 z-20 text-[#f7e5a2] drop-shadow-[0_5px_10px_rgba(0,0,0,0.65)]"
-            transition={{
-              duration: 10.5,
-              ease: EASE_OUT,
-              repeat: motionIsLive ? Infinity : 0,
-              repeatDelay: 0.4,
-              times: [0, 0.2, 0.42, 0.72, 1],
-            }}
-          >
+          <div className="um-browse-cursor pointer-events-none absolute left-1/2 top-1/2 z-20 text-[#f7e5a2] drop-shadow-[0_5px_10px_rgba(0,0,0,0.65)]">
             <MousePointer2 className="size-5" fill="#f7e5a2" strokeWidth={1.2} />
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
     </AmbientStage>
   );
@@ -437,7 +356,7 @@ function ListingTile({ item }: { item: (typeof marketplaceItems)[number] }) {
   const Icon = item.icon;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-white/[0.12] bg-white/[0.045] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_12px_30px_rgba(0,0,0,0.2)] backdrop-blur-xl">
+    <div className="overflow-hidden rounded-xl border border-white/[0.12] bg-[#182025] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_10px_24px_rgba(0,0,0,0.18)]">
       <div
         className="relative grid h-[5.1rem] place-items-center overflow-hidden rounded-lg"
         style={{ backgroundColor: item.color }}
@@ -527,7 +446,7 @@ function CampusNetwork({ motionIsLive }: { motionIsLive: boolean }) {
         </NetworkNode>
 
         <div
-          className="um-network-core absolute z-20 grid size-[4.75rem] place-items-center overflow-hidden rounded-[1.6rem] border border-[#fff8d8]/55 bg-[linear-gradient(145deg,rgba(255,238,161,0.98),rgba(231,188,53,0.9))] text-um-ink-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.72),inset_0_-1px_0_rgba(116,87,6,0.16),0_24px_65px_rgba(0,0,0,0.55),0_8px_30px_rgba(231,188,53,0.2)] backdrop-blur-2xl"
+          className="um-network-core absolute z-20 grid size-[4.75rem] place-items-center overflow-hidden rounded-[1.6rem] border border-[#fff8d8]/55 bg-[linear-gradient(145deg,#ffeea1,#e7bc35)] text-um-ink-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_22px_58px_rgba(0,0,0,0.5)]"
           style={{ left: 'calc(50% - 2.375rem)', top: 'calc(50% - 2.375rem)' }}
         >
           <GlassSpecular />
@@ -535,7 +454,7 @@ function CampusNetwork({ motionIsLive }: { motionIsLive: boolean }) {
         </div>
 
         <div
-          className="um-network-id absolute top-[12%] z-30 flex w-[5.5rem] flex-col items-center overflow-hidden rounded-[1.4rem] border border-white/[0.2] bg-[linear-gradient(145deg,rgba(50,62,51,0.72),rgba(10,16,13,0.84))] px-2 py-3 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_24px_65px_rgba(0,0,0,0.52),0_8px_28px_rgba(231,188,53,0.1)] backdrop-blur-2xl"
+          className="um-network-id absolute top-[12%] z-30 flex w-[5.5rem] flex-col items-center overflow-hidden rounded-[1.4rem] border border-white/[0.2] bg-[linear-gradient(145deg,#323e33,#0a100d)] px-2 py-3 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_22px_58px_rgba(0,0,0,0.48)]"
           style={{ left: 'calc(50% - 2.75rem)' }}
         >
           <GlassSpecular />
@@ -572,7 +491,7 @@ function NetworkNode({
 }) {
   return (
     <span
-      className={`um-network-node absolute z-10 grid size-10 place-items-center overflow-hidden rounded-xl border border-um-gold-300/25 bg-[linear-gradient(145deg,rgba(52,61,49,0.7),rgba(9,14,18,0.8))] text-um-gold-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_16px_38px_rgba(0,0,0,0.38),0_0_22px_rgba(231,188,53,0.08)] backdrop-blur-xl ${className}`}
+      className={`um-network-node absolute z-10 grid size-10 place-items-center overflow-hidden rounded-xl border border-um-gold-300/25 bg-[linear-gradient(145deg,#343d31,#090e12)] text-um-gold-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_14px_32px_rgba(0,0,0,0.34)] ${className}`}
       style={{ animationDelay: `${delay}s` }}
     >
       <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.13),transparent_42%)]" />
@@ -592,7 +511,7 @@ function PersonNode({
 }) {
   return (
     <span
-      className={`um-network-node absolute z-10 grid size-9 place-items-center overflow-hidden rounded-full border border-um-gold-300/30 bg-[linear-gradient(145deg,rgba(52,61,49,0.7),rgba(10,15,13,0.8))] text-[0.58rem] font-black text-[#eee7d7] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_14px_34px_rgba(0,0,0,0.4),0_0_20px_rgba(231,188,53,0.08)] backdrop-blur-xl ${className}`}
+      className={`um-network-node absolute z-10 grid size-9 place-items-center overflow-hidden rounded-full border border-um-gold-300/30 bg-[linear-gradient(145deg,#343d31,#0a0f0d)] text-[0.58rem] font-black text-[#eee7d7] shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_12px_28px_rgba(0,0,0,0.36)] ${className}`}
       style={{ animationDelay: `${delay}s` }}
     >
       <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.13),transparent_48%)]" />

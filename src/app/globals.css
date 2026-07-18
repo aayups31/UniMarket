@@ -216,22 +216,23 @@ svg {
   pointer-events: none;
   background:
     radial-gradient(
-      ellipse 92% 68% at 10% 12%,
-      rgb(231 188 53 / 10%) 0%,
-      rgb(201 152 18 / 4%) 34%,
-      transparent 72%
+      ellipse 92% 68% at 8% 9%,
+      rgb(231 188 53 / 15%) 0%,
+      rgb(201 152 18 / 6%) 34%,
+      transparent 70%
     ),
     radial-gradient(
-      ellipse 88% 72% at 90% 82%,
-      rgb(154 114 0 / 7%) 0%,
-      rgb(62 51 27 / 3.5%) 38%,
-      transparent 74%
+      ellipse 82% 70% at 92% 74%,
+      rgb(40 106 99 / 9%) 0%,
+      rgb(23 56 64 / 5%) 38%,
+      transparent 72%
     ),
-    linear-gradient(145deg, #050609 0%, #080a10 48%, #050609 100%);
+    radial-gradient(ellipse 72% 52% at 68% 30%, rgb(31 52 78 / 11%), transparent 74%),
+    linear-gradient(145deg, #06070a 0%, #090c12 46%, #05080b 100%);
 }
 
 .um-marketing-page {
-  background: #050609;
+  background: #06080c;
 }
 
 .um-marketing-ambient__field {
@@ -249,8 +250,8 @@ svg {
   height: 92vmax;
   background: radial-gradient(
     circle,
-    rgb(231 188 53 / 14%) 0%,
-    rgb(201 152 18 / 8%) 28%,
+    rgb(231 188 53 / 18%) 0%,
+    rgb(201 152 18 / 10%) 28%,
     transparent 68%
   );
   animation: um-ambient-drift-primary 56s ease-in-out infinite alternate;
@@ -263,8 +264,8 @@ svg {
   height: 112vmax;
   background: radial-gradient(
     circle,
-    rgb(154 114 0 / 11%) 0%,
-    rgb(62 51 27 / 10%) 31%,
+    rgb(46 113 105 / 12%) 0%,
+    rgb(25 63 74 / 9%) 31%,
     transparent 70%
   );
   animation: um-ambient-drift-secondary 72s ease-in-out infinite alternate;
@@ -277,8 +278,8 @@ svg {
   height: 72vmax;
   background: radial-gradient(
     ellipse,
-    rgb(242 213 111 / 5.5%) 0%,
-    rgb(13 19 29 / 8%) 38%,
+    rgb(242 213 111 / 8%) 0%,
+    rgb(31 52 78 / 10%) 38%,
     transparent 72%
   );
   opacity: 0.5;
@@ -328,6 +329,68 @@ svg {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+.um-hero-image {
+  animation: um-hero-image-drift 18s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.um-hero-reveal {
+  animation: um-hero-enter 900ms var(--um-ease-out) both;
+}
+
+.um-hero-reveal--one {
+  animation-delay: 100ms;
+}
+
+.um-hero-reveal--two {
+  animation-delay: 170ms;
+}
+
+.um-hero-reveal--three {
+  animation-delay: 290ms;
+}
+
+.um-hero-reveal--four {
+  animation-delay: 380ms;
+}
+
+.um-hero-reveal--five {
+  animation-delay: 520ms;
+}
+
+.um-immersive-photo {
+  transition:
+    transform 1.4s var(--um-ease-out),
+    filter 1.4s var(--um-ease-out);
+}
+
+.group:hover .um-immersive-photo {
+  transform: scale(1.025);
+  filter: brightness(1.04) saturate(1.04);
+}
+
+@keyframes um-hero-enter {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes um-hero-image-drift {
+  from {
+    transform: scale(1.025) translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: scale(1.07) translate3d(-0.8%, -0.5%, 0);
   }
 }
 
@@ -484,42 +547,69 @@ svg {
   translate: 0;
 }
 
-/* Homepage product stories are CSS-timed so the first rendered frame and the hydrated loop agree. */
+/* Keep the homepage product stories on the compositor and pause them outside the viewport. */
+.um-motion-card {
+  contain: layout paint style;
+  content-visibility: auto;
+  contain-intrinsic-size: 620px;
+}
+
 .um-access-signin-panel {
   transform-origin: center;
+  transform: translate3d(0, 0, 0) scale(0.97);
+  backface-visibility: hidden;
+}
+
+.um-motion-live .um-access-signin-panel {
   animation: um-access-signin-panel 9.75s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 
-.um-access-signin-button {
+.um-motion-live .um-access-signin-button {
   animation: um-access-signin-button 9.75s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 
 .um-access-click-ripple {
   opacity: 0;
+}
+
+.um-motion-live .um-access-click-ripple {
   animation: um-access-click-ripple 9.75s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 
 .um-access-cursor {
   opacity: 0;
+}
+
+.um-motion-live .um-access-cursor {
   animation: um-access-cursor 9.75s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 
 .um-access-welcome-panel {
   opacity: 0;
   transform-origin: center;
+  backface-visibility: hidden;
+}
+
+.um-motion-live .um-access-welcome-panel {
   animation: um-access-welcome-panel 9.75s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 
 .um-network-line {
-  opacity: 0;
+  opacity: 0.62;
   stroke-dasharray: 1;
-  stroke-dashoffset: 1;
+  stroke-dashoffset: 0;
+}
+
+.um-motion-live .um-network-line {
   animation: um-network-line 7.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 
 .um-network-id-link {
-  opacity: 0;
-  transform: scaleY(0);
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+.um-motion-live .um-network-id-link {
   animation: um-network-id-link 7.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 
@@ -527,7 +617,85 @@ svg {
 .um-network-id,
 .um-network-node {
   transform-origin: center;
+  backface-visibility: hidden;
+}
+
+.um-motion-live .um-network-core,
+.um-motion-live .um-network-id,
+.um-motion-live .um-network-node {
   animation: um-network-node 7.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.um-browse-device {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.um-browse-grid {
+  transform: translate3d(0, -42px, 0);
+}
+
+.um-browse-cursor {
+  opacity: 0.9;
+  transform: translate3d(8px, 84px, 0);
+}
+
+.um-browse-caret {
+  opacity: 0.6;
+}
+
+.um-motion-live .um-browse-grid {
+  animation: um-browse-scroll 10.9s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.um-motion-live .um-browse-cursor {
+  animation: um-browse-cursor 10.9s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.um-motion-live .um-browse-caret {
+  animation: um-browse-caret 1.2s ease-in-out infinite;
+}
+
+.um-motion-live
+  :is(
+    .um-access-signin-panel,
+    .um-access-signin-button,
+    .um-access-click-ripple,
+    .um-access-cursor,
+    .um-access-welcome-panel,
+    .um-network-core,
+    .um-network-id,
+    .um-network-node,
+    .um-browse-grid,
+    .um-browse-cursor
+  ) {
+  will-change: transform, opacity;
+}
+
+.um-category-image {
+  opacity: 0;
+  backface-visibility: hidden;
+  transition: opacity 820ms var(--um-ease-out);
+}
+
+.um-category-image--active {
+  opacity: 1;
+}
+
+.um-category-copy {
+  animation: um-category-copy-enter 420ms var(--um-ease-out) both;
+}
+
+@keyframes um-category-copy-enter {
+  from {
+    opacity: 0.42;
+    transform: translate3d(0, 10px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 
 @keyframes um-access-signin-panel {
@@ -567,23 +735,74 @@ svg {
   0%,
   30%,
   100% {
-    box-shadow: 0 0 0 rgb(231 188 53 / 0%);
     transform: scale(1);
   }
 
   35% {
-    box-shadow: 0 0 28px rgb(231 188 53 / 28%);
     transform: scale(1);
   }
 
   40% {
-    box-shadow: 0 0 28px rgb(231 188 53 / 22%);
     transform: scale(0.94);
   }
 
   46% {
-    box-shadow: 0 0 0 rgb(231 188 53 / 0%);
     transform: scale(1);
+  }
+}
+
+@keyframes um-browse-scroll {
+  0%,
+  17% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  29%,
+  48% {
+    transform: translate3d(0, -78px, 0);
+  }
+
+  61%,
+  84% {
+    transform: translate3d(0, -150px, 0);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes um-browse-cursor {
+  0% {
+    opacity: 0;
+    transform: translate3d(48px, 132px, 0);
+  }
+
+  20%,
+  42% {
+    opacity: 1;
+    transform: translate3d(8px, 84px, 0);
+  }
+
+  72% {
+    opacity: 0;
+    transform: translate3d(-70px, 190px, 0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(48px, 132px, 0);
+  }
+}
+
+@keyframes um-browse-caret {
+  0%,
+  100% {
+    opacity: 0.18;
+  }
+
+  50% {
+    opacity: 0.9;
   }
 }
 

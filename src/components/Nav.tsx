@@ -5,7 +5,7 @@ import { BrandMark } from '@/components/BrandMark';
 
 export function Nav() {
   return (
-    <header className="sticky top-0 z-50 -mb-20 h-20 border-b border-white/[0.09] bg-um-ink-950/72 text-um-text-inverse shadow-[0_10px_35px_rgba(5,7,11,0.12)] backdrop-blur-xl">
+    <header className="sticky top-0 z-50 -mb-20 h-20 border-b border-white/[0.08] bg-[#06090e]/62 text-um-text-inverse shadow-[0_14px_45px_rgba(0,0,0,0.16)] backdrop-blur-2xl">
       <nav
         aria-label="Public navigation"
         className="mx-auto flex h-20 max-w-um-content items-center gap-5 px-4 sm:px-6"
@@ -47,13 +47,13 @@ export function Nav() {
 
         <div className="ml-auto flex items-center gap-2 md:ml-5">
           <Link
-            className="hidden min-h-11 items-center px-3 text-sm font-bold text-white/72 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-300 sm:inline-flex"
+            className="hidden min-h-11 items-center rounded-full px-4 text-sm font-bold text-white/72 transition-colors hover:bg-white/[0.055] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-300 sm:inline-flex"
             href="/login"
           >
             Sign in
           </Link>
           <Link
-            className="group inline-flex min-h-11 items-center justify-center gap-2 rounded-sm bg-um-gold-400 px-4 text-sm font-black text-um-ink-950 transition-colors hover:bg-um-gold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-um-ink-950"
+            className="group inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-um-gold-300 px-5 text-sm font-black text-um-ink-950 shadow-[0_10px_30px_rgba(201,152,18,0.16)] transition-[background-color,transform,box-shadow] duration-300 ease-um-out hover:-translate-y-0.5 hover:bg-um-gold-200 hover:shadow-[0_14px_38px_rgba(201,152,18,0.22)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-um-ink-950"
             href="/signup"
           >
             <span className="sm:hidden">Join</span>
