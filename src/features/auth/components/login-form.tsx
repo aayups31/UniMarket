@@ -75,7 +75,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
             Password
           </label>
           <Link
-            className="-my-3 inline-flex min-h-11 items-center text-xs font-bold text-um-gold-700 underline decoration-um-gold-500 underline-offset-4 transition hover:text-um-text-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-500"
+            className="-my-3 inline-flex min-h-11 items-center text-xs font-bold text-um-gold-700 underline decoration-um-gold-500 underline-offset-4 transition hover:text-um-gold-200 hover:decoration-um-gold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-500"
             href="/forgot-password"
           >
             Forgot password?
@@ -130,10 +130,10 @@ export function LoginForm({ nextPath }: LoginFormProps) {
         )}
       </button>
 
-      <p className="text-center text-sm text-um-text-muted">
-        New to UniMarket?{' '}
+      <p className="flex flex-wrap items-center justify-center gap-x-1.5 text-center text-sm text-um-text-muted">
+        <span>New to UniMarket?</span>
         <Link
-          className="-my-3 inline-flex min-h-11 items-center align-middle font-bold text-um-text-strong underline decoration-um-gold-500 decoration-2 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-500"
+          className="inline-flex min-h-11 items-center font-bold leading-5 text-um-text-strong underline decoration-um-gold-500 decoration-2 underline-offset-4 transition hover:text-um-gold-200 hover:decoration-um-gold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-500"
           href={signupHref}
         >
           Create an account

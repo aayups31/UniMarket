@@ -1,4 +1,6 @@
+import Image from 'next/image';
 import Link from 'next/link';
+
 import { cn } from '@/lib/utils';
 
 type BrandMarkProps = {
@@ -25,17 +27,14 @@ export function BrandMark({
         className,
       )}
     >
-      <span
-        aria-hidden="true"
-        className={cn(
-          'relative block h-8 w-9 shrink-0 overflow-hidden border-l',
-          tone === 'light' ? 'border-white/22' : 'border-um-ink-950/20',
-        )}
-      >
-        <span className="absolute left-1 top-[0.22rem] h-[0.16rem] w-7 bg-um-gold-300 transition-transform duration-220 ease-um-out group-hover:translate-x-0.5" />
-        <span className="absolute left-1 top-[0.72rem] h-[0.16rem] w-5 bg-um-gold-400 transition-transform duration-220 ease-um-out group-hover:translate-x-1" />
-        <span className="absolute left-1 top-[1.22rem] h-[0.16rem] w-8 bg-um-gold-500 transition-transform duration-220 ease-um-out group-hover:translate-x-0.5" />
-        <span className="absolute left-1 top-[1.72rem] h-[0.16rem] w-4 bg-um-gold-600 transition-transform duration-220 ease-um-out group-hover:translate-x-1" />
+      <span aria-hidden="true" className="relative grid size-9 shrink-0 place-items-center">
+        <Image
+          alt=""
+          className="size-9 object-contain"
+          height={72}
+          src="/brand/unimarket-mark.png"
+          width={72}
+        />
       </span>
 
       <span className="flex flex-col leading-none">

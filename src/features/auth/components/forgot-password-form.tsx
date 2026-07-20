@@ -99,7 +99,7 @@ export function ForgotPasswordForm() {
       </button>
 
       <Link
-        className="mx-auto flex min-h-11 w-fit items-center gap-1.5 px-2 text-sm font-semibold text-um-text-muted transition hover:text-um-text-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-500"
+        className="mx-auto flex min-h-11 w-fit items-center gap-1.5 px-2 text-sm font-semibold text-um-text-muted transition hover:text-um-gold-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-500"
         href="/login"
       >
         <ArrowLeft aria-hidden="true" className="size-4" />

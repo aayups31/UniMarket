@@ -148,11 +148,8 @@ function WarriorsAuthPanel({
     >
       <WarriorPowerField />
 
-      <div className="relative z-10 flex items-start justify-between gap-6">
+      <div className="relative z-10">
         <BrandMark tone="light" />
-        <p className="font-condensed text-right text-[0.64rem] font-semibold uppercase leading-5 tracking-[0.16em] text-white/48">
-          Waterloo Warriors<span className="block text-um-gold-300/76">Verified community</span>
-        </p>
       </div>
 
       <div className="relative z-10 my-auto max-w-[48rem] py-14">

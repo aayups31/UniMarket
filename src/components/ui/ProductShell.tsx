@@ -34,9 +34,10 @@ export function ProductShell({ canSell, children, fullName, role }: ProductShell
         <div className="border-b border-white/[0.07] bg-um-ink-950/[0.97] backdrop-blur-md">
           <div className="mx-auto flex h-[4.25rem] max-w-um-shell items-center gap-4 px-4 sm:px-6 lg:px-8">
             <BrandMark
-              className="shrink-0 [&_.text-um-text-muted]:text-white/45 [&_.text-um-text-strong]:text-white [&>span:first-child]:bg-white/[0.04] [&>span:first-child]:ring-white/10"
+              className="shrink-0"
               href="/marketplace"
               label="UniMarket marketplace"
+              tone="light"
             />
 
             <div className="ml-auto hidden lg:block">

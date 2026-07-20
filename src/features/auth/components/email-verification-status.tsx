@@ -82,14 +82,14 @@ export function EmailVerificationStatus({ email, nextPath }: EmailVerificationSt
 
       <div className="flex flex-col items-center justify-between gap-3 pt-1 text-sm sm:flex-row">
         <Link
-          className="-mx-2 inline-flex min-h-11 items-center gap-1.5 px-2 font-semibold text-um-text-muted transition hover:text-um-text-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-500"
+          className="-mx-2 inline-flex min-h-11 items-center gap-1.5 px-2 font-semibold text-um-text-muted transition hover:text-um-gold-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-500"
           href={signupHref}
         >
           <ArrowLeft aria-hidden="true" className="size-4" />
           Change email
         </Link>
         <button
-          className="-mx-2 inline-flex min-h-11 items-center gap-1.5 px-2 font-semibold text-um-text-muted transition hover:text-um-text-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-500 disabled:cursor-not-allowed disabled:text-black/30"
+          className="-mx-2 inline-flex min-h-11 items-center gap-1.5 px-2 font-semibold text-um-text-muted transition hover:text-um-gold-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-500 disabled:cursor-not-allowed disabled:text-black/30"
           disabled={secondsUntilResend > 0 || isResending}
           onClick={resend}
           type="button"
