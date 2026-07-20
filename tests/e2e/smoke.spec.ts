@@ -52,7 +52,7 @@ test('signup is Waterloo-only and requires matching strong passwords', async ({ 
   await page.getByLabel('Waterloo email').fill('aayupsuw@gmail.com');
   await page.getByLabel('Password', { exact: true }).fill('Waterloo8');
   await page.getByLabel('Confirm password').fill('Different8');
-  await page.getByRole('button', { name: 'Create account' }).click();
+  await page.getByRole('button', { name: 'Join UniMarket' }).click();
 
   await expect(page.getByText('Use your @uwaterloo.ca email address.')).toBeVisible();
   await expect(page.getByText('Passwords do not match.')).toBeVisible();

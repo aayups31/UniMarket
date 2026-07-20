@@ -6,7 +6,7 @@ import { getSafeNextPath } from '@/lib/auth/navigation';
 import { getCurrentIdentity, getViewer } from '@/lib/auth/session';
 
 export const metadata: Metadata = {
-  title: 'Create account',
+  title: 'Join UniMarket',
   description: 'Create a verified Waterloo student account for UniMarket.',
 };
 
@@ -29,7 +29,7 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
   }
 
   return (
-    <div>
+    <div className="um-auth-join">
       <p className="text-sm font-semibold tracking-[0.02em] text-um-gold-700">
         01 / Waterloo access
       </p>
@@ -37,10 +37,6 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
         Your Waterloo
         <span className="block text-um-gold-600">marketplace.</span>
       </h1>
-      <p className="mt-5 max-w-md text-base leading-7 text-um-text">
-        Join with your Waterloo email and a password. You’ll verify the address once, then use your
-        password whenever you return.
-      </p>
 
       <SignupForm nextPath={nextPath} />
     </div>

@@ -152,7 +152,7 @@ function WarriorsAuthPanel({
         <BrandMark tone="light" />
       </div>
 
-      <div className="relative z-10 my-auto max-w-[48rem] py-14">
+      <div className="um-warrior-story relative z-10 my-auto max-w-[48rem] py-14">
         <div className="flex items-center gap-4">
           <span aria-hidden="true" className="h-px w-10 bg-um-gold-400" />
           <p className="font-condensed text-[0.68rem] font-bold uppercase tracking-[0.22em] text-um-gold-300">
@@ -180,12 +180,12 @@ function WarriorsAuthPanel({
           </span>
         </h2>
 
-        <p className="mt-9 max-w-sm border-l border-um-gold-400/65 pl-5 text-sm leading-6 text-white/66 xl:text-base xl:leading-7">
+        <p className="um-warrior-support mt-9 max-w-sm border-l border-um-gold-400/65 pl-5 text-sm leading-6 text-white/66 xl:text-base xl:leading-7">
           One verified Waterloo identity. A marketplace powered by the people around you.
         </p>
       </div>
 
-      <div className="relative z-10 flex items-end justify-between gap-8">
+      <div className="um-warrior-meta relative z-10 flex items-end justify-between gap-8">
         <div>
           <p className="font-condensed text-[0.65rem] font-bold uppercase tracking-[0.2em] text-um-gold-300">
             Around your Waterloo

@@ -89,7 +89,7 @@ export function SignupForm({ nextPath }: { nextPath: string }) {
           </p>
         ) : (
           <p className="text-sm text-um-text-muted" id="signup-password-hint">
-            Use 8–72 characters with uppercase, lowercase, and a number.
+            Minimum 8 characters with uppercase, lowercase, and a number.
           </p>
         )}
       </div>
@@ -134,11 +134,11 @@ export function SignupForm({ nextPath }: { nextPath: string }) {
         {isPending ? (
           <>
             <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
-            Creating account…
+            Joining…
           </>
         ) : (
           <>
-            Create account
+            Join UniMarket
             <ArrowRight
               aria-hidden="true"
               className="size-4 text-um-gold-400 transition-transform group-hover:translate-x-1"
