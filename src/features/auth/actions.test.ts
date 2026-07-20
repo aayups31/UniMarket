@@ -52,6 +52,7 @@ type SupabaseOptions = {
   resendError?: AuthError | null;
   signupError?: AuthError | null;
   signupHasSession?: boolean;
+  signupIdentities?: unknown[];
   updateError?: AuthError | null;
 };
 
@@ -74,6 +75,7 @@ function arrangeSupabase({
   resendError = null,
   signupError = null,
   signupHasSession = false,
+  signupIdentities = [{ id: 'identity-123' }],
   updateError = null,
 }: SupabaseOptions = {}) {
   const signInWithPassword = vi.fn().mockResolvedValue({
@@ -89,7 +91,10 @@ function arrangeSupabase({
     error: loginError,
   });
   const signUp = vi.fn().mockResolvedValue({
-    data: { session: signupHasSession ? { access_token: 'temporary-session' } : null },
+    data: {
+      session: signupHasSession ? { access_token: 'temporary-session' } : null,
+      user: { identities: signupIdentities },
+    },
     error: signupError,
   });
   const resend = vi.fn().mockResolvedValue({ error: resendError });
@@ -194,6 +199,26 @@ describe('auth server actions', () => {
 
       expect(result).toEqual({ ok: false, message: 'Use your @uwaterloo.ca email address.' });
       expect(mocks.createClient).not.toHaveBeenCalled();
+    });
+
+    it('keeps an existing confirmed account on signup with a sign-in prompt', async () => {
+      const cookieStore = { set: vi.fn() };
+      mocks.cookies.mockResolvedValue(cookieStore);
+      arrangeSupabase({ signupIdentities: [] });
+
+      const result = await signupAction({
+        confirmPassword: strongPassword,
+        email: 'student@uwaterloo.ca',
+        password: strongPassword,
+      });
+
+      expect(result).toEqual({
+        ok: false,
+        message: 'This Waterloo email is already registered.',
+        reason: 'account-exists',
+      });
+      expect(mocks.redirect).not.toHaveBeenCalled();
+      expect(cookieStore.set).not.toHaveBeenCalled();
     });
   });
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, RotateCw } from 'lucide-react';
+import { ArrowLeft, MailCheck, RotateCw } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState, useTransition } from 'react';
 
@@ -50,9 +50,16 @@ export function EmailVerificationStatus({ email, nextPath }: EmailVerificationSt
 
   return (
     <div className="mt-8 space-y-5">
-      <div className="border-l-2 border-um-gold-500 bg-um-gold-300/20 px-5 py-4 text-sm leading-6 text-um-text">
-        Open the newest verification link in the same browser and device where you signed up. After
-        verification, return here and sign in with your email and password.
+      <div className="flex items-start gap-4 border-y border-white/10 py-5">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-full border border-um-gold-400/30 bg-um-gold-400/10 text-um-gold-300">
+          <MailCheck aria-hidden="true" className="size-[1.1rem]" />
+        </span>
+        <div>
+          <p className="text-sm font-bold text-um-text-strong">Check the newest email we sent.</p>
+          <p className="mt-1 text-sm leading-6 text-um-text-muted">
+            Open it on this device, then come back and sign in.
+          </p>
+        </div>
       </div>
 
       {serverError ? (
@@ -75,26 +82,24 @@ export function EmailVerificationStatus({ email, nextPath }: EmailVerificationSt
         </div>
       ) : null}
 
-      <p className="text-sm leading-6 text-um-text-muted">
-        If the address already has an account, use the sign-in page instead. Check spam if the
-        message takes a moment to arrive.
-      </p>
-
       <div className="flex flex-col items-center justify-between gap-3 pt-1 text-sm sm:flex-row">
         <Link
-          className="-mx-2 inline-flex min-h-11 items-center gap-1.5 px-2 font-semibold text-um-text-muted transition hover:text-um-gold-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-500"
+          className="um-auth-change-email -mx-3 inline-flex min-h-11 items-center gap-2 rounded-full px-3 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-500"
           href={signupHref}
         >
           <ArrowLeft aria-hidden="true" className="size-4" />
           Change email
         </Link>
         <button
-          className="-mx-2 inline-flex min-h-11 items-center gap-1.5 px-2 font-semibold text-um-text-muted transition hover:text-um-gold-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-500 disabled:cursor-not-allowed disabled:text-black/30"
+          className="group inline-flex min-h-11 items-center gap-2 rounded-full border border-um-gold-300/50 bg-um-gold-300 px-5 font-bold text-um-ink-950 shadow-[0_10px_28px_rgba(242,192,40,0.12)] transition hover:-translate-y-px hover:bg-um-gold-200 hover:shadow-[0_14px_34px_rgba(242,192,40,0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-500 focus-visible:ring-offset-2 focus-visible:ring-offset-um-ink-950 disabled:cursor-wait disabled:border-white/15 disabled:bg-white/[0.06] disabled:text-white/65 disabled:shadow-none disabled:hover:translate-y-0"
           disabled={secondsUntilResend > 0 || isResending}
           onClick={resend}
           type="button"
         >
-          <RotateCw aria-hidden="true" className={`size-4 ${isResending ? 'animate-spin' : ''}`} />
+          <RotateCw
+            aria-hidden="true"
+            className={`size-4 transition-transform group-hover:rotate-[-35deg] ${isResending ? 'animate-spin' : ''}`}
+          />
           {isResending
             ? 'Sending…'
             : secondsUntilResend > 0

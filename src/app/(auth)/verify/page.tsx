@@ -29,12 +29,9 @@ export default async function VerifyPage({ searchParams }: VerifyPageProps) {
 
   return (
     <div>
-      <p className="text-sm font-semibold tracking-[0.02em] text-um-gold-700">
-        02 / Waterloo access · Verification
-      </p>
       <h1
         aria-label="Verify your Waterloo email"
-        className="mt-5 text-[clamp(2.6rem,5.5vw,3.75rem)] font-bold leading-[1.02] tracking-[-0.028em] text-um-text-strong"
+        className="text-[clamp(2.6rem,5.5vw,3.75rem)] font-bold leading-[1.02] tracking-[-0.028em] text-um-text-strong"
       >
         Check your Waterloo
         <span className="block text-um-gold-600">inbox.</span>

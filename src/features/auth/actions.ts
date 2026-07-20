@@ -22,7 +22,14 @@ import {
   type UpdatePasswordInput,
 } from './schemas';
 
-export type AuthActionResult = { ok: true; message: string } | { ok: false; message: string };
+export type AuthActionResult =
+  { ok: true; message: string } | { ok: false; message: string; reason?: 'account-exists' };
+
+const existingAccountResult: AuthActionResult = {
+  ok: false,
+  message: 'This Waterloo email is already registered.',
+  reason: 'account-exists',
+};
 
 function emailRequestErrorMessage(status?: number) {
   if (status === 429) {
@@ -136,11 +143,22 @@ export async function signupAction(input: SignupInput): Promise<AuthActionResult
   });
 
   if (error) {
+    if (error.code === 'user_already_exists' || error.code === 'email_exists') {
+      return existingAccountResult;
+    }
+
     if (error.code === 'weak_password') {
       return { ok: false, message: 'Use a stronger password and try again.' };
     }
 
     return { ok: false, message: emailRequestErrorMessage(error.status) };
+  }
+
+  // With email confirmations enabled, Supabase deliberately obscures whether a
+  // confirmed account exists. An empty identities array is its duplicate-signup
+  // signal, so keep the user here instead of showing a misleading verify screen.
+  if (Array.isArray(data.user?.identities) && data.user.identities.length === 0) {
+    return existingAccountResult;
   }
 
   // Confirmations are required, so no lasting session should be created here.

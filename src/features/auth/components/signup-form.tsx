@@ -11,6 +11,7 @@ import { signupSchema, type SignupInput } from '../schemas';
 
 export function SignupForm({ nextPath }: { nextPath: string }) {
   const [serverError, setServerError] = useState<string | null>(null);
+  const [accountExists, setAccountExists] = useState(false);
   const [isPending, startTransition] = useTransition();
   const {
     formState: { errors },
@@ -23,10 +24,17 @@ export function SignupForm({ nextPath }: { nextPath: string }) {
 
   const onSubmit = handleSubmit((values) => {
     setServerError(null);
+    setAccountExists(false);
     startTransition(async () => {
       try {
         const result = await signupAction(values);
-        if (result && !result.ok) setServerError(result.message);
+        if (result && !result.ok) {
+          if (result.reason === 'account-exists') {
+            setAccountExists(true);
+          } else {
+            setServerError(result.message);
+          }
+        }
       } catch {
         setServerError('Something went wrong. Check your connection and try again.');
       }
@@ -126,36 +134,72 @@ export function SignupForm({ nextPath }: { nextPath: string }) {
         </div>
       ) : null}
 
-      <button
-        className="group flex h-[3.35rem] w-full items-center justify-center gap-3 rounded-sm bg-um-ink-950 px-5 text-sm font-black text-white transition hover:bg-um-ink-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-um-gold-400/45 disabled:cursor-not-allowed disabled:opacity-60"
-        disabled={isPending}
-        type="submit"
-      >
-        {isPending ? (
-          <>
-            <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
-            Joining…
-          </>
-        ) : (
-          <>
-            Join UniMarket
-            <ArrowRight
-              aria-hidden="true"
-              className="size-4 text-um-gold-400 transition-transform group-hover:translate-x-1"
-            />
-          </>
-        )}
-      </button>
-
-      <p className="flex flex-wrap items-center justify-center gap-x-1.5 text-center text-sm text-um-text-muted">
-        <span>Already have an account?</span>
-        <Link
-          className="inline-flex min-h-11 items-center font-bold leading-5 text-um-text-strong underline decoration-um-gold-500 decoration-2 underline-offset-4 transition hover:text-um-gold-200 hover:decoration-um-gold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-500"
-          href={loginHref}
+      {accountExists ? (
+        <div
+          aria-live="polite"
+          className="animate-in fade-in slide-in-from-bottom-2 rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3 duration-300"
+          role="status"
         >
-          Sign in
-        </Link>
-      </p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <p className="text-base font-bold tracking-[-0.015em] text-um-text-strong">
+              Email already registered.
+            </p>
+            <div className="ml-auto flex items-center gap-4">
+              <Link
+                className="um-auth-forgot-password inline-flex min-h-9 items-center rounded-md px-1 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-500"
+                href="/forgot-password"
+              >
+                Forgot password?
+              </Link>
+              <Link
+                className="group inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-um-gold-300 px-4 text-sm font-black text-um-ink-950 transition hover:bg-um-gold-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-500 focus-visible:ring-offset-2 focus-visible:ring-offset-um-ink-950"
+                href={loginHref}
+              >
+                Sign in
+                <ArrowRight
+                  aria-hidden="true"
+                  className="size-4 transition-transform group-hover:translate-x-1"
+                />
+              </Link>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {!accountExists ? (
+        <>
+          <button
+            className="group flex h-[3.35rem] w-full items-center justify-center gap-3 rounded-sm bg-um-ink-950 px-5 text-sm font-black text-white transition hover:bg-um-ink-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-um-gold-400/45 disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={isPending}
+            type="submit"
+          >
+            {isPending ? (
+              <>
+                <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
+                Joining…
+              </>
+            ) : (
+              <>
+                Join UniMarket
+                <ArrowRight
+                  aria-hidden="true"
+                  className="size-4 text-um-gold-400 transition-transform group-hover:translate-x-1"
+                />
+              </>
+            )}
+          </button>
+
+          <p className="flex flex-wrap items-center justify-center gap-x-1.5 text-center text-sm text-um-text-muted">
+            <span>Already have an account?</span>
+            <Link
+              className="inline-flex min-h-11 items-center font-bold leading-5 text-um-text-strong underline decoration-um-gold-500 decoration-2 underline-offset-4 transition hover:text-um-gold-200 hover:decoration-um-gold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-500"
+              href={loginHref}
+            >
+              Sign in
+            </Link>
+          </p>
+        </>
+      ) : null}
     </form>
   );
 }

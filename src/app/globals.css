@@ -489,6 +489,25 @@ svg {
   color: #f2d56f;
 }
 
+.um-auth-dark .um-auth-change-email {
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.um-auth-dark .um-auth-change-email:hover,
+.um-auth-dark .um-auth-change-email:focus-visible {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.um-auth-dark .um-auth-forgot-password {
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.um-auth-dark .um-auth-forgot-password:hover,
+.um-auth-dark .um-auth-forgot-password:focus-visible {
+  color: #fff;
+}
+
 .um-auth-dark [class~='bg-white'],
 .um-product-dark [class~='bg-white'] {
   background-color: #111923;
