@@ -52,19 +52,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <div>
-      <p className="text-sm font-semibold tracking-[0.02em] text-um-gold-700">
-        02 / Waterloo access · Returning
-      </p>
       <h1
         aria-label="Sign in with Waterloo"
-        className="mt-5 text-[clamp(2.6rem,5.5vw,3.75rem)] font-bold leading-[1.02] tracking-[-0.028em] text-um-text-strong"
+        className="text-[clamp(2.6rem,5.5vw,3.75rem)] font-bold leading-[1.02] tracking-[-0.028em] text-um-text-strong"
       >
         Welcome back,
         <span className="block text-um-gold-600">Warrior.</span>
       </h1>
-      <p className="mt-5 max-w-md text-base leading-7 text-um-text">
-        Sign in with your verified Waterloo email and password. No new email is sent.
-      </p>
 
       {authError ? (
         <div

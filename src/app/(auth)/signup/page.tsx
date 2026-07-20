@@ -29,11 +29,8 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
   }
 
   return (
-    <div className="um-auth-join">
-      <p className="text-sm font-semibold tracking-[0.02em] text-um-gold-700">
-        01 / Waterloo access
-      </p>
-      <h1 className="mt-5 text-[clamp(2.6rem,5.5vw,3.75rem)] font-bold leading-[1.02] tracking-[-0.028em] text-um-text-strong">
+    <div>
+      <h1 className="text-[clamp(2.6rem,5.5vw,3.75rem)] font-bold leading-[1.02] tracking-[-0.028em] text-um-text-strong">
         Your Waterloo
         <span className="block text-um-gold-600">marketplace.</span>
       </h1>
