@@ -142,7 +142,7 @@ function WarriorsAuthPanel({
   return (
     <aside
       className={cn(
-        'um-warrior-campaign um-grain relative isolate hidden min-h-screen overflow-hidden border-r border-white/[0.08] px-10 py-9 text-white lg:flex lg:flex-col xl:px-14 xl:py-11',
+        'um-warrior-campaign um-grain relative isolate hidden min-h-screen overflow-hidden border-r border-white/[0.08] px-10 py-9 text-white lg:flex lg:h-full lg:min-h-0 lg:flex-col xl:px-14 xl:py-11',
         className,
       )}
     >
@@ -163,9 +163,24 @@ function WarriorsAuthPanel({
           </p>
         </div>
 
-        <h2 className="um-warrior-slogan mt-8 text-[clamp(4.65rem,7.2vw,7.75rem)] font-black uppercase leading-[0.82] tracking-[-0.065em]">
-          <span className="block text-[#f2eee5]">Go black.</span>
-          <span className="mt-2 block text-um-gold-300">Go gold.</span>
+        <h2
+          aria-label="Go black. Go gold."
+          className="um-warrior-slogan mt-8 text-[clamp(4.65rem,7.2vw,7.75rem)] font-black uppercase leading-[0.82] tracking-[-0.065em]"
+        >
+          <span
+            aria-hidden="true"
+            className="um-warrior-word um-warrior-word--black"
+            data-text="Go black."
+          >
+            Go black.
+          </span>
+          <span
+            aria-hidden="true"
+            className="um-warrior-word um-warrior-word--gold mt-2"
+            data-text="Go gold."
+          >
+            Go gold.
+          </span>
         </h2>
 
         <p className="mt-9 max-w-sm border-l border-um-gold-400/65 pl-5 text-sm leading-6 text-white/66 xl:text-base xl:leading-7">
@@ -197,10 +212,6 @@ function WarriorsAuthPanel({
 function WarriorPowerField({ compact = false }: { compact?: boolean }) {
   return (
     <div aria-hidden="true" className="um-warrior-power-field">
-      <span className="um-warrior-aura" />
-      <span className="um-warrior-orbit um-warrior-orbit--outer" />
-      <span className="um-warrior-orbit um-warrior-orbit--inner" />
-
       <div className="um-warrior-head-shell">
         <Image
           alt=""
@@ -210,27 +221,6 @@ function WarriorPowerField({ compact = false }: { compact?: boolean }) {
           sizes={compact ? '19rem' : '(max-width: 1280px) 52vw, 58rem'}
           src="/waterloo/warriors-head.webp"
         />
-        <span className="um-warrior-charge" />
-      </div>
-
-      <svg
-        className="um-warrior-electricity"
-        fill="none"
-        preserveAspectRatio="none"
-        viewBox="0 0 900 1100"
-      >
-        <path d="m520 880 60-85-22-65 82-82-22-76 82-94" pathLength="1" />
-        <path d="m640 170 60 90-26 58 78 80-26 76 82 82" pathLength="1" />
-        <path d="m690 690 68 43-22 57 84 48-35 68 67 59" pathLength="1" />
-        <path d="m535 260 40 46-17 41 54 51-22 54 52 46" pathLength="1" />
-      </svg>
-
-      <div className="um-warrior-particles">
-        <span />
-        <span />
-        <span />
-        <span />
-        <span />
       </div>
     </div>
   );

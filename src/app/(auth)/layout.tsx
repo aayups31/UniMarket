@@ -4,14 +4,14 @@ import { WaterlooCampaignPanel } from '@/features/auth/components/waterloo-campa
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <main className="um-auth-dark min-h-screen bg-um-ink-950 text-um-text-strong">
-      <div className="mx-auto grid min-h-screen max-w-[112rem] lg:grid-cols-[minmax(30rem,1.08fr)_minmax(32rem,0.92fr)]">
+    <main className="um-auth-dark min-h-screen bg-um-ink-950 text-um-text-strong lg:h-dvh lg:min-h-0 lg:overflow-hidden">
+      <div className="mx-auto grid min-h-screen max-w-[112rem] lg:h-full lg:min-h-0 lg:grid-cols-[minmax(30rem,1.08fr)_minmax(32rem,0.92fr)]">
         <WaterlooCampaignPanel variant="auth" />
 
-        <div className="um-ink-canvas relative flex min-h-screen flex-col overflow-hidden">
+        <div className="um-ink-canvas relative flex min-h-screen flex-col overflow-hidden lg:h-full lg:min-h-0">
           <WaterlooCampaignPanel compact className="lg:hidden" variant="auth" />
 
-          <section className="relative flex flex-1 flex-col px-5 py-9 sm:px-10 sm:py-12 lg:px-16 lg:py-14 xl:px-24">
+          <section className="um-auth-form-stage relative flex flex-1 flex-col px-5 py-9 sm:px-10 sm:py-12 lg:min-h-0 lg:px-12 lg:py-8 xl:px-20 xl:py-9">
             <div className="mx-auto hidden w-full max-w-lg items-center justify-between border-b border-white/[0.08] pb-4 lg:flex">
               <p className="text-xs font-semibold uppercase tracking-[0.1em] text-um-gold-700">
                 Verified Waterloo access
@@ -19,11 +19,11 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
               <p className="text-xs font-medium text-um-text-muted">Private marketplace</p>
             </div>
 
-            <div className="mx-auto flex w-full max-w-lg flex-1 items-center py-5 lg:py-10">
-              <div className="um-fade-up w-full">{children}</div>
+            <div className="mx-auto flex min-h-0 w-full max-w-lg flex-1 items-center py-5 lg:py-4">
+              <div className="um-auth-form-card um-fade-up w-full">{children}</div>
             </div>
 
-            <footer className="mx-auto mt-8 flex w-full max-w-lg items-center justify-between border-t border-white/[0.08] pt-4 text-xs text-um-text-muted">
+            <footer className="mx-auto mt-5 flex w-full max-w-lg items-center justify-between border-t border-white/[0.08] pt-4 text-xs text-um-text-muted">
               <span>Verified Waterloo access</span>
               <span>DC · SLC · E7</span>
             </footer>
