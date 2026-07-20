@@ -5,11 +5,11 @@ import { WaterlooCampaignPanel } from '@/features/auth/components/waterloo-campa
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <main className="um-auth-dark min-h-screen bg-um-ink-950 text-um-text-strong">
-      <div className="mx-auto grid min-h-screen max-w-[112rem] lg:grid-cols-[minmax(28rem,0.94fr)_minmax(32rem,1.06fr)]">
-        <WaterlooCampaignPanel />
+      <div className="mx-auto grid min-h-screen max-w-[112rem] lg:grid-cols-[minmax(30rem,1.08fr)_minmax(32rem,0.92fr)]">
+        <WaterlooCampaignPanel variant="auth" />
 
         <div className="um-ink-canvas relative flex min-h-screen flex-col overflow-hidden">
-          <WaterlooCampaignPanel compact className="lg:hidden" />
+          <WaterlooCampaignPanel compact className="lg:hidden" variant="auth" />
 
           <section className="relative flex flex-1 flex-col px-5 py-9 sm:px-10 sm:py-12 lg:px-16 lg:py-14 xl:px-24">
             <div className="mx-auto hidden w-full max-w-lg items-center justify-between border-b border-white/[0.08] pb-4 lg:flex">

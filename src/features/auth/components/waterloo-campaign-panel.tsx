@@ -1,14 +1,25 @@
+import Image from 'next/image';
+
 import { BrandMark } from '@/components/BrandMark';
 import { cn } from '@/lib/utils';
 
 type WaterlooCampaignPanelProps = {
   className?: string;
   compact?: boolean;
+  variant?: 'auth' | 'default';
 };
 
 const CAMPUS_PLACES = ['DC', 'SLC', 'E7', 'UWP', 'ICON', 'LESTER'];
 
-export function WaterlooCampaignPanel({ className, compact = false }: WaterlooCampaignPanelProps) {
+export function WaterlooCampaignPanel({
+  className,
+  compact = false,
+  variant = 'default',
+}: WaterlooCampaignPanelProps) {
+  if (variant === 'auth') {
+    return <WarriorsAuthPanel className={className} compact={compact} />;
+  }
+
   if (compact) {
     return (
       <header
@@ -91,6 +102,137 @@ export function WaterlooCampaignPanel({ className, compact = false }: WaterlooCa
       </div>
       <GoldBands />
     </aside>
+  );
+}
+
+function WarriorsAuthPanel({
+  className,
+  compact,
+}: Pick<WaterlooCampaignPanelProps, 'className' | 'compact'>) {
+  if (compact) {
+    return (
+      <header
+        className={cn(
+          'um-warrior-campaign um-warrior-campaign--compact relative isolate overflow-hidden border-b border-white/[0.08] px-5 pb-6 pt-4 text-white sm:px-8 sm:pb-7',
+          className,
+        )}
+      >
+        <WarriorPowerField compact />
+
+        <div className="relative z-10 flex items-center justify-between gap-4">
+          <BrandMark showCampusLabel={false} tone="light" />
+          <p className="font-condensed text-right text-[0.62rem] font-semibold uppercase leading-5 tracking-[0.16em] text-white/54">
+            Verified Waterloo<span className="block text-um-gold-300/78">Student access</span>
+          </p>
+        </div>
+
+        <div className="relative z-10 mt-7 border-t border-white/[0.1] pt-5">
+          <p className="font-condensed text-[0.62rem] font-bold uppercase tracking-[0.2em] text-um-gold-300">
+            Waterloo Warriors
+          </p>
+          <h2 className="mt-2 text-[2rem] font-black uppercase leading-[0.88] tracking-[-0.045em]">
+            Go black. <span className="text-um-gold-300">Go gold.</span>
+          </h2>
+        </div>
+        <GoldBands />
+      </header>
+    );
+  }
+
+  return (
+    <aside
+      className={cn(
+        'um-warrior-campaign um-grain relative isolate hidden min-h-screen overflow-hidden border-r border-white/[0.08] px-10 py-9 text-white lg:flex lg:flex-col xl:px-14 xl:py-11',
+        className,
+      )}
+    >
+      <WarriorPowerField />
+
+      <div className="relative z-10 flex items-start justify-between gap-6">
+        <BrandMark tone="light" />
+        <p className="font-condensed text-right text-[0.64rem] font-semibold uppercase leading-5 tracking-[0.16em] text-white/48">
+          Waterloo Warriors<span className="block text-um-gold-300/76">Verified community</span>
+        </p>
+      </div>
+
+      <div className="relative z-10 my-auto max-w-[48rem] py-14">
+        <div className="flex items-center gap-4">
+          <span aria-hidden="true" className="h-px w-10 bg-um-gold-400" />
+          <p className="font-condensed text-[0.68rem] font-bold uppercase tracking-[0.22em] text-um-gold-300">
+            One campus. One marketplace.
+          </p>
+        </div>
+
+        <h2 className="um-warrior-slogan mt-8 text-[clamp(4.65rem,7.2vw,7.75rem)] font-black uppercase leading-[0.82] tracking-[-0.065em]">
+          <span className="block text-[#f2eee5]">Go black.</span>
+          <span className="mt-2 block text-um-gold-300">Go gold.</span>
+        </h2>
+
+        <p className="mt-9 max-w-sm border-l border-um-gold-400/65 pl-5 text-sm leading-6 text-white/66 xl:text-base xl:leading-7">
+          One verified Waterloo identity. A marketplace powered by the people around you.
+        </p>
+      </div>
+
+      <div className="relative z-10 flex items-end justify-between gap-8">
+        <div>
+          <p className="font-condensed text-[0.65rem] font-bold uppercase tracking-[0.2em] text-um-gold-300">
+            Around your Waterloo
+          </p>
+          <p className="mt-2 font-mono text-[0.62rem] font-medium tracking-[0.09em] text-white/54">
+            {CAMPUS_PLACES.join(' · ')}
+          </p>
+          <p className="mt-3 max-w-md text-[0.68rem] leading-5 text-white/38">
+            UniMarket is independent and not an official University of Waterloo service.
+          </p>
+        </div>
+        <p className="hidden font-mono text-[0.58rem] uppercase tracking-[0.18em] text-white/28 xl:block">
+          Powering campus exchange
+        </p>
+      </div>
+      <GoldBands />
+    </aside>
+  );
+}
+
+function WarriorPowerField({ compact = false }: { compact?: boolean }) {
+  return (
+    <div aria-hidden="true" className="um-warrior-power-field">
+      <span className="um-warrior-aura" />
+      <span className="um-warrior-orbit um-warrior-orbit--outer" />
+      <span className="um-warrior-orbit um-warrior-orbit--inner" />
+
+      <div className="um-warrior-head-shell">
+        <Image
+          alt=""
+          className="object-contain"
+          fill
+          loading="eager"
+          sizes={compact ? '19rem' : '(max-width: 1280px) 52vw, 58rem'}
+          src="/waterloo/warriors-head.webp"
+        />
+        <span className="um-warrior-charge" />
+      </div>
+
+      <svg
+        className="um-warrior-electricity"
+        fill="none"
+        preserveAspectRatio="none"
+        viewBox="0 0 900 1100"
+      >
+        <path d="m520 880 60-85-22-65 82-82-22-76 82-94" pathLength="1" />
+        <path d="m640 170 60 90-26 58 78 80-26 76 82 82" pathLength="1" />
+        <path d="m690 690 68 43-22 57 84 48-35 68 67 59" pathLength="1" />
+        <path d="m535 260 40 46-17 41 54 51-22 54 52 46" pathLength="1" />
+      </svg>
+
+      <div className="um-warrior-particles">
+        <span />
+        <span />
+        <span />
+        <span />
+        <span />
+      </div>
+    </div>
   );
 }
 

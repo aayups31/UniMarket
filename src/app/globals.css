@@ -527,6 +527,397 @@ svg {
   color: #a7f3d0;
 }
 
+.um-warrior-campaign {
+  contain: paint;
+  background:
+    radial-gradient(ellipse 78% 64% at 82% 58%, rgb(231 188 53 / 13%), transparent 62%),
+    linear-gradient(145deg, #05070b 0%, #090d14 46%, #0e1218 100%);
+}
+
+.um-warrior-campaign::before {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  content: '';
+  background:
+    linear-gradient(90deg, rgb(5 7 11 / 96%) 0%, rgb(5 7 11 / 82%) 35%, transparent 70%),
+    linear-gradient(0deg, rgb(5 7 11 / 82%) 0%, transparent 36%, rgb(5 7 11 / 26%) 100%);
+}
+
+.um-warrior-campaign--compact::before {
+  background: linear-gradient(
+    90deg,
+    rgb(5 7 11 / 96%) 0%,
+    rgb(5 7 11 / 76%) 58%,
+    rgb(5 7 11 / 28%)
+  );
+}
+
+.um-warrior-power-field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.um-warrior-aura {
+  position: absolute;
+  right: -24rem;
+  bottom: -23rem;
+  width: min(73rem, 82vw);
+  aspect-ratio: 1;
+  border-radius: 999px;
+  opacity: 0.58;
+  background: radial-gradient(
+    circle,
+    rgb(249 231 162 / 34%) 0%,
+    rgb(231 188 53 / 18%) 24%,
+    rgb(201 152 18 / 7%) 48%,
+    transparent 71%
+  );
+  will-change: transform, opacity;
+  animation: um-warrior-aura-charge 8.4s var(--um-ease-out) infinite;
+}
+
+.um-warrior-head-shell {
+  position: absolute;
+  right: -22%;
+  bottom: -13%;
+  width: clamp(45rem, 59vw, 66rem);
+  aspect-ratio: 1;
+  transform-origin: 55% 56%;
+  opacity: 0.42;
+  will-change: transform, opacity;
+  animation: um-warrior-power-up 8.4s var(--um-ease-out) infinite;
+}
+
+.um-warrior-head-shell img {
+  filter: saturate(0.92) brightness(0.78) contrast(1.06);
+}
+
+.um-warrior-charge {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    112deg,
+    transparent 29%,
+    rgb(255 248 207 / 92%) 47%,
+    rgb(242 213 111 / 72%) 54%,
+    transparent 69%
+  );
+  opacity: 0;
+  mix-blend-mode: screen;
+  -webkit-mask: url('/waterloo/warriors-head.webp') center / contain no-repeat;
+  mask: url('/waterloo/warriors-head.webp') center / contain no-repeat;
+  will-change: opacity;
+  animation: um-warrior-charge-flash 8.4s ease-in-out infinite;
+}
+
+.um-warrior-orbit {
+  position: absolute;
+  right: -20rem;
+  bottom: -14rem;
+  aspect-ratio: 1;
+  border: 1px solid rgb(242 213 111 / 18%);
+  border-radius: 50%;
+  opacity: 0.34;
+  will-change: transform, opacity;
+}
+
+.um-warrior-orbit::after {
+  position: absolute;
+  top: 13%;
+  left: 13%;
+  width: 0.42rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #f9e7a2;
+  box-shadow: 0 0 18px rgb(242 213 111 / 78%);
+  content: '';
+}
+
+.um-warrior-orbit--outer {
+  width: min(66rem, 74vw);
+  animation: um-warrior-orbit 18s linear infinite;
+}
+
+.um-warrior-orbit--inner {
+  right: -10rem;
+  bottom: -8rem;
+  width: min(49rem, 57vw);
+  border-color: rgb(255 255 255 / 9%);
+  animation: um-warrior-orbit-reverse 14s linear infinite;
+}
+
+.um-warrior-electricity {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.um-warrior-electricity path {
+  stroke: #f9e7a2;
+  stroke-width: 1.35;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+  will-change: stroke-dashoffset, opacity;
+  animation: um-warrior-bolt 8.4s ease-in-out infinite;
+}
+
+.um-warrior-electricity path:nth-child(2) {
+  animation-delay: 120ms;
+}
+
+.um-warrior-electricity path:nth-child(3) {
+  animation-delay: 260ms;
+}
+
+.um-warrior-electricity path:nth-child(4) {
+  animation-delay: 380ms;
+}
+
+.um-warrior-particles span {
+  position: absolute;
+  z-index: 2;
+  width: 0.24rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #f9e7a2;
+  box-shadow: 0 0 14px rgb(242 213 111 / 72%);
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: um-warrior-particle 8.4s ease-out infinite;
+}
+
+.um-warrior-particles span:nth-child(1) {
+  top: 24%;
+  right: 13%;
+}
+
+.um-warrior-particles span:nth-child(2) {
+  top: 38%;
+  right: 34%;
+  animation-delay: 180ms;
+}
+
+.um-warrior-particles span:nth-child(3) {
+  top: 58%;
+  right: 9%;
+  animation-delay: 330ms;
+}
+
+.um-warrior-particles span:nth-child(4) {
+  right: 42%;
+  bottom: 21%;
+  animation-delay: 480ms;
+}
+
+.um-warrior-particles span:nth-child(5) {
+  right: 24%;
+  bottom: 11%;
+  animation-delay: 620ms;
+}
+
+.um-warrior-slogan {
+  text-shadow: 0 14px 48px rgb(0 0 0 / 44%);
+}
+
+.um-warrior-campaign--compact .um-warrior-head-shell {
+  right: -5.5rem;
+  bottom: -8.5rem;
+  width: 23rem;
+  opacity: 0.28;
+  animation: none;
+  transform: rotate(-3deg);
+}
+
+.um-warrior-campaign--compact .um-warrior-aura {
+  right: -9rem;
+  bottom: -12rem;
+  width: 28rem;
+  opacity: 0.42;
+  animation: none;
+}
+
+.um-warrior-campaign--compact
+  :is(.um-warrior-orbit, .um-warrior-electricity, .um-warrior-particles) {
+  display: none;
+}
+
+@keyframes um-warrior-power-up {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: translate3d(0, 1.1rem, 0) scale(0.975);
+  }
+
+  15% {
+    opacity: 0.48;
+    transform: translate3d(0, 0, 0) scale(1.008);
+  }
+
+  23% {
+    opacity: 0.42;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  62% {
+    opacity: 0.43;
+    transform: translate3d(-0.35rem, -0.2rem, 0) scale(1.006);
+  }
+
+  70% {
+    opacity: 0.49;
+    transform: translate3d(0, -0.45rem, 0) scale(1.012);
+  }
+
+  82% {
+    opacity: 0.39;
+    transform: translate3d(0, 0, 0) scale(0.995);
+  }
+}
+
+@keyframes um-warrior-aura-charge {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.88);
+  }
+
+  18% {
+    opacity: 0.7;
+    transform: scale(1.04);
+  }
+
+  34%,
+  58% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+
+  69% {
+    opacity: 0.72;
+    transform: scale(1.065);
+  }
+
+  82% {
+    opacity: 0.42;
+    transform: scale(1.01);
+  }
+}
+
+@keyframes um-warrior-charge-flash {
+  0%,
+  9%,
+  24%,
+  58%,
+  76%,
+  100% {
+    opacity: 0;
+  }
+
+  14% {
+    opacity: 0.84;
+  }
+
+  18% {
+    opacity: 0.18;
+  }
+
+  66% {
+    opacity: 0.64;
+  }
+
+  71% {
+    opacity: 0.12;
+  }
+}
+
+@keyframes um-warrior-bolt {
+  0%,
+  8%,
+  26%,
+  57%,
+  76%,
+  100% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+
+  14%,
+  17% {
+    stroke-dashoffset: 0;
+    opacity: 0.66;
+  }
+
+  22% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+
+  64%,
+  68% {
+    stroke-dashoffset: 0;
+    opacity: 0.44;
+  }
+
+  73% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes um-warrior-orbit {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes um-warrior-orbit-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes um-warrior-particle {
+  0%,
+  10%,
+  27%,
+  61%,
+  77%,
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 0.75rem, 0) scale(0.45);
+  }
+
+  16%,
+  20% {
+    opacity: 0.82;
+    transform: translate3d(0, -0.7rem, 0) scale(1);
+  }
+
+  68%,
+  71% {
+    opacity: 0.62;
+    transform: translate3d(0.35rem, -0.9rem, 0) scale(0.82);
+  }
+}
+
 .um-skip-link {
   position: fixed;
   top: 0.75rem;
@@ -991,5 +1382,26 @@ svg {
   .um-network-id-link {
     opacity: 1 !important;
     transform: scaleY(1) !important;
+  }
+
+  .um-warrior-head-shell {
+    opacity: 0.42 !important;
+    transform: none !important;
+  }
+
+  .um-warrior-aura {
+    opacity: 0.5 !important;
+    transform: scale(1) !important;
+  }
+
+  .um-warrior-charge,
+  .um-warrior-electricity,
+  .um-warrior-particles {
+    display: none !important;
+  }
+
+  .um-warrior-orbit {
+    opacity: 0.26 !important;
+    transform: none !important;
   }
 }

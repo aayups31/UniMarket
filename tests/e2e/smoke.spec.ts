@@ -9,7 +9,9 @@ test('landing page presents the real Waterloo-only product', async ({ page }) =>
       name: /your university.*your people.*just for you/i,
     }),
   ).toBeVisible();
-  await expect(page.getByRole('link', { name: /enter with @uwaterloo\.ca/i })).toBeVisible();
+  await expect(
+    page.locator('#main-content').getByRole('link', { name: 'Join with Waterloo', exact: true }),
+  ).toBeVisible();
   await expect(page.getByText(/in-app escrow/i)).toHaveCount(0);
   await expect(page.getByText(/coming to your campus/i)).toHaveCount(0);
 });
@@ -45,6 +47,7 @@ test('login rejects non-Waterloo email before password authentication', async ({
 
 test('signup is Waterloo-only and requires matching strong passwords', async ({ page }) => {
   await page.goto('/signup');
+  await page.waitForLoadState('networkidle');
 
   await page.getByLabel('Waterloo email').fill('aayupsuw@gmail.com');
   await page.getByLabel('Password', { exact: true }).fill('Waterloo8');
