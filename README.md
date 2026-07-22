@@ -6,10 +6,11 @@ UniMarket is a private marketplace for verified University of Waterloo students.
 
 - Waterloo-only verified email/password authentication and required profile onboarding
 - Authenticated marketplace with search, categories, featured/recent sections, and pagination
-- Listing details with seller verification, condition, pickup area, and contact action
+- Listing details with seller verification, condition, pickup area, and private listing-linked chat
 - Draft, live preview, publish, edit, archive, and permanent-delete workflows
 - Private resumable image uploads with progress, reordering, validation, and signed delivery
 - Moderator-only removal flow backed by an append-only moderation log
+- Realtime participant-only messaging with unread counts and durable listing context
 - Row-level security, private Storage policies, database constraints, and pgTAP tests
 
 ## Prerequisites
@@ -108,6 +109,7 @@ The browser suite exercises desktop and mobile Chrome. Playwright starts the dev
 - `src/features/auth` and `src/features/onboarding` — email/password, recovery, and profile flows
 - `src/features/marketplace` — discovery queries, filters, cards, and listing details
 - `src/features/listings` — editor, uploads, ownership actions, and moderation UI
+- `src/features/messages` — listing conversations, Realtime inbox UI, and message validation
 - `src/lib/supabase` — typed browser/server Supabase clients
 - `supabase/migrations` — schema, workflows, RLS, and Storage policies
 - `supabase/tests` — database security and workflow tests

@@ -11,6 +11,7 @@ import type {
   MarketplaceSeller,
   MarketplaceViewer,
 } from './types';
+import { marketplaceSearchTerms, normalizeMarketplaceQuery } from './url';
 
 const LISTING_COLUMNS = [
   'id',
@@ -22,9 +23,36 @@ const LISTING_COLUMNS = [
   'condition',
   'open_to_offers',
   'pickup_area',
+  'pickup_latitude',
+  'pickup_longitude',
   'featured_at',
   'published_at',
   'created_at',
+].join(',');
+
+const MARKETPLACE_VIEW_COLUMNS = [
+  'id',
+  'title',
+  'description',
+  'price_cents',
+  'condition',
+  'open_to_offers',
+  'pickup_area',
+  'featured_at',
+  'published_at',
+  'created_at',
+  'category_id',
+  'category_slug',
+  'category_name',
+  'category_icon',
+  'seller_id',
+  'seller_name',
+  'seller_program',
+  'seller_academic_year',
+  'seller_joined_at',
+  'cover_image_path',
+  'pickup_latitude',
+  'pickup_longitude',
 ].join(',');
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -39,6 +67,8 @@ type ListingRow = {
   condition: string | null;
   open_to_offers: boolean;
   pickup_area: string | null;
+  pickup_latitude: number | null;
+  pickup_longitude: number | null;
   featured_at: string | null;
   published_at: string | null;
   created_at: string;
@@ -65,6 +95,8 @@ type MarketplaceViewRow = {
   seller_academic_year?: string | null;
   seller_joined_at?: string;
   cover_image_path: string | null;
+  pickup_latitude: number | null;
+  pickup_longitude: number | null;
 };
 
 type CategoryRow = {
@@ -101,7 +133,7 @@ export async function getMarketplacePage(
   filters: MarketplaceFilters = {},
 ): Promise<MarketplacePageData> {
   const supabase = await createClient();
-  const query = normalizeSearch(filters.query);
+  const query = normalizeMarketplaceQuery(filters.query);
   const page = clampPage(filters.page);
 
   const { data: categoryRows, error: categoryError } = await supabase
@@ -119,7 +151,7 @@ export async function getMarketplacePage(
 
   let recentQuery = supabase
     .from('marketplace_listings')
-    .select('*', { count: 'exact' })
+    .select(MARKETPLACE_VIEW_COLUMNS, { count: 'exact' })
     .order('published_at', { ascending: false })
     .order('id', { ascending: false })
     .range(from, to);
@@ -127,27 +159,22 @@ export async function getMarketplacePage(
   if (explicitCategory) {
     recentQuery = recentQuery.eq('category_slug', explicitCategory.slug);
   }
-  if (query) {
-    recentQuery = recentQuery.or(buildMarketplaceSearchFilter(query));
+  for (const term of marketplaceSearchTerms(query)) {
+    recentQuery = recentQuery.or(buildMarketplaceSearchFilter(term));
   }
 
-  let featuredQuery = supabase
+  const featuredQuery = supabase
     .from('marketplace_listings')
-    .select('*')
+    .select(MARKETPLACE_VIEW_COLUMNS)
     .not('featured_at', 'is', null)
     .order('featured_at', { ascending: false })
     .limit(FEATURED_LISTING_LIMIT);
 
-  if (explicitCategory) {
-    featuredQuery = featuredQuery.eq('category_slug', explicitCategory.slug);
-  }
-  if (query) {
-    featuredQuery = featuredQuery.or(buildMarketplaceSearchFilter(query));
-  }
+  const shouldLoadFeatured = page === 1 && !query && !explicitCategory;
 
   const [recentResult, featuredResult] = await Promise.all([
     recentQuery,
-    page === 1 ? featuredQuery : Promise.resolve({ data: [], error: null }),
+    shouldLoadFeatured ? featuredQuery : Promise.resolve({ data: [], error: null }),
   ]);
 
   if (recentResult.error || featuredResult.error) {
@@ -198,6 +225,8 @@ async function hydrateMarketplaceRows(
     condition: row.condition,
     openToOffers: row.open_to_offers,
     pickupArea: row.pickup_area,
+    pickupLatitude: row.pickup_latitude,
+    pickupLongitude: row.pickup_longitude,
     featuredAt: row.featured_at,
     publishedAt: row.published_at,
     createdAt: row.created_at,
@@ -337,6 +366,8 @@ async function hydrateListings(
     condition: row.condition,
     openToOffers: row.open_to_offers,
     pickupArea: row.pickup_area,
+    pickupLatitude: row.pickup_latitude,
+    pickupLongitude: row.pickup_longitude,
     featuredAt: row.featured_at,
     publishedAt: row.published_at,
     createdAt: row.created_at,
@@ -385,15 +416,6 @@ function toPublicDisplayName(value: string | null | undefined) {
   if (parts.length === 0) return 'Waterloo student';
   if (parts.length === 1) return parts[0];
   return `${parts[0]} ${parts.at(-1)?.charAt(0).toUpperCase()}.`;
-}
-
-function normalizeSearch(value: string | undefined) {
-  return (value ?? '')
-    .normalize('NFKC')
-    .replace(/[^\p{L}\p{N}\s-]/gu, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, 80);
 }
 
 function buildMarketplaceSearchFilter(query: string) {

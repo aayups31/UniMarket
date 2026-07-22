@@ -9,6 +9,7 @@ export type ModerationAction = 'listing_removed';
 export type Profile = {
   id: string;
   full_name: string | null;
+  avatar_path: string | null;
   email: string;
   program: string | null;
   academic_year: string | null;
@@ -50,6 +51,8 @@ export type Listing = {
   condition: ListingCondition | null;
   open_to_offers: boolean;
   pickup_area: string;
+  pickup_latitude: number | null;
+  pickup_longitude: number | null;
   status: ListingStatus;
   featured_at: string | null;
   published_at: string | null;
@@ -87,6 +90,28 @@ export type ModerationEvent = {
   created_at: string;
 };
 
+export type Conversation = {
+  id: string;
+  listing_id: string | null;
+  listing_title_snapshot: string;
+  listing_cover_path_snapshot: string | null;
+  buyer_id: string;
+  seller_id: string;
+  buyer_last_read_at: string;
+  seller_last_read_at: string;
+  last_message_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Message = {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  body: string;
+  created_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -95,6 +120,7 @@ export type Database = {
         Insert: {
           id: string;
           full_name?: string | null;
+          avatar_path?: string | null;
           email: string;
           program?: string | null;
           academic_year?: string | null;
@@ -109,6 +135,7 @@ export type Database = {
         Update: {
           id?: string;
           full_name?: string | null;
+          avatar_path?: string | null;
           email?: string;
           program?: string | null;
           academic_year?: string | null;
@@ -176,6 +203,8 @@ export type Database = {
           condition?: ListingCondition | null;
           open_to_offers?: boolean;
           pickup_area?: string;
+          pickup_latitude?: number | null;
+          pickup_longitude?: number | null;
           status?: ListingStatus;
           featured_at?: string | null;
           published_at?: string | null;
@@ -197,6 +226,8 @@ export type Database = {
           condition?: ListingCondition | null;
           open_to_offers?: boolean;
           pickup_area?: string;
+          pickup_latitude?: number | null;
+          pickup_longitude?: number | null;
           status?: ListingStatus;
           featured_at?: string | null;
           published_at?: string | null;
@@ -270,6 +301,91 @@ export type Database = {
           },
         ];
       };
+      conversations: {
+        Row: Conversation;
+        Insert: {
+          id?: string;
+          listing_id?: string | null;
+          listing_title_snapshot: string;
+          listing_cover_path_snapshot?: string | null;
+          buyer_id: string;
+          seller_id: string;
+          buyer_last_read_at?: string;
+          seller_last_read_at?: string;
+          last_message_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          listing_id?: string | null;
+          listing_title_snapshot?: string;
+          listing_cover_path_snapshot?: string | null;
+          buyer_id?: string;
+          seller_id?: string;
+          buyer_last_read_at?: string;
+          seller_last_read_at?: string;
+          last_message_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'conversations_buyer_id_fkey';
+            columns: ['buyer_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'conversations_listing_id_fkey';
+            columns: ['listing_id'];
+            isOneToOne: false;
+            referencedRelation: 'listings';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'conversations_seller_id_fkey';
+            columns: ['seller_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      messages: {
+        Row: Message;
+        Insert: {
+          id?: string;
+          conversation_id: string;
+          sender_id: string;
+          body: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          conversation_id?: string;
+          sender_id?: string;
+          body?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'messages_conversation_id_fkey';
+            columns: ['conversation_id'];
+            isOneToOne: false;
+            referencedRelation: 'conversations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'messages_sender_id_fkey';
+            columns: ['sender_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       moderation_events: {
         Row: ModerationEvent;
         Insert: {
@@ -319,6 +435,7 @@ export type Database = {
           academic_year: string | null;
           university: string;
           created_at: string;
+          avatar_path: string | null;
         };
         Relationships: [];
       };
@@ -346,6 +463,30 @@ export type Database = {
           seller_joined_at: string;
           seller_university: string;
           cover_image_path: string | null;
+          pickup_latitude: number | null;
+          pickup_longitude: number | null;
+        };
+        Relationships: [];
+      };
+      inbox_conversations: {
+        Row: {
+          id: string;
+          listing_id: string | null;
+          listing_title: string;
+          cover_image_path: string | null;
+          listing_status: ListingStatus | null;
+          buyer_id: string;
+          seller_id: string;
+          counterpart_id: string;
+          counterpart_name: string;
+          last_message_id: string | null;
+          last_message_sender_id: string | null;
+          last_message_body: string | null;
+          last_message_created_at: string | null;
+          unread_count: number;
+          last_message_at: string | null;
+          created_at: string;
+          updated_at: string;
         };
         Relationships: [];
       };
@@ -364,8 +505,12 @@ export type Database = {
         Args: { event: Json };
         Returns: Json;
       };
-      get_listing_contact_email: {
-        Args: { p_listing_id: string };
+      get_unread_message_count: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
+      mark_conversation_read: {
+        Args: { p_conversation_id: string };
         Returns: string;
       };
       publish_listing: {
@@ -382,6 +527,8 @@ export type Database = {
           p_condition?: ListingCondition | null;
           p_open_to_offers?: boolean;
           p_pickup_area?: string;
+          p_pickup_latitude?: number | null;
+          p_pickup_longitude?: number | null;
         };
         Returns: Listing;
       };
@@ -392,6 +539,14 @@ export type Database = {
       remove_listing: {
         Args: { p_listing_id: string; p_reason: string };
         Returns: Listing;
+      };
+      send_conversation_message: {
+        Args: { p_conversation_id: string; p_body: string };
+        Returns: Message;
+      };
+      start_listing_conversation: {
+        Args: { p_listing_id: string };
+        Returns: Conversation;
       };
       search_listings: {
         Args: {

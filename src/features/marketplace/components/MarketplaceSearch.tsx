@@ -1,49 +1,64 @@
-import { Search } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowRight, Search, X } from 'lucide-react';
+
+import { marketplaceHref, marketplaceScopedHref } from '../url';
 
 type MarketplaceSearchProps = {
   query: string;
   category: string | null;
+  scopePath?: string;
 };
 
-export function MarketplaceSearch({ query, category }: MarketplaceSearchProps) {
+export function MarketplaceSearch({ query, category, scopePath }: MarketplaceSearchProps) {
+  const action = scopePath ?? '/marketplace';
+  const clearHref = scopePath
+    ? marketplaceScopedHref(scopePath, {})
+    : marketplaceHref({ category });
+
   return (
-    <div className="w-full">
-      <form
-        action="/marketplace"
-        method="get"
-        role="search"
-        className="relative flex w-full items-center rounded-[1rem] bg-white/[0.075] p-1.5 shadow-[0_18px_48px_rgba(0,0,0,0.18)] ring-1 ring-white/[0.09] backdrop-blur-sm transition duration-160 ease-um-out focus-within:bg-white/[0.1] focus-within:ring-2 focus-within:ring-um-gold-400/55"
-      >
-        <Search
-          className="pointer-events-none absolute left-5 top-1/2 size-5 -translate-y-1/2 text-white/42 sm:left-6 sm:size-[1.35rem]"
-          strokeWidth={1.9}
-          aria-hidden="true"
-        />
-        <label htmlFor="marketplace-search" className="sr-only">
-          Search listings by title, description, or category
-        </label>
-        <input
-          id="marketplace-search"
-          name="q"
-          type="search"
-          defaultValue={query}
-          autoComplete="off"
-          maxLength={80}
-          aria-describedby="marketplace-search-hint"
-          placeholder="Search monitors, textbooks, chairs…"
-          className="h-14 min-w-0 flex-1 rounded-um-md border-0 bg-transparent pl-12 pr-3 text-[0.95rem] font-medium text-white outline-none placeholder:font-normal placeholder:text-white/38 sm:h-16 sm:pl-14 sm:text-[1.05rem]"
-        />
-        {category ? <input type="hidden" name="category" value={category} /> : null}
-        <button
-          type="submit"
-          className="h-11 shrink-0 rounded-um-sm bg-um-gold-400 px-4 text-sm font-bold text-um-ink-950 shadow-[0_8px_22px_rgba(201,152,18,0.18)] transition duration-160 ease-um-out hover:bg-um-gold-300 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-um-ink-950 sm:h-[3.25rem] sm:px-6"
+    <form
+      action={action}
+      method="get"
+      role="search"
+      className="group/search flex w-full items-center gap-1.5 rounded-[0.9rem] border border-white/[0.13] bg-black/[0.45] p-1.5 shadow-[0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur-md transition duration-220 ease-um-out focus-within:border-um-gold-400/56 focus-within:bg-black/60 focus-within:shadow-[0_24px_74px_rgba(0,0,0,0.4)]"
+    >
+      <Search
+        aria-hidden="true"
+        className="ml-3 size-5 shrink-0 text-um-gold-300 sm:ml-4"
+        strokeWidth={1.8}
+      />
+      <label className="sr-only" htmlFor="marketplace-search">
+        Search listings by title, description, or category
+      </label>
+      <input
+        autoComplete="off"
+        className="h-12 min-w-0 flex-1 scroll-mt-24 appearance-none border-0 bg-transparent px-1 text-base font-medium text-white outline-none placeholder:font-normal placeholder:text-white/48 sm:h-14 sm:px-2 sm:text-lg"
+        defaultValue={query}
+        id="marketplace-search"
+        maxLength={80}
+        name="q"
+        placeholder="Search Waterloo"
+        type="search"
+      />
+      {category && !scopePath ? <input name="category" type="hidden" value={category} /> : null}
+      {query ? (
+        <Link
+          aria-label="Clear search"
+          className="grid size-11 shrink-0 place-items-center rounded-[0.65rem] text-white/58 transition duration-160 ease-um-out hover:bg-white/[0.08] hover:text-white focus-visible:ring-2 focus-visible:ring-um-gold-300"
+          href={clearHref}
         >
-          Search
-        </button>
-      </form>
-      <p id="marketplace-search-hint" className="mt-2.5 text-xs text-white/40 sm:text-[0.8rem]">
-        Search listing titles, descriptions, and categories
-      </p>
-    </div>
+          <X aria-hidden="true" className="size-[1.125rem]" strokeWidth={1.9} />
+        </Link>
+      ) : null}
+      <button
+        aria-label="Search listings"
+        className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-[0.65rem] bg-um-gold-300 px-3.5 text-sm font-bold text-um-ink-950 transition duration-160 ease-um-out hover:bg-um-gold-200 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:h-[3.25rem] sm:px-5"
+        type="submit"
+      >
+        <span className="hidden sm:inline">Search</span>
+        <ArrowRight aria-hidden="true" className="size-4" strokeWidth={2.1} />
+        <span className="sr-only sm:hidden">Search</span>
+      </button>
+    </form>
   );
 }

@@ -35,7 +35,6 @@ export default async function EditListingPage({ params }: EditListingPageProps) 
     <ListingComposer
       categories={options.categories}
       initial={listing}
-      pickupAreas={options.pickupAreas}
       sellerName={viewer.profile.full_name ?? 'Waterloo student'}
     />
   );

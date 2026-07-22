@@ -23,7 +23,9 @@ const draft = {
   categoryId: 7,
   condition: 'good' as const,
   openToOffers: true,
-  pickupArea: 'Waterloo Campus',
+  pickupArea: '200 University Ave W',
+  pickupLatitude: 43.471468,
+  pickupLongitude: -80.544205,
 };
 
 const saveDraftArgs = {
@@ -35,6 +37,8 @@ const saveDraftArgs = {
   p_condition: draft.condition,
   p_open_to_offers: draft.openToOffers,
   p_pickup_area: draft.pickupArea,
+  p_pickup_latitude: draft.pickupLatitude,
+  p_pickup_longitude: draft.pickupLongitude,
 };
 
 describe('browser listing persistence', () => {

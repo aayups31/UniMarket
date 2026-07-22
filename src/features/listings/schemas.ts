@@ -7,7 +7,7 @@ export const LISTING_IMAGE_MAX_COUNT = 6;
 
 export const listingConditionSchema = z.enum(['new', 'like_new', 'good', 'fair', 'well_used']);
 
-export const listingDraftSchema = z.object({
+const listingDraftBaseSchema = z.object({
   listingId: z.uuid().nullable().optional(),
   title: z.string().trim().max(LISTING_TITLE_MAX),
   description: z.string().trim().max(LISTING_DESCRIPTION_MAX),
@@ -16,9 +16,21 @@ export const listingDraftSchema = z.object({
   condition: listingConditionSchema.nullable(),
   openToOffers: z.boolean(),
   pickupArea: z.string().trim().max(120),
+  pickupLatitude: z.number().min(-90).max(90).nullable(),
+  pickupLongitude: z.number().min(-180).max(180).nullable(),
 });
 
-export const listingPublishSchema = listingDraftSchema.extend({
+export const listingDraftSchema = listingDraftBaseSchema.superRefine((listing, context) => {
+  if ((listing.pickupLatitude === null) !== (listing.pickupLongitude === null)) {
+    context.addIssue({
+      code: 'custom',
+      message: 'Pickup coordinates must be provided as a complete pair.',
+      path: ['pickupLatitude'],
+    });
+  }
+});
+
+export const listingPublishSchema = listingDraftBaseSchema.extend({
   listingId: z.uuid(),
   title: z
     .string()
@@ -37,7 +49,7 @@ export const listingPublishSchema = listingDraftSchema.extend({
     .max(100_000_000),
   categoryId: z.number({ error: 'Choose the category that fits best.' }).int().positive(),
   condition: listingConditionSchema,
-  pickupArea: z.string().trim().min(2, 'Choose a broad Waterloo pickup area.').max(120),
+  pickupArea: z.string().trim().min(5, 'Add the exact pickup address.').max(120),
 });
 
 export const imageRegistrationSchema = z.object({

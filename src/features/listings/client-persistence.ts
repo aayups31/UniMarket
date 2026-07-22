@@ -69,6 +69,8 @@ export async function saveListingDraftInBrowser(
     p_condition: parsed.data.condition,
     p_open_to_offers: parsed.data.openToOffers,
     p_pickup_area: parsed.data.pickupArea,
+    p_pickup_latitude: parsed.data.pickupLatitude,
+    p_pickup_longitude: parsed.data.pickupLongitude,
   });
 
   if (error || !data) {

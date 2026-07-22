@@ -4,7 +4,6 @@ import Image from 'next/image';
 import { ImageIcon } from 'lucide-react';
 import { useState } from 'react';
 
-import { CampusRouteGraphic } from '@/components/ui/CampusRouteGraphic';
 import type { MarketplaceImage, MarketplaceListing } from '../types';
 
 export function ListingGallery({ listing }: { listing: MarketplaceListing }) {
@@ -20,7 +19,7 @@ export function ListingGallery({ listing }: { listing: MarketplaceListing }) {
 
   return (
     <section aria-label="Listing photos">
-      <div className="relative aspect-[4/3] overflow-hidden rounded-[1.2rem] bg-um-surface-warm shadow-[0_16px_42px_rgba(5,7,11,0.11)] lg:aspect-[7/5]">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-[1.35rem] border border-white/[0.08] bg-[#111923] shadow-[0_30px_90px_rgba(0,0,0,0.28)] lg:aspect-[7/5]">
         {selectedImage ? (
           <Image
             alt={`${listing.title}, photo ${selectedPosition} of ${availableImages.length}`}
@@ -31,19 +30,18 @@ export function ListingGallery({ listing }: { listing: MarketplaceListing }) {
             src={selectedImage.url}
           />
         ) : (
-          <div className="relative isolate grid h-full place-items-center overflow-hidden bg-um-ink-900 px-8 text-center">
-            <CampusRouteGraphic className="absolute inset-0 -z-10 opacity-[0.45]" />
+          <div className="relative isolate grid h-full place-items-center overflow-hidden bg-[radial-gradient(circle_at_50%_35%,rgba(231,188,53,0.09),transparent_18rem),#111923] px-8 text-center">
             <div className="relative">
-              <span className="mx-auto grid size-14 place-items-center rounded-full bg-white/[0.08] text-white/58 ring-1 ring-white/10">
+              <span className="mx-auto grid size-14 place-items-center rounded-full bg-white/[0.055] text-white/48 ring-1 ring-white/[0.08]">
                 <ImageIcon aria-hidden="true" className="size-6" />
               </span>
-              <p className="mt-3 text-sm font-medium text-white/58">Photo unavailable</p>
+              <p className="mt-3 text-sm font-medium text-white/48">Photo unavailable</p>
             </div>
           </div>
         )}
 
         {availableImages.length > 1 ? (
-          <span className="absolute bottom-3 right-3 rounded-full bg-um-ink-950/84 px-3 py-1.5 text-xs font-bold tabular-nums text-white shadow-um-xs backdrop-blur-sm">
+          <span className="absolute bottom-3 right-3 rounded-full border border-white/[0.1] bg-um-ink-950/76 px-3 py-1.5 text-xs font-bold tabular-nums text-white shadow-um-xs backdrop-blur-md">
             {selectedPosition} / {availableImages.length}
           </span>
         ) : null}
@@ -62,9 +60,9 @@ export function ListingGallery({ listing }: { listing: MarketplaceListing }) {
               <button
                 aria-label={`Show photo ${index + 1} of ${availableImages.length}`}
                 aria-pressed={isSelected}
-                className={`relative aspect-[4/3] h-16 shrink-0 overflow-hidden rounded-[0.7rem] bg-um-surface-warm transition duration-160 ease-um-out hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-um-ink-950 focus-visible:ring-offset-2 sm:h-[4.5rem] ${
+                className={`relative aspect-[4/3] h-16 shrink-0 overflow-hidden rounded-[0.7rem] bg-[#111923] transition duration-160 ease-um-out hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-um-gold-400 focus-visible:ring-offset-2 focus-visible:ring-offset-um-ink-950 sm:h-[4.5rem] ${
                   isSelected
-                    ? 'ring-2 ring-um-gold-500 ring-offset-2'
+                    ? 'ring-2 ring-um-gold-400 ring-offset-2 ring-offset-um-ink-950'
                     : 'opacity-[0.68] hover:opacity-100'
                 }`}
                 key={image.id}

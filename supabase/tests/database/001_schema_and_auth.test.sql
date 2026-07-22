@@ -10,7 +10,12 @@ select has_table('public', 'listings', 'listings table exists');
 select has_table('public', 'listing_images', 'listing_images table exists');
 select has_table('public', 'moderation_events', 'moderation_events table exists');
 select has_view('public', 'seller_profiles', 'seller_profiles view exists');
-select has_function('public', 'get_listing_contact_email', array['uuid'], 'explicit seller contact RPC exists');
+select hasnt_function(
+  'public',
+  'get_listing_contact_email',
+  array['uuid'],
+  'seller email contact RPC is removed in favor of private messaging'
+);
 
 select is(
   (select count(*)::integer from public.categories where is_active),

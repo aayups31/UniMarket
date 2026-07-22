@@ -1,44 +1,45 @@
+const pulse = 'animate-pulse motion-reduce:animate-none';
+
 export function MarketplaceSkeleton() {
   return (
-    <div className="min-h-screen bg-um-canvas" aria-label="Loading marketplace" aria-busy="true">
-      <div className="bg-um-ink-950 text-white">
-        <div className="mx-auto grid max-w-um-content gap-12 px-4 pb-12 pt-12 sm:px-6 lg:grid-cols-[minmax(0,1.42fr)_minmax(18rem,0.58fr)] lg:px-8 lg:pb-14 lg:pt-16">
-          <div>
-            <div className="h-3 w-44 animate-pulse rounded-full bg-um-gold-400/30" />
-            <div className="mt-7 h-14 w-[31rem] max-w-full animate-pulse rounded bg-white/10 sm:h-20" />
-            <div className="mt-3 h-12 w-[42rem] max-w-full animate-pulse rounded bg-white/[0.055] sm:h-16" />
-            <div className="mt-7 h-4 w-[30rem] max-w-full animate-pulse rounded bg-white/[0.055]" />
-            <div className="mt-10 h-[4.75rem] w-full max-w-[50rem] animate-pulse rounded-[1rem] bg-white/[0.075] ring-1 ring-white/10" />
-          </div>
-          <div className="hidden self-end border-l border-white/10 pl-7 lg:block">
-            <div className="h-3 w-36 animate-pulse rounded bg-um-gold-400/25" />
-            <div className="mt-5 h-16 w-52 animate-pulse rounded bg-white/[0.07]" />
-            <div className="mt-4 h-10 w-56 animate-pulse rounded bg-white/[0.04]" />
-          </div>
+    <div aria-busy="true" aria-label="Loading marketplace" className="min-h-screen bg-um-canvas">
+      <div className="border-b border-white/[0.08] bg-um-ink-950">
+        <div className="mx-auto max-w-um-content px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-[4.75rem]">
+          <div className={`h-2.5 w-36 rounded-full bg-um-gold-300/25 ${pulse}`} />
+          <div
+            className={`mt-6 h-14 w-[34rem] max-w-full rounded bg-white/[0.09] sm:h-20 ${pulse}`}
+          />
+          <div className={`mt-3 h-12 w-[28rem] max-w-full rounded bg-white/[0.05] ${pulse}`} />
+          <div
+            className={`mt-9 h-[4.25rem] w-full max-w-[47rem] rounded-[0.9rem] border border-white/[0.08] bg-white/[0.05] ${pulse}`}
+          />
         </div>
-        <div className="h-10 animate-pulse border-t border-white/[0.07] bg-white/[0.025]" />
       </div>
 
-      <div className="mx-auto max-w-um-content px-4 pb-20 pt-14 sm:px-6 sm:pt-16 lg:px-8 lg:pt-20">
-        <div className="h-3 w-36 animate-pulse rounded bg-um-gold-600/18" />
-        <div className="mt-3 h-8 w-72 max-w-full animate-pulse rounded bg-black/[0.08]" />
-        <div className="mt-8 grid auto-rows-[9.5rem] grid-cols-2 gap-3 lg:grid-cols-12 lg:gap-4">
-          <div className="col-span-2 row-span-2 animate-pulse rounded-[1.15rem] bg-um-ink-900 lg:col-span-5" />
-          <div className="animate-pulse rounded-[1.15rem] bg-[#263b48] lg:col-span-4" />
-          <div className="animate-pulse rounded-[1.15rem] bg-[#d3c6ad] lg:col-span-3" />
-          <div className="animate-pulse rounded-[1.15rem] bg-[#39463f] lg:col-span-3" />
-          <div className="animate-pulse rounded-[1.15rem] bg-[#b98255] lg:col-span-4" />
+      <div className="mx-auto max-w-um-content px-4 pb-20 pt-7 sm:px-6 sm:pt-9 lg:px-8">
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-5 sm:gap-3">
+          {Array.from({ length: 5 }, (_, index) => (
+            <div
+              className={`min-h-[6.8rem] rounded-[0.9rem] border border-white/[0.07] bg-white/[0.055] sm:min-h-[8rem] ${pulse} ${
+                index === 0 ? 'col-span-2 sm:col-span-1' : ''
+              }`}
+              key={index}
+            />
+          ))}
         </div>
 
-        <div className="mt-20 h-3 w-28 animate-pulse rounded bg-um-gold-600/18" />
-        <div className="mt-3 h-10 w-56 animate-pulse rounded bg-black/[0.08]" />
-        <div className="mt-8 grid grid-cols-1 gap-x-4 gap-y-10 min-[480px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-5">
+        <div className="mt-10 border-b border-white/[0.08] pb-5 sm:mt-12">
+          <div className={`h-9 w-48 rounded bg-white/[0.07] ${pulse}`} />
+        </div>
+        <div className="mt-8 grid grid-cols-1 gap-x-3.5 gap-y-9 min-[500px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-4">
           {Array.from({ length: 8 }, (_, index) => (
             <div key={index}>
-              <div className="aspect-[5/4] animate-pulse rounded-[1.05rem] bg-black/[0.07]" />
-              <div className="mt-4 h-5 w-4/5 animate-pulse rounded bg-black/[0.08]" />
-              <div className="mt-3 h-5 w-20 animate-pulse rounded bg-black/[0.08]" />
-              <div className="mt-3 h-3 w-2/3 animate-pulse rounded bg-black/[0.05]" />
+              <div
+                className={`aspect-[4/3] rounded-[0.9rem] border border-white/[0.06] bg-white/[0.06] ${pulse}`}
+              />
+              <div className={`mt-4 h-3 w-20 rounded bg-white/[0.05] ${pulse}`} />
+              <div className={`mt-2.5 h-5 w-4/5 rounded bg-white/[0.08] ${pulse}`} />
+              <div className={`mt-3 h-3 w-2/3 rounded bg-white/[0.045] ${pulse}`} />
             </div>
           ))}
         </div>

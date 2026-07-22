@@ -70,8 +70,9 @@ For a published listing, register and upload a replacement before removing the o
 
 ## Security model
 
-- Profiles are private to their owner. `seller_profiles` exposes only a shortened display name and approved trust facts; seller email is available one listing at a time through an explicit authenticated contact action.
+- Profiles are private to their owner. `seller_profiles` exposes only a shortened display name and approved trust facts; seller email is never exposed for marketplace contact.
 - Students can manage only their own listings and images. Drafts remain owner-only.
+- Conversations and immutable messages are visible only to their buyer and seller. Participant identities are derived inside security-definer RPCs, and removed listings cannot receive new messages.
 - Moderators cannot create listings. `remove_listing` soft-removes a non-draft listing and appends an immutable moderation event.
 - `publish_listing` is the only supported transition into `published`; direct client updates are rejected by a trigger.
 - Secret/service credentials remain server-only. No key belongs in SQL, seeds, or client code.

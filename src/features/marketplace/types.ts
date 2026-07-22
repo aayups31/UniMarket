@@ -29,6 +29,8 @@ export type MarketplaceListing = {
   condition: string | null;
   openToOffers: boolean;
   pickupArea: string | null;
+  pickupLatitude?: number | null;
+  pickupLongitude?: number | null;
   featuredAt: string | null;
   publishedAt: string | null;
   createdAt: string;

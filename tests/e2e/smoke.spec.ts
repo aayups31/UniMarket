@@ -65,7 +65,8 @@ test('signup confirmation screen explains the one-time verification email', asyn
     page.getByRole('heading', { level: 1, name: 'Verify your Waterloo email' }),
   ).toBeVisible();
   await expect(page.getByText('student@uwaterloo.ca')).toBeVisible();
-  await expect(page.getByText(/sign in with your email and password/i)).toBeVisible();
+  await expect(page.getByText('Check the newest email we sent.')).toBeVisible();
+  await expect(page.getByText(/open it on this device, then come back and sign in/i)).toBeVisible();
   await expect(page.getByRole('link', { name: 'Change email' })).toHaveAttribute(
     'href',
     '/signup?next=%2Flistings%2Fnew',

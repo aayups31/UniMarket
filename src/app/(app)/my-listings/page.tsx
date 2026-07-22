@@ -4,20 +4,19 @@ import type { Metadata } from 'next';
 import {
   Archive,
   Armchair,
+  BadgeCheck,
   BookOpenText,
   FileEdit,
   ImageIcon,
   MonitorSmartphone,
   Plus,
   Radio,
-  BadgeCheck,
   Shapes,
   Shirt,
   Store,
   type LucideIcon,
 } from 'lucide-react';
 
-import { CampusRouteGraphic } from '@/components/ui/CampusRouteGraphic';
 import { ListingManagementActions } from '@/features/listings/components/ListingManagementActions';
 import { getManagedListings, type ManagedListing } from '@/features/listings/editor-queries';
 import { requireStudentSeller } from '@/lib/auth/session';
@@ -31,30 +30,10 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 const GROUPS = [
-  {
-    status: 'draft' as const,
-    label: 'Drafts',
-    description: 'Private works in progress. Only you can see these.',
-    icon: FileEdit,
-  },
-  {
-    status: 'published' as const,
-    label: 'Live on campus',
-    description: 'Listings visible to verified Waterloo students.',
-    icon: Radio,
-  },
-  {
-    status: 'sold' as const,
-    label: 'Sold',
-    description: 'Completed exchanges, kept here until you are ready to delete them.',
-    icon: BadgeCheck,
-  },
-  {
-    status: 'archived' as const,
-    label: 'Archived',
-    description: 'Listings you have taken off the marketplace.',
-    icon: Archive,
-  },
+  { status: 'draft' as const, label: 'Drafts', icon: FileEdit },
+  { status: 'published' as const, label: 'Live', icon: Radio },
+  { status: 'sold' as const, label: 'Sold', icon: BadgeCheck },
+  { status: 'archived' as const, label: 'Archived', icon: Archive },
 ];
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
@@ -76,68 +55,47 @@ export default async function MyListingsPage() {
   ) as Record<ManagedListing['status'], number>;
 
   return (
-    <div className="bg-um-canvas pb-24 lg:pb-28">
-      <header className="relative isolate overflow-hidden bg-um-ink-950 text-white">
-        <CampusRouteGraphic className="pointer-events-none absolute inset-y-0 right-0 hidden w-[48%] opacity-35 lg:block" />
-        <div className="relative mx-auto grid max-w-um-content gap-8 px-4 py-12 sm:px-6 sm:py-14 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:px-8 lg:py-16">
+    <div className="min-h-[calc(100vh-4.35rem)] bg-[#080c13] pb-24 text-um-text-strong lg:pb-28">
+      <header className="border-b border-white/[0.075] bg-[radial-gradient(circle_at_84%_12%,rgba(231,188,53,0.08),transparent_26rem)]">
+        <div className="mx-auto flex max-w-um-content flex-col gap-6 px-4 py-9 sm:flex-row sm:items-end sm:justify-between sm:px-6 sm:py-11 lg:px-8">
           <div>
-            <p className="font-condensed flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-um-gold-400">
-              <span aria-hidden="true" className="h-0.5 w-8 bg-um-gold-500" />
+            <p className="font-condensed text-[0.66rem] font-bold uppercase tracking-[0.19em] text-um-gold-300/78">
               Seller workspace
             </p>
-            <h1 className="mt-4 max-w-4xl text-[clamp(2.7rem,7vw,5.5rem)] font-bold leading-[0.92] tracking-[-0.06em] text-white">
+            <h1 className="mt-2 text-[clamp(2.55rem,5vw,4.35rem)] font-bold leading-[0.96] tracking-[-0.052em] text-[#f0ece4]">
               Your listings.
-              <span className="font-editorial ml-2 font-normal italic text-white/55">
-                All in one place.
-              </span>
             </h1>
-            <p className="mt-5 max-w-2xl text-sm leading-7 text-white/58 sm:text-base">
-              Continue a draft, keep a live listing accurate, or make space before the next term.
-            </p>
           </div>
 
           <Link
-            className="inline-flex min-h-12 w-fit shrink-0 items-center justify-center gap-2 rounded-um-sm bg-um-gold-400 px-5 text-sm font-bold text-um-ink-950 shadow-um-xs transition duration-160 ease-um-out hover:-translate-y-0.5 hover:bg-um-gold-300 hover:shadow-um-sm"
+            className="inline-flex min-h-11 w-fit shrink-0 items-center justify-center gap-2 rounded-full bg-um-gold-300 px-5 text-sm font-bold text-um-ink-950 shadow-[0_12px_32px_rgba(201,152,18,0.14)] transition-[background-color,box-shadow,transform] duration-220 ease-um-out hover:-translate-y-px hover:bg-um-gold-200 hover:shadow-[0_15px_38px_rgba(201,152,18,0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             href="/listings/new"
           >
-            <Plus aria-hidden="true" className="size-[1.1rem]" strokeWidth={2.1} />
-            Create listing
+            <Plus aria-hidden="true" className="size-4" strokeWidth={2.1} />
+            New listing
           </Link>
         </div>
       </header>
 
       <div className="mx-auto max-w-um-content px-4 sm:px-6 lg:px-8">
-        <section aria-label="Listing totals" className="grid grid-cols-3 border-b border-black/10">
-          {GROUPS.map((group, index) => {
-            const Icon = group.icon;
-            return (
-              <div
-                className={cn(
-                  'py-5 sm:flex sm:items-center sm:gap-3',
-                  index > 0 && 'border-l border-black/10 pl-4 sm:pl-6',
-                )}
-                key={group.status}
-              >
-                <span className="hidden size-9 shrink-0 place-items-center rounded-full bg-um-surface-warm text-um-text-muted sm:grid">
-                  <Icon aria-hidden="true" className="size-4" strokeWidth={1.8} />
-                </span>
-                <span>
-                  <strong className="block text-xl font-bold tabular-nums text-um-text-strong sm:text-2xl">
-                    {counts[group.status]}
-                  </strong>
-                  <span className="font-condensed mt-0.5 block text-[0.66rem] font-semibold uppercase tracking-[0.11em] text-um-text-muted sm:text-xs">
-                    {group.status === 'published' ? 'Live' : group.label}
-                  </span>
-                </span>
-              </div>
-            );
-          })}
+        <section
+          aria-label="Listing totals"
+          className="grid grid-cols-2 border-b border-white/[0.075] sm:grid-cols-4"
+        >
+          {GROUPS.map((group, index) => (
+            <StatusSummary
+              count={counts[group.status]}
+              group={group}
+              index={index}
+              key={group.status}
+            />
+          ))}
         </section>
 
         {listings.length === 0 ? (
           <EmptyListings />
         ) : (
-          <div className="space-y-16 pt-12 sm:pt-14 lg:space-y-20">
+          <div className="space-y-14 pt-10 sm:space-y-16 sm:pt-12 lg:space-y-20">
             {GROUPS.map((group) => {
               const groupListings = listings.filter((listing) => listing.status === group.status);
               if (groupListings.length === 0) return null;
@@ -145,35 +103,28 @@ export default async function MyListingsPage() {
               const Icon = group.icon;
               return (
                 <section aria-labelledby={`${group.status}-heading`} key={group.status}>
-                  <div className="mb-6 flex items-end justify-between gap-5">
-                    <div className="flex items-start gap-3">
-                      <span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-full bg-um-gold-300/[0.35] text-um-gold-700">
-                        <Icon aria-hidden="true" className="size-4" strokeWidth={1.8} />
-                      </span>
-                      <div>
-                        <h2
-                          className="text-2xl font-bold tracking-[-0.035em] text-um-text-strong"
-                          id={`${group.status}-heading`}
-                        >
-                          {group.label}
-                        </h2>
-                        <p className="mt-1 text-sm leading-6 text-um-text-muted">
-                          {group.description}
-                        </p>
-                      </div>
+                  <div className="mb-5 flex items-center justify-between gap-5 border-b border-white/[0.075] pb-4">
+                    <div className="flex items-center gap-2.5">
+                      <Icon
+                        aria-hidden="true"
+                        className="size-4 text-um-gold-300/76"
+                        strokeWidth={1.8}
+                      />
+                      <h2
+                        className="text-lg font-bold tracking-[-0.025em] text-[#f0ece4]"
+                        id={`${group.status}-heading`}
+                      >
+                        {group.label}
+                      </h2>
                     </div>
-                    <span className="font-condensed shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-um-text-muted">
-                      {groupListings.length} {groupListings.length === 1 ? 'item' : 'items'}
+                    <span className="font-mono text-[0.62rem] font-semibold tracking-[0.13em] text-white/32">
+                      {String(groupListings.length).padStart(2, '0')}
                     </span>
                   </div>
 
-                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-12">
-                    {groupListings.map((listing, index) => (
-                      <ManagedListingCard
-                        featured={index === 0}
-                        key={listing.id}
-                        listing={listing}
-                      />
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-5">
+                    {groupListings.map((listing) => (
+                      <ManagedListingCard key={listing.id} listing={listing} />
                     ))}
                   </div>
                 </section>
@@ -186,80 +137,105 @@ export default async function MyListingsPage() {
   );
 }
 
-function ManagedListingCard({ featured, listing }: { featured: boolean; listing: ManagedListing }) {
+function StatusSummary({
+  count,
+  group,
+  index,
+}: {
+  count: number;
+  group: (typeof GROUPS)[number];
+  index: number;
+}) {
+  const Icon = group.icon;
+  const content = (
+    <>
+      <Icon aria-hidden="true" className="size-4 text-white/28" strokeWidth={1.8} />
+      <span>
+        <strong className="block text-xl font-bold tabular-nums tracking-[-0.04em] text-[#f0ece4] sm:text-2xl">
+          {count}
+        </strong>
+        <span className="font-condensed mt-0.5 block text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-white/38">
+          {group.label}
+        </span>
+      </span>
+    </>
+  );
+  const className = cn(
+    'flex min-h-[5.3rem] items-center gap-3 py-4 transition-colors duration-220 ease-um-out sm:min-h-[5.75rem]',
+    index % 2 !== 0 && 'border-l border-white/[0.075] pl-4 sm:pl-6',
+    index > 1 && 'border-t border-white/[0.075] sm:border-t-0',
+    index === 2 && 'sm:border-l sm:pl-6',
+    count > 0 && 'hover:bg-white/[0.025]',
+  );
+
+  return count > 0 ? (
+    <a className={className} href={`#${group.status}-heading`}>
+      {content}
+    </a>
+  ) : (
+    <div className={className}>{content}</div>
+  );
+}
+
+function ManagedListingCard({ listing }: { listing: ManagedListing }) {
   const title = listing.title.trim() || 'Untitled draft';
   const CategoryIcon = listing.category
     ? (CATEGORY_ICONS[listing.category.slug] ?? Shapes)
     : Shapes;
 
   return (
-    <article
-      className={cn(
-        'group overflow-hidden rounded-um-md bg-um-surface shadow-um-xs ring-1 ring-black/[0.06] transition duration-220 ease-um-out hover:-translate-y-0.5 hover:shadow-um-sm',
-        featured ? 'xl:col-span-6' : 'xl:col-span-3',
-      )}
-    >
-      <div
-        className={cn(
-          'relative overflow-hidden bg-um-surface-warm',
-          featured ? 'aspect-[16/10]' : 'aspect-[4/3]',
-        )}
-      >
+    <article className="group min-w-0 overflow-hidden rounded-[1.05rem] border border-white/[0.075] bg-[#0d131d] shadow-[0_16px_42px_rgba(0,0,0,0.14)] transition-[border-color,box-shadow,transform] duration-220 ease-um-out hover:-translate-y-0.5 hover:border-white/[0.13] hover:shadow-[0_22px_54px_rgba(0,0,0,0.22)]">
+      <div className="relative aspect-[5/4] overflow-hidden bg-[#131b27]">
         {listing.coverUrl ? (
           <Image
             alt={`Cover for ${title}`}
-            className="object-cover transition duration-300 ease-um-out group-hover:scale-[1.015]"
+            className="object-cover transition-transform duration-500 ease-um-out group-hover:scale-[1.018]"
             fill
-            sizes="(min-width: 1280px) 30vw, (min-width: 768px) 46vw, 100vw"
+            sizes="(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 640px) 46vw, 100vw"
             src={listing.coverUrl}
             unoptimized
           />
         ) : (
-          <div className="grid h-full place-items-center text-um-text-muted/[0.45]">
-            <div className="text-center">
-              <ImageIcon aria-hidden="true" className="mx-auto size-8" strokeWidth={1.5} />
-              <p className="mt-2 text-xs font-medium">No cover photo yet</p>
-            </div>
+          <div className="grid h-full place-items-center text-white/24">
+            <ImageIcon aria-hidden="true" className="size-7" strokeWidth={1.4} />
           </div>
         )}
 
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/52 to-transparent"
+        />
         <span
           className={cn(
-            'font-condensed absolute left-3 top-3 rounded-full px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-[0.12em] shadow-um-xs',
+            'font-condensed absolute left-3 top-3 rounded-full px-2.5 py-1 text-[0.61rem] font-bold uppercase tracking-[0.13em] shadow-[0_4px_16px_rgba(0,0,0,0.16)] backdrop-blur-md',
             statusBadgeClassName(listing.status),
           )}
         >
-          {listing.status === 'published'
-            ? 'Live'
-            : listing.status === 'sold'
-              ? 'Sold'
-              : listing.status}
+          {listing.status === 'published' ? 'Live' : listing.status}
+        </span>
+        <span className="absolute bottom-3 left-3 flex max-w-[calc(100%_-_1.5rem)] items-center gap-1.5 font-condensed text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-white/72">
+          <CategoryIcon aria-hidden="true" className="size-3.5 shrink-0" strokeWidth={1.8} />
+          <span className="truncate">{listing.category?.name ?? 'Uncategorized'}</span>
         </span>
       </div>
 
-      <div className="p-5">
+      <div className="p-4 sm:p-5">
         <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <p className="flex items-center gap-1.5 truncate font-condensed text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-um-text-muted">
-              <CategoryIcon aria-hidden="true" className="size-3.5 shrink-0" strokeWidth={1.8} />
-              {listing.category?.name ?? 'Category not set'}
-            </p>
-            <h3 className="mt-2 line-clamp-2 text-lg font-bold leading-6 tracking-[-0.025em] text-um-text-strong">
-              {title}
-            </h3>
-          </div>
-          <p className="shrink-0 text-sm font-bold tabular-nums text-um-text-strong">
+          <h3 className="line-clamp-2 min-w-0 text-[1.02rem] font-bold leading-6 tracking-[-0.025em] text-[#f0ece4]">
+            {title}
+          </h3>
+          <p className="shrink-0 text-sm font-bold tabular-nums text-[#f0ece4]">
             {formatManagedPrice(listing.priceCents)}
           </p>
         </div>
 
-        <p className="mt-3 text-xs text-um-text-muted">
+        <p className="mt-2 font-mono text-[0.62rem] tracking-[0.04em] text-white/30">
           {listing.status === 'published' && listing.publishedAt
-            ? `Published ${formatDate(listing.publishedAt)}`
+            ? `Live ${formatDate(listing.publishedAt)}`
             : `Updated ${formatDate(listing.updatedAt)}`}
         </p>
 
-        <div className="mt-5 border-t border-black/[0.08] pt-4">
+        <div className="mt-4 border-t border-white/[0.075] pt-3">
           <ListingManagementActions listingId={listing.id} status={listing.status} />
         </div>
       </div>
@@ -269,28 +245,21 @@ function ManagedListingCard({ featured, listing }: { featured: boolean; listing:
 
 function EmptyListings() {
   return (
-    <section className="relative my-12 overflow-hidden rounded-um-lg bg-um-ink-900 px-6 py-16 text-white shadow-um-md sm:my-16 sm:px-10 sm:py-20 lg:px-14">
-      <CampusRouteGraphic className="pointer-events-none absolute inset-y-0 right-0 w-full opacity-25 sm:w-[62%]" />
-      <div className="relative max-w-xl">
-        <span className="grid size-12 place-items-center border border-white/10 bg-white/[0.06] text-um-gold-400">
-          <Store aria-hidden="true" className="size-5" strokeWidth={1.8} />
+    <section className="my-10 grid min-h-[24rem] place-items-center rounded-[1.25rem] border border-white/[0.075] bg-[#0d131d] px-6 py-14 text-center sm:my-12">
+      <div>
+        <span className="mx-auto grid size-11 place-items-center rounded-full bg-white/[0.045] text-um-gold-300 ring-1 ring-inset ring-white/[0.08]">
+          <Store aria-hidden="true" className="size-5" strokeWidth={1.7} />
         </span>
-        <p className="font-condensed mt-6 text-xs font-bold uppercase tracking-[0.16em] text-um-gold-400">
-          Your first listing
-        </p>
-        <h2 className="font-editorial mt-2 text-4xl tracking-[-0.035em] text-white sm:text-5xl">
-          Pass something on.
+        <h2 className="mt-5 text-2xl font-bold tracking-[-0.04em] text-[#f0ece4]">
+          Nothing listed yet.
         </h2>
-        <p className="mt-4 max-w-lg leading-7 text-white/58">
-          Start privately. Add a few clear photos, set a campus pickup area, and publish when it is
-          ready for another student.
-        </p>
+        <p className="mt-2 text-sm text-white/42">One clear photo is enough to begin.</p>
         <Link
-          className="mt-7 inline-flex min-h-12 items-center gap-2 rounded-um-sm bg-um-gold-400 px-5 text-sm font-bold text-um-ink-950 shadow-um-xs transition duration-160 ease-um-out hover:-translate-y-0.5 hover:bg-um-gold-300 hover:shadow-um-sm"
+          className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-full bg-um-gold-300 px-5 text-sm font-bold text-um-ink-950 transition-[background-color,transform] duration-220 ease-um-out hover:-translate-y-px hover:bg-um-gold-200"
           href="/listings/new"
         >
           <Plus aria-hidden="true" className="size-4" />
-          Create your first listing
+          New listing
         </Link>
       </div>
     </section>
@@ -298,14 +267,14 @@ function EmptyListings() {
 }
 
 function statusBadgeClassName(status: ManagedListing['status']) {
-  if (status === 'published') return 'bg-um-success text-white';
-  if (status === 'sold') return 'bg-um-gold-400 text-um-ink-950';
-  if (status === 'archived') return 'bg-um-ink-900 text-white';
-  return 'bg-um-gold-400 text-um-ink-950';
+  if (status === 'published') return 'bg-um-gold-300 text-um-ink-950';
+  if (status === 'sold') return 'bg-white/[0.88] text-um-ink-950';
+  if (status === 'archived') return 'bg-black/58 text-white/72 ring-1 ring-inset ring-white/10';
+  return 'bg-[#111923]/86 text-um-gold-200 ring-1 ring-inset ring-um-gold-300/20';
 }
 
 function formatManagedPrice(priceCents: number | null) {
-  if (priceCents === null) return 'Price not set';
+  if (priceCents === null) return '—';
   if (priceCents === 0) return 'Free';
   return new Intl.NumberFormat('en-CA', {
     style: 'currency',

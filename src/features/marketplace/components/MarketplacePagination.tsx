@@ -1,13 +1,14 @@
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
-import { marketplaceHref } from '../url';
+import { marketplaceHref, marketplaceScopedHref } from '../url';
 
 type MarketplacePaginationProps = {
   page: number;
   totalPages: number;
   query: string;
   category: string | null;
+  scopePath?: string;
 };
 
 export function MarketplacePagination({
@@ -15,40 +16,49 @@ export function MarketplacePagination({
   totalPages,
   query,
   category,
+  scopePath,
 }: MarketplacePaginationProps) {
   if (totalPages <= 1) return null;
 
   return (
     <nav
-      className="mt-10 flex items-center justify-between border-t border-black/[0.08] pt-6"
       aria-label="Marketplace pages"
+      className="mt-12 flex items-center justify-between border-t border-white/[0.08] pt-6"
     >
       {page > 1 ? (
         <Link
-          href={marketplaceHref({ query, category, page: page - 1 })}
-          className="inline-flex min-h-11 items-center gap-2 rounded-um-sm border border-black/10 bg-um-surface px-3.5 py-2.5 text-sm font-bold text-um-text-strong shadow-um-xs transition duration-160 ease-um-out hover:border-black/25 focus-visible:ring-2 focus-visible:ring-um-ink-950 focus-visible:ring-offset-2"
+          aria-label="Previous marketplace page"
+          className="grid size-11 place-items-center rounded-[0.65rem] border border-white/[0.1] text-white/68 transition duration-160 hover:border-white/25 hover:bg-white/[0.06] hover:text-white focus-visible:ring-2 focus-visible:ring-um-gold-300"
+          href={
+            scopePath
+              ? marketplaceScopedHref(scopePath, { query, page: page - 1 })
+              : marketplaceHref({ query, category, page: page - 1 })
+          }
         >
-          <ArrowLeft className="size-4" aria-hidden="true" />
-          Previous
+          <ArrowLeft aria-hidden="true" className="size-4" />
         </Link>
       ) : (
-        <span />
+        <span aria-hidden="true" className="size-11" />
       )}
 
-      <span className="text-xs font-medium tabular-nums text-um-text-muted">
-        Page {page} of {totalPages}
+      <span className="text-xs font-semibold tabular-nums tracking-[0.06em] text-white/48">
+        {page} / {totalPages}
       </span>
 
       {page < totalPages ? (
         <Link
-          href={marketplaceHref({ query, category, page: page + 1 })}
-          className="inline-flex min-h-11 items-center gap-2 rounded-um-sm border border-black/10 bg-um-surface px-3.5 py-2.5 text-sm font-bold text-um-text-strong shadow-um-xs transition duration-160 ease-um-out hover:border-black/25 focus-visible:ring-2 focus-visible:ring-um-ink-950 focus-visible:ring-offset-2"
+          aria-label="Next marketplace page"
+          className="grid size-11 place-items-center rounded-[0.65rem] border border-white/[0.1] text-white/68 transition duration-160 hover:border-white/25 hover:bg-white/[0.06] hover:text-white focus-visible:ring-2 focus-visible:ring-um-gold-300"
+          href={
+            scopePath
+              ? marketplaceScopedHref(scopePath, { query, page: page + 1 })
+              : marketplaceHref({ query, category, page: page + 1 })
+          }
         >
-          Next
-          <ArrowRight className="size-4" aria-hidden="true" />
+          <ArrowRight aria-hidden="true" className="size-4" />
         </Link>
       ) : (
-        <span />
+        <span aria-hidden="true" className="size-11" />
       )}
     </nav>
   );

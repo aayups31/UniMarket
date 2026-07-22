@@ -1,16 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import {
-  ArrowRight,
-  CircleCheckBig,
-  ClipboardList,
-  Eye,
-  Inbox,
-  LockKeyhole,
-  ShieldCheck,
-} from 'lucide-react';
+import { ArrowUpRight, ClipboardList, Eye, Inbox, ShieldCheck } from 'lucide-react';
 
-import { CampusRouteGraphic } from '@/components/ui/CampusRouteGraphic';
 import { ModerationAuditLog } from '@/features/moderation/components/ModerationAuditLog';
 import { getModerationWorkspace } from '@/features/moderation/queries';
 import { requireModerator } from '@/lib/auth/session';
@@ -34,155 +25,105 @@ export default async function ModerationPage({ searchParams }: ModerationPagePro
   const data = await getModerationWorkspace(page);
 
   return (
-    <div className="mx-auto max-w-um-content px-4 pb-24 pt-6 sm:px-6 sm:pt-9 lg:px-8 lg:pb-28 lg:pt-12">
-      <header className="relative isolate overflow-hidden rounded-um-lg bg-um-ink-950 text-white shadow-um-md">
-        <CampusRouteGraphic className="pointer-events-none absolute inset-0 opacity-[0.16]" />
-        <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-um-gold-400" />
-        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_21rem]">
-          <div className="px-6 pb-8 pt-9 sm:px-9 sm:pb-10 sm:pt-11 lg:px-11 lg:py-12">
-            <p className="font-condensed flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-um-gold-400">
-              <ShieldCheck aria-hidden="true" className="size-3.5" strokeWidth={2} />
-              Moderator workspace
+    <div className="min-h-[calc(100vh-4.35rem)] bg-[#080c13] pb-24 text-um-text-strong lg:pb-28">
+      <header className="border-b border-white/[0.075] bg-[radial-gradient(circle_at_84%_12%,rgba(231,188,53,0.075),transparent_26rem)]">
+        <div className="mx-auto flex max-w-um-content flex-col gap-6 px-4 py-9 sm:flex-row sm:items-end sm:justify-between sm:px-6 sm:py-11 lg:px-8">
+          <div>
+            <p className="font-condensed flex items-center gap-2 text-[0.66rem] font-bold uppercase tracking-[0.19em] text-um-gold-300/78">
+              <ShieldCheck aria-hidden="true" className="size-3.5" strokeWidth={1.9} />
+              Restricted workspace
             </p>
-            <h1 className="um-balanced mt-5 max-w-4xl text-[clamp(2.65rem,7vw,5.25rem)] font-bold leading-[0.92] tracking-[-0.06em] text-white">
-              Keep the marketplace useful.
-              <span className="mt-1 block text-white/48">Leave a clear record.</span>
+            <h1 className="mt-2 text-[clamp(2.55rem,5vw,4.35rem)] font-bold leading-[0.96] tracking-[-0.052em] text-[#f0ece4]">
+              Moderation.
             </h1>
-            <p className="mt-6 max-w-2xl text-sm leading-7 text-white/60 sm:text-base">
-              Review current listings in context. When removal is necessary, the database requires a
-              reason and writes an audit entry that cannot be edited or deleted.
+            <p className="mt-3 text-xs font-medium text-white/35">
+              Drafts stay private. Every removal stays recorded.
             </p>
-            <Link
-              className="mt-7 inline-flex min-h-11 items-center gap-2 rounded-um-sm bg-um-gold-400 px-5 text-sm font-bold text-um-ink-950 shadow-um-xs transition duration-160 ease-um-out hover:-translate-y-0.5 hover:bg-um-gold-300"
-              href="/marketplace"
-            >
-              Review current listings
-              <ArrowRight aria-hidden="true" className="size-4" />
-            </Link>
           </div>
 
-          <aside className="relative hidden overflow-hidden border-l border-white/10 bg-white/[0.025] p-8 text-um-text-inverse backdrop-blur-[1px] lg:flex lg:flex-col lg:justify-between">
-            <div>
-              <p className="font-condensed text-xs font-bold uppercase tracking-[0.17em] text-um-gold-400">
-                Enforcement boundary
-              </p>
-              <LockKeyhole
-                aria-hidden="true"
-                className="mt-6 size-11 text-um-gold-400"
-                strokeWidth={1.5}
-              />
-            </div>
-            <div className="space-y-4 text-sm leading-6 text-white/65">
-              <p className="flex items-start gap-2.5">
-                <CircleCheckBig
-                  aria-hidden="true"
-                  className="mt-1 size-4 shrink-0 text-um-gold-400"
-                  strokeWidth={2}
-                />
-                Private student drafts remain outside moderator view.
-              </p>
-              <p className="flex items-start gap-2.5">
-                <CircleCheckBig
-                  aria-hidden="true"
-                  className="mt-1 size-4 shrink-0 text-um-gold-400"
-                  strokeWidth={2}
-                />
-                Removal is limited to eligible non-draft listings.
-              </p>
-            </div>
-          </aside>
+          <Link
+            className="group inline-flex min-h-11 w-fit shrink-0 items-center justify-center gap-2 rounded-full bg-um-gold-300 px-5 text-sm font-bold text-um-ink-950 shadow-[0_12px_32px_rgba(201,152,18,0.14)] transition-[background-color,box-shadow,transform] duration-220 ease-um-out hover:-translate-y-px hover:bg-um-gold-200 hover:shadow-[0_15px_38px_rgba(201,152,18,0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            href="/marketplace"
+          >
+            Review listings
+            <ArrowUpRight
+              aria-hidden="true"
+              className="size-4 transition-transform duration-220 ease-um-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+            />
+          </Link>
         </div>
       </header>
 
-      <section aria-labelledby="moderation-overview-heading" className="mt-12 sm:mt-14">
-        <div className="mb-5">
-          <p className="font-condensed text-xs font-bold uppercase tracking-[0.16em] text-um-text-muted">
-            Live overview
-          </p>
-          <h2
-            className="mt-1.5 text-2xl font-bold tracking-[-0.04em] text-um-text-strong sm:text-3xl"
-            id="moderation-overview-heading"
-          >
-            What is available now
+      <div className="mx-auto max-w-um-content px-4 sm:px-6 lg:px-8">
+        <section aria-labelledby="moderation-overview-heading" className="pt-8 sm:pt-10">
+          <h2 className="sr-only" id="moderation-overview-heading">
+            Moderation overview
           </h2>
-        </div>
 
-        <div className="grid divide-y divide-black/10 border-y border-black/10 md:grid-cols-[1.2fr_1fr_1fr] md:divide-x md:divide-y-0">
-          <OverviewCard
-            description="Published inventory available for direct review."
-            icon={Eye}
-            label="Current listings"
-            value={data.currentListingCount.toLocaleString('en-CA')}
-          />
-          <OverviewCard
-            description="Immutable removal entries written by the database."
-            icon={ClipboardList}
-            label="Removal records"
-            value={data.totalEvents.toLocaleString('en-CA')}
-          />
-          <OverviewCard
-            description="Student report intake and a reports queue are not enabled."
-            icon={Inbox}
-            label="Report intake"
-            value="Not enabled"
-          />
-        </div>
-      </section>
+          <div className="grid overflow-hidden rounded-[1.05rem] border border-white/[0.075] bg-[#0d131d] sm:grid-cols-3 sm:divide-x sm:divide-white/[0.075]">
+            <OverviewCard
+              icon={Eye}
+              label="Published"
+              value={data.currentListingCount.toLocaleString('en-CA')}
+            />
+            <OverviewCard
+              icon={ClipboardList}
+              label="Removal records"
+              value={data.totalEvents.toLocaleString('en-CA')}
+            />
+            <OverviewCard icon={Inbox} label="Reports" value="Off" />
+          </div>
+        </section>
 
-      <section aria-labelledby="moderation-audit-heading" className="mt-14 sm:mt-16 lg:mt-20">
-        <div className="mb-6 border-b border-black/10 pb-6 sm:flex sm:items-end sm:justify-between sm:gap-8">
-          <div>
-            <p className="font-condensed text-xs font-bold uppercase tracking-[0.16em] text-um-gold-700">
-              Accountability
-            </p>
-            <h2
-              className="mt-1.5 text-2xl font-bold tracking-[-0.04em] text-um-text-strong sm:text-3xl"
-              id="moderation-audit-heading"
-            >
-              Removal audit
-            </h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-um-text-muted">
-              Listing titles and reasons are stored as snapshots, so the record remains useful even
-              if a listing or account is later deleted.
+        <section aria-labelledby="moderation-audit-heading" className="mt-12 sm:mt-14 lg:mt-16">
+          <div className="mb-5 flex flex-col gap-3 border-b border-white/[0.075] pb-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="font-condensed text-[0.64rem] font-bold uppercase tracking-[0.18em] text-um-gold-300/72">
+                Append-only
+              </p>
+              <h2
+                className="mt-1 text-2xl font-bold tracking-[-0.04em] text-[#f0ece4] sm:text-3xl"
+                id="moderation-audit-heading"
+              >
+                Removal audit
+              </h2>
+            </div>
+            <p className="font-mono text-[0.61rem] uppercase tracking-[0.12em] text-white/28">
+              Waterloo local time
             </p>
           </div>
-          <p className="mt-4 shrink-0 text-xs font-medium text-um-text-muted sm:mt-0">
-            Times shown in Waterloo local time
-          </p>
-        </div>
 
-        <ModerationAuditLog
-          currentModeratorId={viewer.id}
-          events={data.events}
-          page={data.page}
-          totalEvents={data.totalEvents}
-          totalPages={data.totalPages}
-        />
-      </section>
+          <ModerationAuditLog
+            currentModeratorId={viewer.id}
+            events={data.events}
+            page={data.page}
+            totalEvents={data.totalEvents}
+            totalPages={data.totalPages}
+          />
+        </section>
+      </div>
     </div>
   );
 }
 
 type OverviewCardProps = {
-  description: string;
   icon: typeof Eye;
   label: string;
   value: string;
 };
 
-function OverviewCard({ description, icon: Icon, label, value }: OverviewCardProps) {
+function OverviewCard({ icon: Icon, label, value }: OverviewCardProps) {
   return (
-    <article className="p-5 sm:p-6">
-      <div className="flex items-start justify-between gap-4">
-        <span className="grid size-10 shrink-0 place-items-center border-l-2 border-um-gold-500 bg-um-surface-warm text-um-text-muted">
-          <Icon aria-hidden="true" className="size-[1.15rem]" strokeWidth={1.8} />
+    <article className="flex min-h-[6.75rem] items-center justify-between gap-5 border-b border-white/[0.075] p-5 last:border-b-0 sm:border-b-0 sm:px-6">
+      <div className="flex items-center gap-3">
+        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-white/[0.045] text-white/42 ring-1 ring-inset ring-white/[0.07]">
+          <Icon aria-hidden="true" className="size-4" strokeWidth={1.8} />
         </span>
-        <strong className="text-right text-xl font-bold tabular-nums tracking-[-0.035em] text-um-text-strong">
-          {value}
-        </strong>
+        <h3 className="text-xs font-semibold text-white/48">{label}</h3>
       </div>
-      <h3 className="mt-5 text-sm font-bold text-um-text-strong">{label}</h3>
-      <p className="mt-1.5 text-xs leading-5 text-um-text-muted">{description}</p>
+      <strong className="text-xl font-bold tabular-nums tracking-[-0.035em] text-[#f0ece4]">
+        {value}
+      </strong>
     </article>
   );
 }

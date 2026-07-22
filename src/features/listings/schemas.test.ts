@@ -18,7 +18,9 @@ const validDraft = {
   categoryId: 1,
   condition: 'good' as const,
   openToOffers: true,
-  pickupArea: 'ICON',
+  pickupArea: '200 University Ave W',
+  pickupLatitude: 43.471468,
+  pickupLongitude: -80.544205,
 };
 
 describe('listing schemas', () => {
@@ -32,6 +34,8 @@ describe('listing schemas', () => {
         categoryId: null,
         condition: null,
         pickupArea: '',
+        pickupLatitude: null,
+        pickupLongitude: null,
       }).success,
     ).toBe(true);
   });
@@ -39,6 +43,26 @@ describe('listing schemas', () => {
   it('requires complete publish data', () => {
     expect(listingPublishSchema.safeParse(validDraft).success).toBe(true);
     expect(listingPublishSchema.safeParse({ ...validDraft, title: '' }).success).toBe(false);
+    expect(
+      listingPublishSchema.safeParse({
+        ...validDraft,
+        pickupLatitude: null,
+        pickupLongitude: null,
+      }).success,
+    ).toBe(true);
+  });
+
+  it('allows an unpinned draft but rejects a partial coordinate pair', () => {
+    expect(
+      listingDraftSchema.safeParse({
+        ...validDraft,
+        pickupLatitude: null,
+        pickupLongitude: null,
+      }).success,
+    ).toBe(true);
+    expect(listingDraftSchema.safeParse({ ...validDraft, pickupLongitude: null }).success).toBe(
+      false,
+    );
   });
 
   it('validates destructive and moderation action inputs', () => {

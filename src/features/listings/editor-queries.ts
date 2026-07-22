@@ -21,7 +21,6 @@ export type ListingEditorCategory = {
 
 export type ListingEditorOptions = {
   categories: ListingEditorCategory[];
-  pickupAreas: string[];
 };
 
 export type OwnedListingForEdit = {
@@ -33,6 +32,8 @@ export type OwnedListingForEdit = {
   condition: ListingCondition | null;
   openToOffers: boolean;
   pickupArea: string;
+  pickupLatitude: number | null;
+  pickupLongitude: number | null;
   status: 'draft' | 'published';
   images: Array<{
     id: string;
@@ -64,26 +65,18 @@ export class ListingEditorDataError extends Error {
 
 export const getListingEditorOptions = cache(async (): Promise<ListingEditorOptions> => {
   const supabase = await createClient();
-  const [categoriesResult, pickupAreasResult] = await Promise.all([
-    supabase
-      .from('categories')
-      .select('id,slug,name,icon')
-      .eq('is_active', true)
-      .order('sort_order', { ascending: true }),
-    supabase
-      .from('pickup_areas')
-      .select('name')
-      .eq('is_active', true)
-      .order('sort_order', { ascending: true }),
-  ]);
+  const categoriesResult = await supabase
+    .from('categories')
+    .select('id,slug,name,icon')
+    .eq('is_active', true)
+    .order('sort_order', { ascending: true });
 
-  if (categoriesResult.error || pickupAreasResult.error) {
+  if (categoriesResult.error) {
     throw new ListingEditorDataError();
   }
 
   return {
     categories: categoriesResult.data ?? [],
-    pickupAreas: (pickupAreasResult.data ?? []).map((area) => area.name),
   };
 });
 
@@ -95,7 +88,7 @@ export async function getOwnedListingForEdit(
   const { data: listing, error } = await supabase
     .from('listings')
     .select(
-      'id,title,description,price_cents,category_id,condition,open_to_offers,pickup_area,status',
+      'id,title,description,price_cents,category_id,condition,open_to_offers,pickup_area,pickup_latitude,pickup_longitude,status',
     )
     .eq('id', listingId)
     .eq('seller_id', sellerId)
@@ -133,6 +126,8 @@ export async function getOwnedListingForEdit(
     condition: listing.condition,
     openToOffers: listing.open_to_offers,
     pickupArea: listing.pickup_area,
+    pickupLatitude: listing.pickup_latitude,
+    pickupLongitude: listing.pickup_longitude,
     status: listing.status as 'draft' | 'published',
     images: rows.map((image, index) => ({
       id: image.id,

@@ -9,11 +9,9 @@ import {
   Armchair,
   BookOpenText,
   Check,
-  ChevronDown,
   Eye,
   ImageIcon,
   Loader2,
-  MapPin,
   MonitorSmartphone,
   Save,
   Shapes,
@@ -29,6 +27,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
 import { Textarea } from '@/components/ui/Textarea';
+import { WaterlooVerificationBadge } from '@/features/profiles/components/WaterlooVerificationBadge';
 import { cn } from '@/lib/utils';
 
 import { publishListingAction, saveListingDraftAction } from '../actions';
@@ -49,7 +48,6 @@ type CategoryOption = { id: number; slug: string; name: string; icon: string };
 type ListingComposerProps = {
   sellerName: string;
   categories: CategoryOption[];
-  pickupAreas: string[];
   initial?: {
     id: string;
     title: string;
@@ -59,6 +57,8 @@ type ListingComposerProps = {
     condition: ListingCondition | null;
     openToOffers: boolean;
     pickupArea: string;
+    pickupLatitude: number | null;
+    pickupLongitude: number | null;
     status: string;
     images: ComposerImage[];
   };
@@ -74,12 +74,12 @@ type FormValues = {
   pickupArea: string;
 };
 
-const CONDITIONS: Array<{ value: ListingCondition; label: string; detail: string }> = [
-  { value: 'new', label: 'New', detail: 'Unused and in original condition.' },
-  { value: 'like_new', label: 'Like New', detail: 'Barely used with almost no wear.' },
-  { value: 'good', label: 'Good', detail: 'Works well with normal signs of use.' },
-  { value: 'fair', label: 'Fair', detail: 'Functional with visible wear or small flaws.' },
-  { value: 'well_used', label: 'Well Used', detail: 'Heavily used, but still useful.' },
+const CONDITIONS: Array<{ value: ListingCondition; label: string }> = [
+  { value: 'new', label: 'New' },
+  { value: 'like_new', label: 'Like New' },
+  { value: 'good', label: 'Good' },
+  { value: 'fair', label: 'Fair' },
+  { value: 'well_used', label: 'Well Used' },
 ];
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
@@ -98,13 +98,10 @@ const STEPS = [
 ];
 
 const AUTOSAVE_DELAY_MS = 1600;
+const DARK_FIELD_CLASS =
+  'border-white/[0.14] !bg-[#111a26] !text-[#f7f4ee] caret-um-gold-300 placeholder:!text-white/42 focus:!bg-[#172231] focus:!text-white focus:border-um-gold-300 focus:ring-4 focus:ring-um-gold-400/[0.16]';
 
-export function ListingComposer({
-  sellerName,
-  categories,
-  pickupAreas,
-  initial,
-}: ListingComposerProps) {
+export function ListingComposer({ sellerName, categories, initial }: ListingComposerProps) {
   const router = useRouter();
   const isPublished = initial?.status === 'published';
   const [listingId, setListingId] = useState(initial?.id ?? null);
@@ -159,6 +156,10 @@ export function ListingComposer({
       condition: getValues('condition') || null,
       openToOffers: getValues('openToOffers'),
       pickupArea: getValues('pickupArea'),
+      // Map placement is paused. Always clear legacy pins so coordinates can
+      // never silently disagree with an edited pickup address.
+      pickupLatitude: null,
+      pickupLongitude: null,
     }),
     [getValues],
   );
@@ -490,11 +491,10 @@ export function ListingComposer({
           : 'Not saved yet';
 
   return (
-    <div className="relative overflow-hidden bg-um-ink-950 pb-44 text-um-text-inverse lg:pb-24">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-48 -top-64 size-[48rem] rounded-full bg-um-gold-400/[0.065] blur-[120px]"
-      />
+    <div className="relative bg-um-ink-950 pb-44 text-um-text-inverse lg:pb-24">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -right-48 -top-64 size-[48rem] rounded-full bg-um-gold-400/[0.065] blur-[120px]" />
+      </div>
       <header className="relative mx-auto max-w-um-content overflow-hidden px-5 pb-10 pt-10 text-um-text-inverse sm:px-8 sm:pb-12 sm:pt-14 lg:px-10 lg:pb-14 lg:pt-16">
         <GoldBands />
         <div className="relative z-10 max-w-3xl">
@@ -505,14 +505,9 @@ export function ListingComposer({
             <span aria-hidden="true" className="h-px w-8 bg-um-gold-600" />
             <p className="text-xs font-medium text-white/[0.55]">{saveState}</p>
           </div>
-          <h1 className="mt-4 text-[clamp(2.65rem,6vw,4.4rem)] font-bold leading-[1.02] tracking-[-0.026em] text-white">
+          <h1 className="mt-4 break-words pb-1 text-[clamp(2.65rem,6vw,4.4rem)] font-bold leading-[1.08] tracking-[-0.026em] text-white">
             {isPublished ? 'Keep it current.' : 'Pass it on.'}
           </h1>
-          <p className="mt-4 max-w-xl text-sm leading-6 text-white/[0.76] sm:text-base sm:leading-7">
-            {isPublished
-              ? 'Update the details students need, then save your changes.'
-              : 'Create a clear listing for another Waterloo student. Most take less than two minutes.'}
-          </p>
         </div>
       </header>
 
@@ -561,7 +556,6 @@ export function ListingComposer({
               eyebrow="Item details"
               number="02"
               title="Tell students what they need to know"
-              body="Specific listings earn confidence faster. Mention what is included and be direct about wear."
               id="details-heading"
             />
 
@@ -569,7 +563,6 @@ export function ListingComposer({
               <Field
                 counter={`${values.title.length}/${LISTING_TITLE_MAX}`}
                 error={errors.title?.message}
-                helper="Include the item type, brand, and one useful detail."
                 label="Title"
               >
                 <Input
@@ -579,9 +572,11 @@ export function ListingComposer({
                       message: `Use ${LISTING_TITLE_MAX} characters or fewer.`,
                     },
                   })}
-                  aria-describedby="title-help"
                   aria-invalid={Boolean(errors.title)}
-                  className="h-[3.25rem] rounded-um-sm border-white/[0.12] bg-um-ink-850 px-4 text-base text-um-text-strong shadow-um-xs placeholder:text-um-text-muted focus:border-um-gold-400 focus:ring-4 focus:ring-um-gold-500/[0.18]"
+                  className={cn(
+                    'h-[3.25rem] rounded-um-sm px-4 text-base shadow-um-xs',
+                    DARK_FIELD_CLASS,
+                  )}
                   id="title"
                   placeholder="Dell 24-inch monitor with stand"
                 />
@@ -590,7 +585,6 @@ export function ListingComposer({
               <Field
                 counter={`${values.description.length}/${LISTING_DESCRIPTION_MAX}`}
                 error={errors.description?.message}
-                helper="Mention what is included, how it works, and any defects."
                 label="Description"
               >
                 <Textarea
@@ -600,9 +594,11 @@ export function ListingComposer({
                       message: 'The description is too long.',
                     },
                   })}
-                  aria-describedby="description-help"
                   aria-invalid={Boolean(errors.description)}
-                  className="min-h-44 rounded-um-sm border-white/[0.12] bg-um-ink-850 px-4 py-4 text-base leading-7 text-um-text-strong shadow-um-xs placeholder:text-um-text-muted focus:border-um-gold-400 focus:ring-4 focus:ring-um-gold-500/[0.18]"
+                  className={cn(
+                    'min-h-44 rounded-um-sm px-4 py-4 text-base leading-7 shadow-um-xs',
+                    DARK_FIELD_CLASS,
+                  )}
                   id="description"
                   onInput={(event) => {
                     event.currentTarget.style.height = 'auto';
@@ -614,14 +610,11 @@ export function ListingComposer({
               </Field>
 
               <fieldset
-                aria-describedby={`categoryId-help${errors.categoryId ? ' categoryId-error' : ''}`}
+                aria-describedby={errors.categoryId ? 'categoryId-error' : undefined}
                 aria-invalid={Boolean(errors.categoryId)}
                 id="categoryId-group"
               >
                 <legend className="text-sm font-bold text-um-text-strong">Category</legend>
-                <p className="mt-1.5 text-sm text-um-text-muted" id="categoryId-help">
-                  Choose the closest fit.
-                </p>
                 <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
                   {categories.map((category) => {
                     const selected = values.categoryId === String(category.id);
@@ -638,7 +631,7 @@ export function ListingComposer({
                       >
                         <input
                           {...register('categoryId')}
-                          aria-describedby={`categoryId-help${errors.categoryId ? ' categoryId-error' : ''}`}
+                          aria-describedby={errors.categoryId ? 'categoryId-error' : undefined}
                           className="sr-only"
                           id={`categoryId-${category.id}`}
                           type="radio"
@@ -681,14 +674,11 @@ export function ListingComposer({
               </fieldset>
 
               <fieldset
-                aria-describedby={`condition-help${errors.condition ? ' condition-error' : ''}`}
+                aria-describedby={errors.condition ? 'condition-error' : undefined}
                 aria-invalid={Boolean(errors.condition)}
                 id="condition-group"
               >
                 <legend className="text-sm font-bold text-um-text-strong">Condition</legend>
-                <p className="mt-1.5 text-sm text-um-text-muted" id="condition-help">
-                  Choose the honest description a buyer would expect.
-                </p>
                 <div className="mt-4 grid grid-cols-2 overflow-hidden rounded-um-sm border border-white/[0.12] bg-um-ink-850 sm:grid-cols-5">
                   {CONDITIONS.map((condition) => {
                     const selected = values.condition === condition.value;
@@ -704,7 +694,7 @@ export function ListingComposer({
                       >
                         <input
                           {...register('condition')}
-                          aria-describedby={`condition-help${errors.condition ? ' condition-error' : ''}`}
+                          aria-describedby={errors.condition ? 'condition-error' : undefined}
                           className="sr-only"
                           id={`condition-${condition.value}`}
                           type="radio"
@@ -723,14 +713,6 @@ export function ListingComposer({
                     );
                   })}
                 </div>
-                <div
-                  aria-live="polite"
-                  className="min-h-[3.25rem] border-b border-white/[0.08] bg-um-ink-850 px-4 py-3 text-sm leading-6 text-um-text-muted"
-                >
-                  {selectedCondition
-                    ? `${selectedCondition.label} — ${selectedCondition.detail}`
-                    : 'Select the condition that sets an honest expectation.'}
-                </div>
                 {errors.condition ? (
                   <p className="mt-2 text-sm text-um-danger" id="condition-error" role="alert">
                     {errors.condition.message}
@@ -746,7 +728,6 @@ export function ListingComposer({
             id="pricing"
           >
             <SectionHeading
-              body="Set the price in Canadian dollars and choose a broad meetup area. Exact locations stay private."
               eyebrow="Price & pickup"
               id="pricing-heading"
               number="03"
@@ -754,11 +735,7 @@ export function ListingComposer({
             />
 
             <div className="mt-9 grid gap-8 sm:grid-cols-2">
-              <Field
-                error={errors.price?.message}
-                helper="Enter 0 if you are passing it on for free."
-                label="Price"
-              >
+              <Field error={errors.price?.message} helper="0 = free" label="Price">
                 <div className="relative">
                   <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-sm font-bold text-um-text-muted">
                     $
@@ -767,7 +744,10 @@ export function ListingComposer({
                     {...register('price')}
                     aria-describedby="price-help"
                     aria-invalid={Boolean(errors.price)}
-                    className="h-[3.25rem] rounded-um-sm border-white/[0.12] bg-um-ink-850 pl-8 pr-16 text-lg font-bold text-um-text-strong shadow-um-xs placeholder:text-um-text-muted focus:border-um-gold-400 focus:ring-4 focus:ring-um-gold-500/[0.18]"
+                    className={cn(
+                      'h-[3.25rem] rounded-um-sm pl-8 pr-16 text-lg font-bold shadow-um-xs',
+                      DARK_FIELD_CLASS,
+                    )}
                     id="price"
                     inputMode="decimal"
                     placeholder="120"
@@ -778,60 +758,50 @@ export function ListingComposer({
                 </div>
               </Field>
 
-              <Field
-                error={errors.pickupArea?.message}
-                helper="Share the exact meetup point privately after agreeing on the sale."
-                htmlFor="pickupArea"
-                label="Pickup area"
-              >
-                <div className="relative">
-                  <MapPin
-                    aria-hidden="true"
-                    className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-um-text-muted"
-                    strokeWidth={1.8}
-                  />
-                  <select
-                    {...register('pickupArea')}
-                    aria-describedby="pickupArea-help"
-                    aria-invalid={Boolean(errors.pickupArea)}
-                    className="flex h-[3.25rem] w-full appearance-none rounded-um-sm border border-white/[0.12] bg-um-ink-850 pl-11 pr-10 text-sm font-medium text-um-text-strong shadow-um-xs outline-none transition focus:border-um-gold-400 focus:ring-4 focus:ring-um-gold-500/[0.18]"
-                    id="pickupArea"
-                  >
-                    <option value="">Choose a broad area</option>
-                    {pickupAreas.map((area) => (
-                      <option key={area} value={area}>
-                        {area}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown
-                    aria-hidden="true"
-                    className="pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 text-um-text-muted"
-                  />
-                </div>
-              </Field>
-            </div>
-
-            <div className="mt-8 flex items-center justify-between gap-5 border-y border-white/[0.09] py-5">
               <div>
-                <Label className="text-um-text-strong" htmlFor="open-to-offers">
+                <Label
+                  className="mb-2.5 block font-bold text-um-text-strong"
+                  htmlFor="open-to-offers"
+                >
                   Open to offers
                 </Label>
-                <p className="mt-1.5 text-sm leading-6 text-um-text-muted">
-                  Let students know there is room to find a fair price.
-                </p>
+                <div className="flex h-[3.25rem] items-center justify-end rounded-um-sm border border-white/[0.14] bg-[#111a26] px-4 shadow-um-xs">
+                  <Switch.Root
+                    aria-label="Open to offers"
+                    checked={values.openToOffers}
+                    className="relative h-7 w-12 shrink-0 rounded-full bg-white/[0.16] transition-colors duration-160 ease-um-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-400 focus-visible:ring-offset-2 focus-visible:ring-offset-um-ink-900 data-[state=checked]:bg-um-gold-500"
+                    id="open-to-offers"
+                    onCheckedChange={(checked) =>
+                      setValue('openToOffers', checked, { shouldDirty: true })
+                    }
+                  >
+                    <Switch.Thumb className="block size-5 translate-x-1 rounded-full bg-white shadow transition-transform duration-160 ease-um-out data-[state=checked]:translate-x-6 data-[state=checked]:bg-um-ink-950" />
+                  </Switch.Root>
+                </div>
               </div>
-              <Switch.Root
-                aria-label="Open to offers"
-                checked={values.openToOffers}
-                className="relative h-11 w-12 shrink-0 rounded-full bg-transparent transition-colors duration-160 ease-um-out before:absolute before:inset-x-0 before:top-2 before:h-7 before:rounded-full before:bg-white/[0.16] before:transition-colors before:duration-160 before:ease-um-out focus-visible:ring-2 focus-visible:ring-um-gold-400 focus-visible:ring-offset-2 focus-visible:ring-offset-um-ink-900 data-[state=checked]:before:bg-um-gold-500"
-                id="open-to-offers"
-                onCheckedChange={(checked) =>
-                  setValue('openToOffers', checked, { shouldDirty: true })
-                }
-              >
-                <Switch.Thumb className="absolute left-0 top-3 block size-5 translate-x-1 rounded-full bg-white shadow transition-transform duration-160 ease-um-out data-[state=checked]:translate-x-6 data-[state=checked]:bg-um-gold-400" />
-              </Switch.Root>
+
+              <div className="sm:col-span-2">
+                <Field
+                  error={errors.pickupArea?.message}
+                  htmlFor="pickupArea"
+                  label="Pickup address"
+                >
+                  <div>
+                    <Input
+                      {...register('pickupArea')}
+                      aria-describedby={errors.pickupArea ? 'pickupArea-help' : undefined}
+                      aria-invalid={Boolean(errors.pickupArea)}
+                      autoComplete="street-address"
+                      className={cn(
+                        'h-[3.25rem] rounded-um-sm px-4 text-base shadow-um-xs',
+                        DARK_FIELD_CLASS,
+                      )}
+                      id="pickupArea"
+                      placeholder="200 University Ave W, Waterloo"
+                    />
+                  </div>
+                </Field>
+              </div>
             </div>
           </section>
 
@@ -852,10 +822,6 @@ export function ListingComposer({
                   <h2 className="mt-1.5 text-xl font-bold tracking-[-0.025em] text-white">
                     Listed for Waterloo.
                   </h2>
-                  <p className="mt-2 max-w-xl text-sm leading-6 text-white/60">
-                    Drafts stay private. Publishing makes this visible to verified Waterloo
-                    students.
-                  </p>
                 </div>
               </div>
 
@@ -914,7 +880,10 @@ export function ListingComposer({
           </section>
         </form>
 
-        <aside aria-label="Live listing preview" className="sticky top-32 hidden min-w-0 lg:block">
+        <aside
+          aria-label="Live listing preview"
+          className="hidden min-w-0 self-start lg:sticky lg:top-24 lg:block"
+        >
           <div className="mb-3 flex items-center justify-between gap-3">
             <p className="font-condensed text-xs font-bold uppercase tracking-[0.16em] text-um-gold-400">
               Live preview
@@ -929,9 +898,6 @@ export function ListingComposer({
             sellerName={sellerName}
             values={values}
           />
-          <p className="mt-3 text-xs leading-5 text-white/45">
-            This preview updates as you type. Your listing stays private until you publish.
-          </p>
         </aside>
       </div>
 
@@ -988,11 +954,8 @@ export function ListingComposer({
                       <Dialog.Title className="text-xl font-bold tracking-[-0.025em] text-white">
                         Buyer preview
                       </Dialog.Title>
-                      <Dialog.Description
-                        className="mt-1 text-sm leading-5 text-white/55"
-                        id="mobile-preview-description"
-                      >
-                        This updates live and stays private until you publish.
+                      <Dialog.Description className="sr-only" id="mobile-preview-description">
+                        Live listing preview
                       </Dialog.Description>
                     </div>
                     <Dialog.Close asChild>
@@ -1082,13 +1045,11 @@ function SectionHeading({
   eyebrow,
   number,
   title,
-  body,
   id,
 }: {
   eyebrow: string;
   number: string;
   title: string;
-  body: string;
   id: string;
 }) {
   return (
@@ -1100,10 +1061,12 @@ function SectionHeading({
         <p className="font-condensed text-xs font-bold uppercase tracking-[0.15em] text-um-gold-700">
           {eyebrow}
         </p>
-        <h2 className="mt-1.5 text-2xl font-bold tracking-[-0.035em] text-um-text-strong" id={id}>
+        <h2
+          className="mt-1.5 break-words pb-0.5 text-2xl font-bold leading-tight tracking-[-0.035em] text-um-text-strong"
+          id={id}
+        >
           {title}
         </h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-um-text-muted">{body}</p>
       </div>
     </div>
   );
@@ -1136,12 +1099,14 @@ function Field({
         ) : null}
       </div>
       {children}
-      <p
-        className={cn('mt-2 text-sm leading-5', error ? 'text-um-danger' : 'text-um-text-muted')}
-        id={`${id}-help`}
-      >
-        {error || helper}
-      </p>
+      {error || helper ? (
+        <p
+          className={cn('mt-2 text-sm leading-5', error ? 'text-um-danger' : 'text-um-text-muted')}
+          id={`${id}-help`}
+        >
+          {error || helper}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -1186,10 +1151,7 @@ function ListingPreviewCard({
             </div>
           </div>
         )}
-        <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-um-ink-950/90 px-2.5 py-1 text-[0.65rem] font-bold text-white shadow-um-xs backdrop-blur-sm">
-          <ShieldCheck aria-hidden="true" className="size-3 text-um-gold-400" />
-          Verified Waterloo seller
-        </span>
+        <WaterlooVerificationBadge className="absolute left-3 top-3 bg-um-ink-950/90 shadow-um-xs backdrop-blur-sm" />
       </div>
 
       <div className="p-5">
@@ -1197,7 +1159,7 @@ function ListingPreviewCard({
           {selectedCategory?.name || 'Category'}
         </p>
         <div className="mt-2 flex items-start justify-between gap-4">
-          <h3 className="min-w-0 text-base font-bold leading-6 tracking-[-0.02em] text-white">
+          <h3 className="min-w-0 break-words text-base font-bold leading-6 tracking-[-0.02em] text-white">
             {values.title || 'Your listing title'}
           </h3>
           <p className="shrink-0 text-base font-bold tabular-nums text-white">
@@ -1218,12 +1180,9 @@ function ListingPreviewCard({
         </div>
 
         <div className="mt-5 space-y-2.5 border-t border-white/[0.09] pt-4 text-sm text-white/55">
+          <p>{values.pickupArea || 'Pickup address'}</p>
           <p className="flex items-center gap-2">
-            <MapPin aria-hidden="true" className="size-4" strokeWidth={1.8} />
-            {values.pickupArea || 'Pickup area'}
-          </p>
-          <p className="flex items-center gap-2">
-            <ShieldCheck aria-hidden="true" className="size-4 text-um-gold-400" strokeWidth={1.8} />
+            <WaterlooVerificationBadge iconOnly size="xs" />
             {sellerName}
           </p>
         </div>
@@ -1262,6 +1221,8 @@ function draftFingerprint(payload: ListingDraftInput) {
     condition: payload.condition,
     openToOffers: payload.openToOffers,
     pickupArea: payload.pickupArea,
+    pickupLatitude: payload.pickupLatitude,
+    pickupLongitude: payload.pickupLongitude,
   });
 }
 
@@ -1271,7 +1232,12 @@ function applyFieldErrors(
 ) {
   if (!errors) return;
   for (const [field, message] of Object.entries(errors)) {
-    const formField = field === 'priceCents' ? 'price' : field;
+    const formField =
+      field === 'priceCents'
+        ? 'price'
+        : field === 'pickupLatitude' || field === 'pickupLongitude'
+          ? 'pickupArea'
+          : field;
     if (
       formField in
       {
@@ -1291,7 +1257,12 @@ function applyFieldErrors(
 
 function focusFirstIssue(field: PropertyKey | undefined) {
   if (typeof field !== 'string') return;
-  const formField = field === 'priceCents' ? 'price' : field;
+  const formField =
+    field === 'priceCents'
+      ? 'price'
+      : field === 'pickupLatitude' || field === 'pickupLongitude'
+        ? 'pickupArea'
+        : field;
   const isRadioGroup = formField === 'categoryId' || formField === 'condition';
   const control = isRadioGroup
     ? (document.querySelector<HTMLInputElement>(`input[name="${formField}"]:checked`) ??

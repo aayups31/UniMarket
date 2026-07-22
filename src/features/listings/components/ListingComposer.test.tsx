@@ -1,5 +1,6 @@
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ComponentProps } from 'react';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -53,7 +54,6 @@ vi.mock('./ImageUploader', async () => {
 import { ListingComposer } from './ListingComposer';
 
 const categories = [{ id: 7, slug: 'books', name: 'Books', icon: 'book' }];
-const pickupAreas = ['Waterloo Campus'];
 
 beforeAll(() => {
   vi.stubGlobal(
@@ -72,11 +72,31 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function renderComposer() {
+type ComposerInitial = NonNullable<ComponentProps<typeof ListingComposer>['initial']>;
+
+function renderComposer(initial?: Partial<ComposerInitial>) {
+  const hydratedInitial: ComposerInitial | undefined = initial
+    ? {
+        id: 'c67713b4-f2e5-4c4a-a647-e22a65134c80',
+        title: 'Desk lamp',
+        description: 'A bright desk lamp in excellent working condition.',
+        priceCents: 1200,
+        categoryId: 7,
+        condition: 'good',
+        openToOffers: false,
+        pickupArea: '200 University Ave W',
+        pickupLatitude: null,
+        pickupLongitude: null,
+        status: 'published',
+        images: [],
+        ...initial,
+      }
+    : undefined;
+
   return render(
     <ListingComposer
       categories={categories}
-      pickupAreas={pickupAreas}
+      initial={hydratedInitial}
       sellerName="A Waterloo student"
     />,
   );
@@ -103,6 +123,32 @@ describe('ListingComposer listing actions', () => {
     }));
   });
 
+  it('keeps listing fields legible without exposing map controls', () => {
+    renderComposer();
+
+    expect(screen.getByLabelText('Title')).toHaveClass('!bg-[#111a26]', '!text-[#f7f4ee]');
+    expect(screen.getByLabelText('Description')).toHaveClass('!bg-[#111a26]', '!text-[#f7f4ee]');
+    expect(screen.getByLabelText('Pickup address')).toHaveClass('!bg-[#111a26]', '!text-[#f7f4ee]');
+    expect(screen.queryByText('Place the pickup pin')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Use my location' })).not.toBeInTheDocument();
+  });
+
+  it('does not retain a hidden legacy pin when an older listing is saved', async () => {
+    const user = userEvent.setup();
+    renderComposer({
+      pickupArea: '200 University Ave W',
+      pickupLatitude: 43.471468,
+      pickupLongitude: -80.544205,
+    });
+
+    await user.click(screen.getAllByRole('button', { name: 'Save changes' })[0]);
+
+    await waitFor(() => expect(mocks.saveListingDraftAction).toHaveBeenCalledTimes(1));
+    expect(mocks.saveListingDraftAction).toHaveBeenCalledWith(
+      expect.objectContaining({ pickupLatitude: null, pickupLongitude: null }),
+    );
+  });
+
   it('saves a new draft and reuses the returned listing id on the next save', async () => {
     const user = userEvent.setup();
     renderComposer();
@@ -123,6 +169,8 @@ describe('ListingComposer listing actions', () => {
       condition: null,
       openToOffers: false,
       pickupArea: '',
+      pickupLatitude: null,
+      pickupLongitude: null,
     });
 
     await waitFor(() =>
@@ -150,7 +198,7 @@ describe('ListingComposer listing actions', () => {
     await user.type(screen.getByLabelText('Price'), '35');
     await user.click(screen.getByRole('radio', { name: 'Books' }));
     await user.click(screen.getByRole('radio', { name: 'Good' }));
-    await user.selectOptions(screen.getByLabelText('Pickup area'), 'Waterloo Campus');
+    await user.type(screen.getByLabelText('Pickup address'), '200 University Ave W');
 
     await user.click(screen.getAllByRole('button', { name: 'Publish listing' })[0]);
 
@@ -169,7 +217,9 @@ describe('ListingComposer listing actions', () => {
       categoryId: 7,
       condition: 'good',
       openToOffers: false,
-      pickupArea: 'Waterloo Campus',
+      pickupArea: '200 University Ave W',
+      pickupLatitude: null,
+      pickupLongitude: null,
     });
     expect(mocks.publishListingAction).toHaveBeenCalledWith({
       listingId: reservedId,
@@ -179,7 +229,9 @@ describe('ListingComposer listing actions', () => {
       categoryId: 7,
       condition: 'good',
       openToOffers: false,
-      pickupArea: 'Waterloo Campus',
+      pickupArea: '200 University Ave W',
+      pickupLatitude: null,
+      pickupLongitude: null,
     });
     expect(mocks.saveListingDraftAction.mock.invocationCallOrder[0]).toBeLessThan(
       mocks.publishListingAction.mock.invocationCallOrder[0],

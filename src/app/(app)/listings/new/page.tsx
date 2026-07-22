@@ -20,7 +20,6 @@ export default async function NewListingPage() {
   return (
     <ListingComposer
       categories={options.categories}
-      pickupAreas={options.pickupAreas}
       sellerName={viewer.profile.full_name ?? 'Waterloo student'}
     />
   );

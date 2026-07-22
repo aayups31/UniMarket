@@ -1,26 +1,31 @@
-import { MapPin, ShieldCheck } from 'lucide-react';
+import Link from 'next/link';
 
 import { BrandMark } from '@/components/BrandMark';
 import { SignOutButton } from '@/features/auth/components/sign-out-button';
-import { waterlooTheme } from '@/lib/university-theme';
+import { ProfileAvatar } from '@/features/profiles/components/ProfileAvatar';
+import { WaterlooVerificationBadge } from '@/features/profiles/components/WaterlooVerificationBadge';
+import { getProfileInitials } from '@/features/profiles/format';
 
 import {
   CreateListingNavigationButton,
+  MessagesNavigationButton,
   MobileTabBar,
   ProductNavigation,
+  SearchNavigationButton,
 } from './ProductNavigation';
 
 type ProductShellProps = {
+  avatarUrl: string | null;
   canSell: boolean;
   children: React.ReactNode;
   fullName: string | null;
   role: 'student' | 'moderator';
 };
 
-export function ProductShell({ canSell, children, fullName, role }: ProductShellProps) {
+export function ProductShell({ avatarUrl, canSell, children, fullName, role }: ProductShellProps) {
   const identityName =
     fullName?.trim() || (role === 'moderator' ? 'Moderator' : 'Waterloo student');
-  const initial = identityName.charAt(0).toLocaleUpperCase();
+  const initials = getProfileInitials(identityName) || 'UM';
 
   return (
     <div className="um-product-dark min-h-screen bg-um-canvas text-um-text-strong">
@@ -28,48 +33,58 @@ export function ProductShell({ canSell, children, fullName, role }: ProductShell
         Skip to content
       </a>
 
-      <header className="sticky top-0 z-40 bg-um-ink-950 text-white shadow-[0_1px_0_rgba(255,255,255,0.06)]">
-        <CampusStrip />
+      <header className="sticky top-0 z-40 border-b border-white/[0.075] bg-[#070a0f]/92 text-white shadow-[0_12px_36px_rgba(0,0,0,0.13)] backdrop-blur-xl">
+        <div className="mx-auto flex h-[4.35rem] max-w-um-shell items-center gap-2 px-4 sm:gap-3 sm:px-6 lg:px-8">
+          <BrandMark
+            className="shrink-0"
+            href="/marketplace"
+            label="UniMarket marketplace"
+            showCampusLabel={false}
+            tone="light"
+          />
 
-        <div className="border-b border-white/[0.07] bg-um-ink-950/[0.97] backdrop-blur-md">
-          <div className="mx-auto flex h-[4.25rem] max-w-um-shell items-center gap-4 px-4 sm:px-6 lg:px-8">
-            <BrandMark
-              className="shrink-0"
-              href="/marketplace"
-              label="UniMarket marketplace"
-              tone="light"
-            />
+          <span aria-hidden="true" className="mx-3 hidden h-5 w-px bg-white/[0.09] lg:block" />
 
-            <div className="ml-auto hidden lg:block">
-              <ProductNavigation canSell={canSell} isModerator={role === 'moderator'} />
-            </div>
+          <ProductNavigation canSell={canSell} isModerator={role === 'moderator'} />
 
+          <div className="ml-auto flex items-center gap-2">
+            <SearchNavigationButton />
+            {canSell ? <MessagesNavigationButton /> : null}
             {canSell ? <CreateListingNavigationButton /> : null}
 
-            <div className="hidden min-w-0 items-center gap-2.5 border-l border-white/10 pl-4 sm:flex">
-              <span
-                aria-hidden="true"
-                className="grid size-9 shrink-0 place-items-center rounded-full bg-white/[0.07] text-xs font-bold text-um-gold-400 ring-1 ring-white/10"
-              >
-                {initial}
+            <Link
+              aria-label={`Open profile for ${identityName}`}
+              className="ml-1 hidden min-w-0 items-center gap-2.5 rounded-full border-l border-white/[0.09] py-1 pl-3 pr-2 transition-colors duration-200 hover:bg-white/[0.045] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-300 lg:flex"
+              href="/profile"
+              title="Your profile"
+            >
+              <span className="relative shrink-0">
+                <ProfileAvatar
+                  avatarUrl={avatarUrl}
+                  className="size-8 text-[0.66rem] shadow-none"
+                  initials={initials}
+                  name={identityName}
+                />
+                {role === 'student' ? (
+                  <WaterlooVerificationBadge
+                    className="absolute -bottom-1 -right-1 bg-[#090d14] ring-1 ring-[#090d14]"
+                    iconOnly
+                    size="xs"
+                  />
+                ) : null}
               </span>
               <span className="hidden min-w-0 xl:block">
-                <span className="block max-w-40 truncate text-xs font-bold text-white">
+                <span className="block max-w-36 truncate text-xs font-bold text-white/88">
                   {identityName}
                 </span>
-                <span className="mt-0.5 flex items-center gap-1 text-[0.67rem] font-medium text-white/45">
-                  <ShieldCheck
-                    aria-hidden="true"
-                    className="size-3 text-um-gold-700"
-                    strokeWidth={2}
-                  />
-                  {role === 'moderator' ? 'Moderator' : 'Verified student'}
+                <span className="mt-0.5 block text-[0.64rem] font-medium text-white/38">
+                  {role === 'moderator' ? 'Moderator' : 'Student'}
                 </span>
               </span>
-            </div>
+            </Link>
 
             <SignOutButton
-              className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-um-sm px-3 text-sm font-semibold text-white/48 transition-colors duration-160 ease-um-out hover:bg-white/[0.07] hover:text-white"
+              className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-full px-3 text-xs font-semibold text-white/42 transition-colors duration-220 ease-um-out hover:bg-white/[0.055] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-300 max-[420px]:px-2 max-[420px]:text-[0px] max-[420px]:[&_svg]:size-[1.05rem]"
               label="Sign out"
             />
           </div>
@@ -81,28 +96,6 @@ export function ProductShell({ canSell, children, fullName, role }: ProductShell
       </main>
 
       <MobileTabBar canSell={canSell} isModerator={role === 'moderator'} />
-    </div>
-  );
-}
-
-function CampusStrip() {
-  return (
-    <div className="h-7 border-b border-white/[0.07] bg-um-ink-1000 text-um-text-inverse">
-      <div className="mx-auto flex h-full max-w-um-shell items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <p className="font-condensed flex min-w-0 items-center gap-1.5 truncate text-[0.66rem] font-semibold uppercase tracking-[0.13em] text-white/[0.72]">
-          <MapPin aria-hidden="true" className="size-3 shrink-0 text-um-gold-400" strokeWidth={2} />
-          <span>{waterlooTheme.shortName} campus</span>
-          <span aria-hidden="true" className="text-um-gold-500">
-            /
-          </span>
-          <span className="truncate">Independent student-built marketplace</span>
-        </p>
-
-        <p className="font-condensed hidden shrink-0 items-center gap-1.5 text-[0.66rem] font-semibold uppercase tracking-[0.13em] text-white/[0.72] sm:flex">
-          <ShieldCheck aria-hidden="true" className="size-3 text-um-gold-400" strokeWidth={2} />
-          {waterlooTheme.copy.verification}
-        </p>
-      </div>
     </div>
   );
 }
