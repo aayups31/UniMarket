@@ -48,7 +48,8 @@ export function Nav() {
         <div className="ml-auto flex items-center gap-2 md:ml-5">
           <Link
             className="hidden min-h-11 items-center rounded-full px-4 text-sm font-bold text-white/72 transition-colors hover:bg-white/[0.055] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-300 sm:inline-flex"
-            href="/login"
+            href="/marketplace"
+            prefetch={false}
           >
             Sign in
           </Link>

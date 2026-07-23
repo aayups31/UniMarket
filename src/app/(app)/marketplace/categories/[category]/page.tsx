@@ -50,8 +50,6 @@ export default async function MarketplaceCategoryPage({
   const canSell = viewer.profile.role === 'student';
   const scopePath = `/marketplace/categories/${encodeURIComponent(activeCategory.slug)}`;
   const isFiltered = Boolean(data.query);
-  const rangeStart = data.total === 0 ? 0 : (data.page - 1) * data.pageSize + 1;
-  const rangeEnd = Math.min(data.page * data.pageSize, data.total);
 
   return (
     <div className="min-h-screen bg-um-canvas text-um-text-strong">
@@ -95,11 +93,6 @@ export default async function MarketplaceCategoryPage({
             </div>
 
             <div className="flex shrink-0 items-center gap-3 text-xs font-medium text-white/48 sm:text-sm">
-              {data.total > 0 ? (
-                <span className="tabular-nums">
-                  {rangeStart}–{rangeEnd} of {data.total}
-                </span>
-              ) : null}
               {isFiltered ? (
                 <Link
                   className="inline-flex min-h-11 items-center gap-1.5 rounded-[0.6rem] px-2.5 text-white/62 transition duration-160 hover:bg-white/[0.07] hover:text-white focus-visible:ring-2 focus-visible:ring-um-gold-300"

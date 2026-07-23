@@ -1,6 +1,6 @@
 # UniMarket
 
-UniMarket is a private marketplace for verified University of Waterloo students. Students create an account with an exact `@uwaterloo.ca` address and password, verify the address once by email, then use email and password for normal sign-in. A separately provisioned moderator can remove inappropriate listings with an auditable reason.
+UniMarket is a private marketplace for verified University of Waterloo students. Students create an account with an exact `@uwaterloo.ca` address and password, verify the address once with a six-digit email code, then use email and password for normal sign-in. A separately provisioned moderator can remove inappropriate listings with an auditable reason.
 
 ## What is included
 
@@ -39,7 +39,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 SUPABASE_SECRET_KEY=sb_secret_your_server_only_key
 ```
 
-The Supabase URL and publishable key are required by the web app. `NEXT_PUBLIC_SITE_URL` fixes the origin used by email callbacks; it falls back to the current request origin when omitted. Keep the secret key server-only; never prefix it with `NEXT_PUBLIC_`, expose it in client code, or commit `.env.local`.
+The Supabase URL and publishable key are required by the web app. `NEXT_PUBLIC_SITE_URL` fixes the origin used by password-recovery callbacks; it falls back to the current request origin when omitted. Keep the secret key server-only; never prefix it with `NEXT_PUBLIC_`, expose it in client code, or commit `.env.local`.
 
 Start the application:
 
@@ -59,23 +59,21 @@ npx supabase link --project-ref YOUR_PROJECT_REF
 npx supabase db push
 ```
 
-Then review and push the Auth policy and local callback URLs:
+The checked-in local configuration enables the Waterloo signup hook, an eight-character password policy, six-digit signup codes that expire after 15 minutes, a 60-second resend interval, and exact local recovery callbacks. Signup codes use `{{ .Token }}` and never include a confirmation link, so email-security scanners cannot verify an account by opening a URL. After verification, normal access uses `signInWithPassword` and sends no email. Password recovery remains a separate short-lived PKCE link through `/auth/recovery-callback`.
 
-```sh
-npx supabase config push
-```
+Do not run `supabase config push` against the hosted project without first replacing every localhost URL and reviewing the rate limits in [`supabase/config.toml`](supabase/config.toml). The local two-emails-per-hour limit is intentionally conservative and is not a production setting.
 
-The checked-in configuration enables the Waterloo signup hook, an eight-character password policy, 15-minute email-action links, a 60-second resend interval, and exact local confirmation and recovery callbacks. It intentionally leaves Supabase's default email templates unchanged. Signup sends one confirmation link through `/auth/callback`; after verification, normal access uses `signInWithPassword` and sends no email. Password recovery uses `/auth/recovery-callback` and a short-lived PKCE session.
-
-Supabase's built-in sender is sufficient for owner/team MVP testing, but it only delivers to addresses belonging to members of the Supabase organization and is heavily rate-limited. This mode is not suitable for a wider Waterloo beta. Do not grant untrusted testers project access just so they can receive an email; configure custom SMTP before opening sign-in beyond the project team.
+For a public Waterloo beta, configure custom SMTP in the hosted Supabase project. Supabase's built-in sender is heavily restricted and is suitable only for owner/team testing.
 
 Before deploying, also:
 
-1. Set `NEXT_PUBLIC_SITE_URL` to the deployed origin.
-2. Replace the localhost Site URL and redirect URLs in [`supabase/config.toml`](supabase/config.toml) with the deployed origin and its exact `/auth/callback` and `/auth/recovery-callback` URLs, then push the reviewed change.
-3. Create the moderator email documented in the product specification through a trusted admin path. The private database allowlist assigns that account the moderator role; public signup remains Waterloo-only.
+1. Set `NEXT_PUBLIC_SITE_URL` to the canonical deployed origin.
+2. In **Supabase Dashboard → Authentication → Email Templates → Confirm signup**, set the subject to `Your UniMarket verification code` and paste [`supabase/templates/confirmation.html`](supabase/templates/confirmation.html). The hosted template must contain `{{ .Token }}` and no `{{ .ConfirmationURL }}`.
+3. In the hosted email Auth settings, keep **Confirm email** enabled and set the OTP length to `6`, expiry to `900` seconds, and minimum resend interval to `60` seconds.
+4. Keep only the canonical deployed recovery callback in the hosted redirect allowlist, plus localhost callbacks needed for development.
+5. Create the moderator email documented in the product specification through a trusted admin path. The private database allowlist assigns that account the moderator role; public signup remains Waterloo-only.
 
-Custom SMTP and branded email templates are deferred until production preparation; neither is required for team-only signup confirmation and password recovery.
+Deploy the OTP-capable app before changing the hosted confirmation template. Disable new signups during that short rollout window, change the template and hosted OTP settings, and wait out the previous hosted confirmation-link expiry so every already-issued link is dead. Then complete one end-to-end test and re-enable signups. Delete and recreate any test accounts that an email scanner previously auto-confirmed.
 
 See [`supabase/README.md`](supabase/README.md) for the full database, Storage, and security contract.
 
@@ -89,7 +87,7 @@ npm run supabase:reset
 npx supabase test db
 ```
 
-`supabase start` prints the local API, Studio, and captured-email URLs. Open captured signup-confirmation or password-recovery messages in Mailpit; password sign-in itself sends no email. Seeds provide reference categories and pickup areas, and test users should be created through the normal signup flow.
+`supabase start` prints the local API, Studio, and captured-email URLs. Open captured signup-code or password-recovery messages in Mailpit; password sign-in itself sends no email. Seeds provide reference categories and pickup areas, and test users should be created through the normal signup flow.
 
 ## Quality checks
 

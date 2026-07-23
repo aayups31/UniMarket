@@ -68,7 +68,8 @@ export function Hero() {
               </Link>
               <Link
                 className="inline-flex min-h-12 items-center justify-center rounded-full px-6 text-sm font-bold text-white/74 transition-colors hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-400"
-                href="/login"
+                href="/marketplace"
+                prefetch={false}
               >
                 Sign in
               </Link>

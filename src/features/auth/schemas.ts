@@ -51,6 +51,15 @@ export const resendSignupSchema = z.object({
   next: z.string().max(2_048).optional(),
 });
 
+export const verifySignupOtpSchema = z.object({
+  email: waterlooEmailSchema,
+  next: z.string().max(2_048).optional(),
+  token: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, 'Enter the six-digit code from your email.'),
+});
+
 export const passwordResetRequestSchema = z.object({
   email: authEmailSchema,
 });
@@ -70,3 +79,4 @@ export type PasswordResetRequestInput = z.infer<typeof passwordResetRequestSchem
 export type ResendSignupInput = z.infer<typeof resendSignupSchema>;
 export type SignupInput = z.infer<typeof signupSchema>;
 export type UpdatePasswordInput = z.infer<typeof updatePasswordSchema>;
+export type VerifySignupOtpInput = z.infer<typeof verifySignupOtpSchema>;

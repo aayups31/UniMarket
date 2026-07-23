@@ -2,9 +2,12 @@ import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-const mocks = vi.hoisted(() => ({ signupAction: vi.fn() }));
+const mocks = vi.hoisted(() => ({ resendSignupAction: vi.fn(), signupAction: vi.fn() }));
 
-vi.mock('../actions', () => ({ signupAction: mocks.signupAction }));
+vi.mock('../actions', () => ({
+  resendSignupAction: mocks.resendSignupAction,
+  signupAction: mocks.signupAction,
+}));
 
 import { SignupForm } from './signup-form';
 
@@ -41,6 +44,34 @@ describe('SignupForm', () => {
       'href',
       '/forgot-password',
     );
+    expect(
+      within(accountNotice).queryByRole('button', { name: 'Send new code' }),
+    ).not.toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('offers verification recovery when the signup response is interrupted', async () => {
+    mocks.signupAction.mockRejectedValue(new Error('connection lost'));
+    mocks.resendSignupAction.mockResolvedValue({
+      ok: true,
+      message: 'If verification is still pending, a new code has been requested.',
+    });
+    const user = userEvent.setup();
+
+    render(<SignupForm nextPath="/marketplace" />);
+    await user.type(screen.getByLabelText('Waterloo email'), 'student@uwaterloo.ca');
+    await user.type(screen.getByLabelText('Password', { exact: true }), 'Waterloo8');
+    await user.type(screen.getByLabelText('Confirm password'), 'Waterloo8');
+    await user.click(screen.getByRole('button', { name: 'Join UniMarket' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent("We couldn't confirm the result");
+    const resendButton = screen.getByRole('button', { name: 'Send new code' });
+    expect(resendButton).toBeVisible();
+
+    await user.click(resendButton);
+    expect(
+      await screen.findByText('If verification is still pending, a new code has been requested.'),
+    ).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Resend in 60s' })).toBeDisabled();
   });
 });

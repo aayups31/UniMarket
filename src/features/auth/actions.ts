@@ -7,6 +7,7 @@ import { buildAuthCallbackUrl } from '@/lib/auth/callback-url';
 import { isAllowedAuthEmail, normalizeEmail } from '@/lib/auth/email';
 import { getSafeNextPath } from '@/lib/auth/navigation';
 import { AUTH_NEXT_COOKIE, AUTH_NEXT_MAX_AGE_SECONDS } from '@/lib/auth/pending-sign-in';
+import { clearWebSessionActivity, markWebSessionActivity } from '@/lib/auth/web-session-cookies';
 import { createClient } from '@/lib/supabase/server';
 
 import {
@@ -15,11 +16,13 @@ import {
   resendSignupSchema,
   signupSchema,
   updatePasswordSchema,
+  verifySignupOtpSchema,
   type LoginInput,
   type PasswordResetRequestInput,
   type ResendSignupInput,
   type SignupInput,
   type UpdatePasswordInput,
+  type VerifySignupOtpInput,
 } from './schemas';
 
 export type AuthActionResult =
@@ -31,17 +34,41 @@ const existingAccountResult: AuthActionResult = {
   reason: 'account-exists',
 };
 
-function emailRequestErrorMessage(status?: number) {
-  if (status === 429) {
-    return 'Too many emails were requested. Wait a minute, then try again.';
+type AuthEmailError = {
+  code?: string;
+  status?: number;
+};
+
+function emailRequestErrorMessage(error?: AuthEmailError) {
+  if (error?.code === 'email_address_not_authorized') {
+    return 'Email delivery is not enabled for this address. Please contact UniMarket support.';
+  }
+
+  if (error?.code === 'over_email_send_rate_limit' || error?.status === 429) {
+    return 'Too many emails were requested. Wait a few minutes, then try once.';
+  }
+
+  if (error?.code === 'request_timeout') {
+    return 'The email request timed out. Please try again in a moment.';
   }
 
   return "We couldn't send the email right now. Please try again in a moment.";
 }
 
+function logEmailRequestError(
+  operation: 'password-recovery' | 'resend-verification' | 'signup',
+  error: AuthEmailError,
+) {
+  console.error('[auth-email] request failed', {
+    code: error.code ?? 'unknown',
+    operation,
+    status: error.status ?? null,
+  });
+}
+
 function loginErrorMessage(code?: string) {
   if (code === 'email_not_confirmed') {
-    return 'Verify your email before signing in. Use the confirmation email from signup.';
+    return 'Verify your email before signing in. Enter the six-digit code from signup.';
   }
 
   if (code === 'over_request_rate_limit') {
@@ -55,6 +82,14 @@ function passwordUpdateErrorMessage(code?: string) {
   if (code === 'same_password') return 'Choose a password you have not used for this account.';
   if (code === 'weak_password') return 'Use a stronger password and try again.';
   return "We couldn't update the password. Request a new recovery link and try again.";
+}
+
+function signupOtpErrorMessage(code?: string) {
+  if (code === 'over_request_rate_limit') {
+    return 'Too many code attempts. Wait a few minutes, then try again.';
+  }
+
+  return 'That code is invalid or expired. Request a new code and try again.';
 }
 
 async function getEmailRedirectTo(path: '/auth/callback' | '/auth/recovery-callback') {
@@ -118,6 +153,7 @@ export async function loginAction(input: LoginInput): Promise<AuthActionResult> 
     return { ok: false, message: "Your account couldn't be prepared. Please try again." };
   }
 
+  await markWebSessionActivity();
   const next = getSafeNextPath(parsed.data.next);
 
   if (profile.role === 'moderator' || profile.onboarding_completed_at) redirect(next);
@@ -135,11 +171,9 @@ export async function signupAction(input: SignupInput): Promise<AuthActionResult
   }
 
   const supabase = await createClient();
-  const emailRedirectTo = await getEmailRedirectTo('/auth/callback');
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
-    options: { emailRedirectTo },
   });
 
   if (error) {
@@ -151,7 +185,8 @@ export async function signupAction(input: SignupInput): Promise<AuthActionResult
       return { ok: false, message: 'Use a stronger password and try again.' };
     }
 
-    return { ok: false, message: emailRequestErrorMessage(error.status) };
+    logEmailRequestError('signup', error);
+    return { ok: false, message: emailRequestErrorMessage(error) };
   }
 
   // With email confirmations enabled, Supabase deliberately obscures whether a
@@ -181,17 +216,79 @@ export async function resendSignupAction(input: ResendSignupInput): Promise<Auth
   }
 
   const supabase = await createClient();
-  const emailRedirectTo = await getEmailRedirectTo('/auth/callback');
   const { error } = await supabase.auth.resend({
     email: parsed.data.email,
-    options: { emailRedirectTo },
     type: 'signup',
   });
 
-  if (error) return { ok: false, message: emailRequestErrorMessage(error.status) };
+  if (error) {
+    logEmailRequestError('resend-verification', error);
+    return { ok: false, message: emailRequestErrorMessage(error) };
+  }
 
   await rememberAuthDestination(parsed.data.next);
-  return { ok: true, message: 'A new verification email is on its way.' };
+  return {
+    ok: true,
+    message: 'If verification is still pending, a new code has been requested.',
+  };
+}
+
+export async function verifySignupOtpAction(
+  input: VerifySignupOtpInput,
+): Promise<AuthActionResult> {
+  const parsed = verifySignupOtpSchema.safeParse(input);
+
+  if (!parsed.success) {
+    return {
+      ok: false,
+      message: parsed.error.issues[0]?.message ?? 'Enter the six-digit code from your email.',
+    };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.verifyOtp({
+    email: parsed.data.email,
+    token: parsed.data.token,
+    type: 'email',
+  });
+
+  if (error || !data.user) {
+    return { ok: false, message: signupOtpErrorMessage(error?.code) };
+  }
+
+  const verifiedEmail = normalizeEmail(data.user.email ?? '');
+
+  if (
+    !data.user.email_confirmed_at ||
+    !isAllowedAuthEmail(verifiedEmail) ||
+    verifiedEmail !== parsed.data.email
+  ) {
+    await supabase.auth.signOut({ scope: 'local' });
+    return { ok: false, message: 'That code could not verify this Waterloo account.' };
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('email_verified')
+    .eq('id', data.user.id)
+    .maybeSingle();
+
+  if (profileError || !profile?.email_verified) {
+    await supabase.auth.signOut({ scope: 'local' });
+    return { ok: false, message: "Your account couldn't be prepared. Please try again." };
+  }
+
+  // OTP verification creates a temporary session. End it so normal access still
+  // requires the password selected during signup.
+  await supabase.auth.signOut({ scope: 'local' });
+
+  const cookieStore = await cookies();
+  cookieStore.delete(AUTH_NEXT_COOKIE);
+
+  const params = new URLSearchParams({ notice: 'email-verified' });
+  const next = getSafeNextPath(parsed.data.next);
+  if (next !== '/marketplace') params.set('next', next);
+  redirect(`/login?${params.toString()}`);
 }
 
 export async function requestPasswordResetAction(
@@ -207,7 +304,10 @@ export async function requestPasswordResetAction(
   const redirectTo = await getEmailRedirectTo('/auth/recovery-callback');
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, { redirectTo });
 
-  if (error) return { ok: false, message: emailRequestErrorMessage(error.status) };
+  if (error) {
+    logEmailRequestError('password-recovery', error);
+    return { ok: false, message: emailRequestErrorMessage(error) };
+  }
 
   return {
     ok: true,
@@ -237,12 +337,14 @@ export async function updatePasswordAction(input: UpdatePasswordInput): Promise<
 
   if (error) return { ok: false, message: passwordUpdateErrorMessage(error.code) };
 
+  await clearWebSessionActivity();
   await supabase.auth.signOut({ scope: 'local' });
   redirect('/login?notice=password-updated');
 }
 
 export async function signOutAction() {
   const supabase = await createClient();
+  await clearWebSessionActivity();
   await supabase.auth.signOut({ scope: 'local' });
   redirect('/login');
 }

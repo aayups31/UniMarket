@@ -68,7 +68,12 @@ enable_signup = true
 double_confirm_changes = true
 enable_confirmations = true
 max_frequency = "60s"
+otp_length = 6
 otp_expiry = 900
+
+[auth.email.template.confirmation]
+subject = "Your UniMarket verification code"
+content_path = "./supabase/templates/confirmation.html"
 
 [auth.mfa.totp]
 enroll_enabled = true

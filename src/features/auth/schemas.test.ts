@@ -5,6 +5,7 @@ import {
   passwordResetRequestSchema,
   signupSchema,
   updatePasswordSchema,
+  verifySignupOtpSchema,
 } from './schemas';
 
 const strongPassword = 'Waterloo8';
@@ -100,5 +101,22 @@ describe('password recovery schemas', () => {
         password: strongPassword,
       }).success,
     ).toBe(false);
+  });
+});
+
+describe('verifySignupOtpSchema', () => {
+  it('normalizes the email and accepts exactly six digits', () => {
+    expect(
+      verifySignupOtpSchema.parse({
+        email: ' Student@UWATERLOO.CA ',
+        token: ' 123456 ',
+      }),
+    ).toEqual({ email: 'student@uwaterloo.ca', token: '123456' });
+  });
+
+  it.each(['12345', '1234567', '12a456', ''])('rejects an invalid code: %s', (token) => {
+    expect(verifySignupOtpSchema.safeParse({ email: 'student@uwaterloo.ca', token }).success).toBe(
+      false,
+    );
   });
 });

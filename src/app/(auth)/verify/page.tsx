@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
-import { EmailVerificationStatus } from '@/features/auth/components/email-verification-status';
+import { EmailOtpVerification } from '@/features/auth/components/email-otp-verification';
 import { waterlooEmailSchema } from '@/features/auth/schemas';
 import { getSafeNextPath } from '@/lib/auth/navigation';
 
 export const metadata: Metadata = {
-  title: 'Check your email',
+  title: 'Enter your verification code',
   description: 'Verify your Waterloo email to continue to UniMarket.',
 };
 
@@ -33,18 +33,18 @@ export default async function VerifyPage({ searchParams }: VerifyPageProps) {
         aria-label="Verify your Waterloo email"
         className="text-[clamp(2.6rem,5.5vw,3.75rem)] font-bold leading-[1.02] tracking-[-0.028em] text-um-text-strong"
       >
-        Check your Waterloo
-        <span className="block text-um-gold-600">inbox.</span>
+        Verify your Waterloo
+        <span className="block text-um-gold-600">email.</span>
       </h1>
       <p className="mt-5 text-lg font-semibold tracking-[-0.02em] text-um-text">
-        Your campus is one click away.
+        Enter the code we sent you.
       </p>
       <p className="mt-3 text-sm leading-6 text-um-text">
-        We sent a one-time verification link to{' '}
+        A six-digit code is on its way to{' '}
         <span className="font-bold text-um-text-strong">{parsedEmail.data}</span>.
       </p>
 
-      <EmailVerificationStatus email={parsedEmail.data} nextPath={nextPath} />
+      <EmailOtpVerification email={parsedEmail.data} nextPath={nextPath} />
     </div>
   );
 }

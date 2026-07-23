@@ -12,6 +12,10 @@ test('landing page presents the real Waterloo-only product', async ({ page }) =>
   await expect(
     page.locator('#main-content').getByRole('link', { name: 'Join with Waterloo', exact: true }),
   ).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Sign in', exact: true }).first()).toHaveAttribute(
+    'href',
+    '/marketplace',
+  );
   await expect(page.getByText(/in-app escrow/i)).toHaveCount(0);
   await expect(page.getByText(/coming to your campus/i)).toHaveCount(0);
 });
@@ -58,15 +62,19 @@ test('signup is Waterloo-only and requires matching strong passwords', async ({ 
   await expect(page.getByText('Passwords do not match.')).toBeVisible();
 });
 
-test('signup confirmation screen explains the one-time verification email', async ({ page }) => {
+test('signup confirmation screen accepts a six-digit email code', async ({ page }) => {
   await page.goto('/verify?email=student%40uwaterloo.ca&next=%2Flistings%2Fnew');
 
   await expect(
     page.getByRole('heading', { level: 1, name: 'Verify your Waterloo email' }),
   ).toBeVisible();
   await expect(page.getByText('student@uwaterloo.ca')).toBeVisible();
-  await expect(page.getByText('Check the newest email we sent.')).toBeVisible();
-  await expect(page.getByText(/open it on this device, then come back and sign in/i)).toBeVisible();
+  await expect(page.getByLabel('Verification code')).toHaveAttribute(
+    'autocomplete',
+    'one-time-code',
+  );
+  await expect(page.getByText('Six digits · expires in 15 minutes')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Resend in 60s' })).toBeDisabled();
   await expect(page.getByRole('link', { name: 'Change email' })).toHaveAttribute(
     'href',
     '/signup?next=%2Flistings%2Fnew',

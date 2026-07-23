@@ -1,5 +1,12 @@
 const DEFAULT_AUTHENTICATED_PATH = '/marketplace';
-const ALLOWED_DESTINATIONS = ['/marketplace', '/listings', '/my-listings', '/moderation'];
+const ALLOWED_DESTINATIONS = [
+  '/marketplace',
+  '/listings',
+  '/messages',
+  '/moderation',
+  '/my-listings',
+  '/profile',
+];
 
 export function getSafeNextPath(value: string | null | undefined) {
   if (

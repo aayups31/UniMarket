@@ -3,7 +3,76 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions, pg_catalog;
 
-select plan(9);
+select plan(10);
+
+insert into auth.users (
+  id,
+  instance_id,
+  aud,
+  role,
+  email,
+  encrypted_password,
+  email_confirmed_at,
+  raw_app_meta_data,
+  raw_user_meta_data,
+  created_at,
+  updated_at,
+  confirmation_token,
+  email_change,
+  email_change_token_new,
+  recovery_token
+)
+values (
+  '65000000-0000-4000-8000-000000000005',
+  '00000000-0000-0000-0000-000000000000',
+  'authenticated',
+  'authenticated',
+  'no-map@uwaterloo.ca',
+  '',
+  now(),
+  '{"provider":"email","providers":["email"]}',
+  '{}',
+  now(),
+  now(),
+  '',
+  '',
+  '',
+  ''
+);
+
+update public.profiles
+set
+  full_name = 'No Map Seller',
+  program = 'Computer Science',
+  academic_year = '3',
+  residence_area = 'UWP',
+  onboarding_completed_at = now()
+where id = '65000000-0000-4000-8000-000000000005';
+
+insert into public.listings (
+  id,
+  seller_id,
+  title,
+  description,
+  price_cents,
+  category_id,
+  condition,
+  pickup_area,
+  pickup_latitude,
+  pickup_longitude
+)
+values (
+  '65100000-0000-4000-8000-000000000005',
+  '65000000-0000-4000-8000-000000000005',
+  'Address-only listing',
+  'A complete listing that deliberately has no map coordinates.',
+  2500,
+  (select id from public.categories where slug = 'books'),
+  'good',
+  '200 University Ave W, Waterloo',
+  null,
+  null
+);
 
 select has_column('public', 'listings', 'pickup_latitude', 'listings has pickup latitude');
 select has_column('public', 'listings', 'pickup_longitude', 'listings has pickup longitude');
@@ -58,6 +127,15 @@ select is(
   ),
   3,
   'pickup coordinate integrity constraints are installed'
+);
+
+select lives_ok(
+  $$
+    select private.assert_publishable_fields(listing)
+    from public.listings as listing
+    where listing.id = '65100000-0000-4000-8000-000000000005'
+  $$,
+  'a complete address-only listing is publishable while the map is paused'
 );
 
 select * from finish();

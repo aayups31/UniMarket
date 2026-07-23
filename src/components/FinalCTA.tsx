@@ -58,7 +58,8 @@ export function FinalCTA() {
               </Link>
               <Link
                 className="inline-flex min-h-12 items-center justify-center rounded-full border border-[#d9d2c6]/24 px-6 text-sm font-bold text-[#e8e3da] transition-colors hover:border-um-gold-300/60 hover:bg-um-gold-300/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-400"
-                href="/login"
+                href="/marketplace"
+                prefetch={false}
               >
                 Sign in
               </Link>

@@ -23,7 +23,6 @@ export function WaterlooVerificationBadge({
     <span
       aria-label="Verified University of Waterloo student"
       className={cn('inline-flex shrink-0 items-center rounded-full text-um-gold-200', className)}
-      title="Verified University of Waterloo student"
     >
       <span
         aria-hidden="true"

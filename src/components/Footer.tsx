@@ -11,7 +11,7 @@ const productLinks = [
 
 const accessLinks = [
   { href: '/signup', label: 'Create account' },
-  { href: '/login', label: 'Sign in' },
+  { href: '/marketplace', label: 'Sign in' },
   { href: '/forgot-password', label: 'Recover password' },
 ];
 
@@ -70,6 +70,7 @@ function FooterLinks({
             <Link
               className="inline-flex min-h-11 items-center rounded-sm text-[#c8c1b6]/62 transition-colors hover:text-um-gold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-400"
               href={link.href}
+              prefetch={link.label === 'Sign in' ? false : undefined}
             >
               {link.label}
             </Link>

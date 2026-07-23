@@ -182,7 +182,7 @@ function getRestrictionNotice(value: string | null | undefined) {
   if (value === 'selling-restricted') {
     return {
       title: 'Seller tools are unavailable for this account.',
-      message: 'Selling is reserved for verified student profiles.',
+      message: 'Selling is reserved for Waterloo student accounts.',
     };
   }
 

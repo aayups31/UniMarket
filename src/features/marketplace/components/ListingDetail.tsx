@@ -154,7 +154,7 @@ export function ListingDetail({
                     <MessageSellerButton listingId={listing.id} />
                   ) : (
                     <p className="rounded-[0.8rem] border border-white/[0.08] bg-white/[0.035] px-4 py-3 text-center text-xs leading-5 text-white/45">
-                      Seller messaging is for verified students.
+                      Seller messaging is for Waterloo student accounts.
                     </p>
                   )}
                 </div>
@@ -211,7 +211,7 @@ function SellerSummary({ listing }: { listing: MarketplaceListing }) {
         <p className="truncate text-sm font-bold text-white">{sellerName}</p>
         <p className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-white/42">
           <WaterlooVerificationBadge iconOnly size="xs" />
-          {sellerDetails || 'Verified Waterloo student'}
+          {sellerDetails || 'Waterloo student'}
         </p>
       </div>
     </>

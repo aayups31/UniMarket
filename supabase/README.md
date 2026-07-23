@@ -11,7 +11,7 @@ npm run supabase:start
 npm run supabase:reset
 ```
 
-Local API, Studio, and captured-email URLs are printed by `supabase start`. The local Auth configuration uses Supabase's default confirmation and recovery emails, requires email verification before password sign-in, and invokes `public.hook_restrict_signup` before creating a user.
+Local API, Studio, and captured-email URLs are printed by `supabase start`. The local Auth configuration sends a six-digit signup code, keeps password recovery link-based, requires email verification before password sign-in, and invokes `public.hook_restrict_signup` before creating a user.
 
 Reference categories and popular pickup areas are seeded automatically. Create test users through email/password signup; `seed.sql` intentionally does not write directly to Supabase's `auth` schema.
 
@@ -30,21 +30,19 @@ npx supabase link --project-ref YOUR_PROJECT_REF
 npx supabase db push
 ```
 
-Review and push the checked-in Auth policy and callback configuration:
+The checked-in configuration enables the before-user-created hook, an eight-character password policy requiring uppercase, lowercase, and a number, six-digit signup codes with a 900-second expiry, a 60-second resend interval, and exact localhost recovery callback URLs. The signup template renders `{{ .Token }}` only; it never renders `{{ .ConfirmationURL }}`, which prevents mail scanners from confirming accounts automatically. Password recovery returns through `/auth/recovery-callback`, while ordinary password sign-in sends no email.
 
-```sh
-npx supabase config push
-```
-
-The configuration push enables the before-user-created hook, an eight-character password policy requiring uppercase, lowercase, and a number, a 900-second email-action expiry, a 60-second resend interval, and exact localhost confirmation/recovery callback URLs. It deliberately leaves Supabase's default templates unchanged. Signup confirmation returns through `/auth/callback`; password recovery returns through `/auth/recovery-callback`. Both complete a PKCE exchange, while ordinary password sign-in sends no email.
-
-For the MVP, the hosted project can continue using Supabase's built-in email provider. That provider only sends to Supabase organization team-member addresses and has restrictive email limits, so it is appropriate for owner/team testing rather than an open student beta. Custom SMTP and branded templates are deferred until production preparation.
+Do not blindly run `npx supabase config push` against production: this repository contains localhost URLs and a conservative two-emails-per-hour local limit. Review every hosted value first. Configure custom SMTP before opening signup to a wider student beta; the built-in sender is intended only for restricted owner/team testing.
 
 Before deploying:
 
-1. Set `NEXT_PUBLIC_SITE_URL` to the deployed origin.
-2. Replace the localhost Site URL and exact allowed redirect URLs in `config.toml` with the deployed origin and its exact `/auth/callback` and `/auth/recovery-callback` URLs, then push the reviewed change.
-3. In **Authentication > Users**, create `aayupsuw@gmail.com` through a trusted admin path. That exact address is in the private administrative allowlist, and the profile trigger assigns it the `moderator` role. The migration never creates credentials or sends an invitation.
+1. Set `NEXT_PUBLIC_SITE_URL` to the canonical deployed origin.
+2. In **Authentication → Email Templates → Confirm signup**, set the subject to `Your UniMarket verification code` and paste `templates/confirmation.html`. Keep `{{ .Token }}` and remove every `{{ .ConfirmationURL }}`.
+3. In the hosted email Auth settings, keep email confirmation enabled and set OTP length to `6`, expiry to `900` seconds, and minimum resend interval to `60` seconds.
+4. Keep the deployed `/auth/recovery-callback` and required localhost recovery callbacks in the hosted redirect allowlist.
+5. In **Authentication → Users**, create `aayupsuw@gmail.com` through a trusted admin path. That exact address is in the private administrative allowlist, and the profile trigger assigns it the `moderator` role. The migration never creates credentials or sends an invitation.
+
+Deploy the OTP-capable app before changing the hosted confirmation template. Keep new signups disabled during the switch and until the previous hosted confirmation-link expiry has elapsed, so every already-issued scanner-consumable link is dead. Test one new account end to end and only then re-enable signup. Accounts that were already auto-confirmed by a mail scanner must be deleted and recreated if their ownership was not independently established.
 
 The previously provisioned moderator has no shared or committed password. Use the app's password-recovery flow to set one privately. When SMTP is added later, keep its credentials out of source control and enter them directly in the Supabase Dashboard.
 

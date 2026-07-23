@@ -14,13 +14,20 @@ vi.mock('next/navigation', () => ({ redirect: mocks.redirect }));
 vi.mock('@/lib/supabase/server', () => ({ createClient: mocks.createClient }));
 
 import { AUTH_NEXT_COOKIE } from '@/lib/auth/pending-sign-in';
+import {
+  WEB_ACTIVITY_COOKIE,
+  WEB_SESSION_POLICY_COOKIE,
+  WEB_SESSION_POLICY_VERSION,
+} from '@/lib/auth/web-session';
 
 import {
   loginAction,
   requestPasswordResetAction,
   resendSignupAction,
+  signOutAction,
   signupAction,
   updatePasswordAction,
+  verifySignupOtpAction,
 } from './actions';
 
 const siteUrl = 'https://mvp.unimarket.example';
@@ -54,6 +61,10 @@ type SupabaseOptions = {
   signupHasSession?: boolean;
   signupIdentities?: unknown[];
   updateError?: AuthError | null;
+  verifyOtpEmail?: string;
+  verifyOtpEmailConfirmedAt?: string | null;
+  verifyOtpError?: AuthError | null;
+  verifyOtpHasUser?: boolean;
 };
 
 function arrangeSupabase({
@@ -77,6 +88,10 @@ function arrangeSupabase({
   signupHasSession = false,
   signupIdentities = [{ id: 'identity-123' }],
   updateError = null,
+  verifyOtpEmail = 'student@uwaterloo.ca',
+  verifyOtpEmailConfirmedAt = '2026-07-15T12:00:00.000Z',
+  verifyOtpError = null,
+  verifyOtpHasUser = true,
 }: SupabaseOptions = {}) {
   const signInWithPassword = vi.fn().mockResolvedValue({
     data: {
@@ -106,6 +121,18 @@ function arrangeSupabase({
     error: getUserError,
   });
   const updateUser = vi.fn().mockResolvedValue({ error: updateError });
+  const verifyOtp = vi.fn().mockResolvedValue({
+    data: {
+      user: verifyOtpHasUser
+        ? {
+            email: verifyOtpEmail,
+            email_confirmed_at: verifyOtpEmailConfirmedAt,
+            id: 'user-123',
+          }
+        : null,
+    },
+    error: verifyOtpError,
+  });
   const signOut = vi.fn().mockResolvedValue({ error: null });
   const maybeSingle = vi.fn().mockResolvedValue(profile);
   const eq = vi.fn(() => ({ maybeSingle }));
@@ -121,6 +148,7 @@ function arrangeSupabase({
       signOut,
       signUp,
       updateUser,
+      verifyOtp,
     },
     from,
   });
@@ -137,6 +165,7 @@ function arrangeSupabase({
     signOut,
     signUp,
     updateUser,
+    verifyOtp,
   };
 }
 
@@ -161,7 +190,7 @@ describe('auth server actions', () => {
   });
 
   describe('signupAction', () => {
-    it('signs up with the password and static confirmation callback', async () => {
+    it('signs up with a password and routes to six-digit verification', async () => {
       const cookieStore = { set: vi.fn() };
       mocks.cookies.mockResolvedValue(cookieStore);
       const context = arrangeSupabase();
@@ -179,7 +208,6 @@ describe('auth server actions', () => {
 
       expect(context.signUp).toHaveBeenCalledWith({
         email: 'student@uwaterloo.ca',
-        options: { emailRedirectTo: `${siteUrl}/auth/callback` },
         password: strongPassword,
       });
       expect(cookieStore.set).toHaveBeenCalledWith(
@@ -223,7 +251,7 @@ describe('auth server actions', () => {
   });
 
   describe('resendSignupAction', () => {
-    it('resends a signup confirmation with the static callback', async () => {
+    it('resends a signup verification code', async () => {
       const context = arrangeSupabase();
 
       const result = await resendSignupAction({
@@ -231,12 +259,152 @@ describe('auth server actions', () => {
         next: '/listings/new',
       });
 
-      expect(result).toEqual({ ok: true, message: 'A new verification email is on its way.' });
+      expect(result).toEqual({
+        ok: true,
+        message: 'If verification is still pending, a new code has been requested.',
+      });
       expect(context.resend).toHaveBeenCalledWith({
         email: 'student@uwaterloo.ca',
-        options: { emailRedirectTo: `${siteUrl}/auth/callback` },
         type: 'signup',
       });
+    });
+
+    it.each([
+      {
+        error: { code: 'email_address_not_authorized', status: 403 },
+        message:
+          'Email delivery is not enabled for this address. Please contact UniMarket support.',
+      },
+      {
+        error: { code: 'over_email_send_rate_limit', status: 429 },
+        message: 'Too many emails were requested. Wait a few minutes, then try once.',
+      },
+    ])('returns a useful delivery error for $error.code', async ({ error, message }) => {
+      const log = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      arrangeSupabase({ resendError: error });
+
+      const result = await resendSignupAction({ email: 'student@uwaterloo.ca' });
+
+      expect(result).toEqual({ ok: false, message });
+      expect(log).toHaveBeenCalledWith(
+        '[auth-email] request failed',
+        expect.objectContaining({ code: error.code, operation: 'resend-verification' }),
+      );
+      log.mockRestore();
+    });
+  });
+
+  describe('verifySignupOtpAction', () => {
+    it('verifies the code, checks the profile, ends the temporary session, and redirects', async () => {
+      const cookieStore = { delete: vi.fn(), set: vi.fn() };
+      mocks.cookies.mockResolvedValue(cookieStore);
+      const context = arrangeSupabase();
+
+      await expectRedirect(
+        () =>
+          verifySignupOtpAction({
+            email: ' Student@UWATERLOO.CA ',
+            next: '/listings/new',
+            token: '123456',
+          }),
+        '/login?notice=email-verified&next=%2Flistings%2Fnew',
+      );
+
+      expect(context.verifyOtp).toHaveBeenCalledWith({
+        email: 'student@uwaterloo.ca',
+        token: '123456',
+        type: 'email',
+      });
+      expect(context.select).toHaveBeenCalledWith('email_verified');
+      expect(context.eq).toHaveBeenCalledWith('id', 'user-123');
+      expect(context.signOut).toHaveBeenCalledWith({ scope: 'local' });
+      expect(cookieStore.delete).toHaveBeenCalledWith(AUTH_NEXT_COOKIE);
+    });
+
+    it('rejects an invalid or expired code without creating a session', async () => {
+      const context = arrangeSupabase({
+        verifyOtpError: { code: 'otp_expired', status: 403 },
+        verifyOtpHasUser: false,
+      });
+
+      const result = await verifySignupOtpAction({
+        email: 'student@uwaterloo.ca',
+        token: '123456',
+      });
+
+      expect(result).toEqual({
+        ok: false,
+        message: 'That code is invalid or expired. Request a new code and try again.',
+      });
+      expect(context.from).not.toHaveBeenCalled();
+      expect(context.signOut).not.toHaveBeenCalled();
+    });
+
+    it('returns a useful message when code attempts are rate-limited', async () => {
+      const context = arrangeSupabase({
+        verifyOtpError: { code: 'over_request_rate_limit', status: 429 },
+        verifyOtpHasUser: false,
+      });
+
+      const result = await verifySignupOtpAction({
+        email: 'student@uwaterloo.ca',
+        token: '123456',
+      });
+
+      expect(result).toEqual({
+        ok: false,
+        message: 'Too many code attempts. Wait a few minutes, then try again.',
+      });
+      expect(context.from).not.toHaveBeenCalled();
+      expect(context.signOut).not.toHaveBeenCalled();
+    });
+
+    it('ends the session when the verified identity does not match the submitted email', async () => {
+      const context = arrangeSupabase({ verifyOtpEmail: 'different@uwaterloo.ca' });
+
+      const result = await verifySignupOtpAction({
+        email: 'student@uwaterloo.ca',
+        token: '123456',
+      });
+
+      expect(result).toEqual({
+        ok: false,
+        message: 'That code could not verify this Waterloo account.',
+      });
+      expect(context.signOut).toHaveBeenCalledWith({ scope: 'local' });
+      expect(context.from).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      {
+        label: 'missing',
+        profile: { data: null, error: null },
+      },
+      {
+        label: 'not verified',
+        profile: {
+          data: {
+            email_verified: false,
+            onboarding_completed_at: null,
+            role: 'student' as const,
+          },
+          error: null,
+        },
+      },
+    ])('ends the temporary session when the profile is $label', async ({ profile }) => {
+      const context = arrangeSupabase({ profile });
+
+      const result = await verifySignupOtpAction({
+        email: 'student@uwaterloo.ca',
+        token: '123456',
+      });
+
+      expect(result).toEqual({
+        ok: false,
+        message: "Your account couldn't be prepared. Please try again.",
+      });
+      expect(context.signOut).toHaveBeenCalledWith({ scope: 'local' });
+      expect(mocks.redirect).not.toHaveBeenCalled();
     });
   });
 
@@ -267,6 +435,8 @@ describe('auth server actions', () => {
         },
       },
     ])('routes $label directly to the safe destination', async ({ email, profile }) => {
+      const cookieStore = { set: vi.fn() };
+      mocks.cookies.mockResolvedValue(cookieStore);
       const context = arrangeSupabase({ loginEmail: email, profile });
 
       await expectRedirect(
@@ -286,6 +456,16 @@ describe('auth server actions', () => {
       expect(context.select).toHaveBeenCalledWith('role, onboarding_completed_at, email_verified');
       expect(context.eq).toHaveBeenCalledWith('id', 'user-123');
       expect(context.signOut).not.toHaveBeenCalled();
+      expect(cookieStore.set).toHaveBeenCalledWith(
+        WEB_SESSION_POLICY_COOKIE,
+        WEB_SESSION_POLICY_VERSION,
+        expect.objectContaining({ httpOnly: true, path: '/', sameSite: 'lax' }),
+      );
+      expect(cookieStore.set).toHaveBeenCalledWith(
+        WEB_ACTIVITY_COOKIE,
+        expect.stringMatching(/^\d{13}$/),
+        expect.objectContaining({ httpOnly: true, path: '/', sameSite: 'lax' }),
+      );
     });
 
     it('routes an incomplete student to onboarding with the safe destination', async () => {
@@ -385,6 +565,8 @@ describe('auth server actions', () => {
 
   describe('updatePasswordAction', () => {
     it('verifies the recovery user, updates the password, signs out locally, and redirects', async () => {
+      const cookieStore = { set: vi.fn() };
+      mocks.cookies.mockResolvedValue(cookieStore);
       const context = arrangeSupabase();
 
       await expectRedirect(
@@ -405,6 +587,16 @@ describe('auth server actions', () => {
       expect(context.updateUser.mock.invocationCallOrder[0]).toBeLessThan(
         context.signOut.mock.invocationCallOrder[0],
       );
+      expect(cookieStore.set).toHaveBeenCalledWith(
+        WEB_SESSION_POLICY_COOKIE,
+        '',
+        expect.objectContaining({ maxAge: 0 }),
+      );
+      expect(cookieStore.set).toHaveBeenCalledWith(
+        WEB_ACTIVITY_COOKIE,
+        '',
+        expect.objectContaining({ maxAge: 0 }),
+      );
     });
 
     it('does not update a password without an eligible recovery user', async () => {
@@ -420,6 +612,28 @@ describe('auth server actions', () => {
         message: 'Request a new recovery link before updating your password.',
       });
       expect(context.updateUser).not.toHaveBeenCalled();
+      expect(context.signOut).toHaveBeenCalledWith({ scope: 'local' });
+    });
+  });
+
+  describe('signOutAction', () => {
+    it('clears the web inactivity marker before ending the local session', async () => {
+      const cookieStore = { set: vi.fn() };
+      mocks.cookies.mockResolvedValue(cookieStore);
+      const context = arrangeSupabase();
+
+      await expectRedirect(() => signOutAction(), '/login');
+
+      expect(cookieStore.set).toHaveBeenCalledWith(
+        WEB_SESSION_POLICY_COOKIE,
+        '',
+        expect.objectContaining({ maxAge: 0 }),
+      );
+      expect(cookieStore.set).toHaveBeenCalledWith(
+        WEB_ACTIVITY_COOKIE,
+        '',
+        expect.objectContaining({ maxAge: 0 }),
+      );
       expect(context.signOut).toHaveBeenCalledWith({ scope: 'local' });
     });
   });

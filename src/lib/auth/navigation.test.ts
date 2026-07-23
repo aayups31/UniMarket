@@ -6,8 +6,10 @@ describe('safe post-auth navigation', () => {
   it.each([
     ['/marketplace', '/marketplace'],
     ['/listings/abc?from=search', '/listings/abc?from=search'],
+    ['/messages?conversation=abc', '/messages?conversation=abc'],
     ['/my-listings?page=2', '/my-listings?page=2'],
     ['/moderation?page=2', '/moderation?page=2'],
+    ['/profile/student-123', '/profile/student-123'],
   ])('allows authenticated app paths', (value, expected) => {
     expect(getSafeNextPath(value)).toBe(expected);
   });
