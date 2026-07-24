@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Barlow, Source_Serif_4 } from 'next/font/google';
 
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site';
 import { waterlooTheme } from '@/lib/university-theme';
 
 import './globals.css';
@@ -21,12 +22,49 @@ const sourceSerif = Source_Serif_4({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: 'UniMarket — Marketplace for Waterloo',
-    template: '%s · UniMarket',
+    default: 'UniMarket Waterloo | Student Marketplace',
+    template: '%s | UniMarket Waterloo',
   },
-  description: 'Buy and sell with verified University of Waterloo students.',
-  applicationName: 'UniMarket',
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  authors: [{ name: 'UniMarket' }],
+  creator: 'UniMarket',
+  publisher: 'UniMarket',
+  category: 'student marketplace',
+  formatDetection: {
+    address: false,
+    email: false,
+    telephone: false,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_CA',
+    siteName: 'UniMarket',
+    title: 'UniMarket Waterloo | Student Marketplace',
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    images: [
+      {
+        url: '/opengraph-image',
+        width: 1200,
+        height: 630,
+        alt: 'UniMarket — the student marketplace for Waterloo',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'UniMarket Waterloo | Student Marketplace',
+    description: SITE_DESCRIPTION,
+    images: ['/opengraph-image'],
+  },
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+  },
+  manifest: '/manifest.webmanifest',
 };
 
 export const viewport: Viewport = {

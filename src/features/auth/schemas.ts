@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { isAllowedAuthEmail, isWaterlooEmail } from '@/lib/auth/email';
+import { isWaterlooEmail } from '@/lib/auth/email';
 
 const normalizedEmailSchema = z
   .string()
@@ -11,7 +11,7 @@ const normalizedEmailSchema = z
   .max(254, 'That email address is too long.');
 
 export const authEmailSchema = normalizedEmailSchema.refine(
-  isAllowedAuthEmail,
+  isWaterlooEmail,
   'Use your @uwaterloo.ca email address.',
 );
 

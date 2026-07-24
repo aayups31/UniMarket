@@ -26,9 +26,9 @@ describe('Waterloo email validation', () => {
     expect(normalizeEmail('  STUDENT@UWATERLOO.CA ')).toBe('student@uwaterloo.ca');
   });
 
-  it('allows the provisioned moderator without opening other email domains', () => {
-    expect(isAllowedAuthEmail(' AAYUPSUW@GMAIL.COM ')).toBe(true);
+  it('allows only the exact Waterloo domain for authentication', () => {
     expect(isAllowedAuthEmail('student@uwaterloo.ca')).toBe(true);
+    expect(isAllowedAuthEmail('aayupsuw@gmail.com')).toBe(false);
     expect(isAllowedAuthEmail('another@gmail.com')).toBe(false);
   });
 });

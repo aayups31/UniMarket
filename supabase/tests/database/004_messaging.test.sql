@@ -5,6 +5,13 @@ set local search_path = public, extensions, pg_catalog;
 
 select plan(30);
 
+insert into private.admin_user_allowlist (email, role, note)
+values (
+  'message.moderator@uwaterloo.ca',
+  'moderator',
+  'Transaction-scoped messaging test moderator.'
+);
+
 insert into auth.users (
   id,
   instance_id,
@@ -44,7 +51,7 @@ values
   (
     '64000000-0000-4000-8000-000000000004',
     '00000000-0000-0000-0000-000000000000',
-    'authenticated', 'authenticated', 'aayupsuw@gmail.com', '', now(),
+    'authenticated', 'authenticated', 'message.moderator@uwaterloo.ca', '', now(),
     '{"provider":"email","providers":["email"]}', '{}', now(), now(), '', '', '', ''
   );
 

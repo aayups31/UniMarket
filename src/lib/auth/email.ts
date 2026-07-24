@@ -1,5 +1,4 @@
 export const WATERLOO_EMAIL_DOMAIN = 'uwaterloo.ca';
-export const MODERATOR_SIGN_IN_EMAIL = 'aayupsuw@gmail.com';
 
 export function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
@@ -18,6 +17,5 @@ export function isWaterlooEmail(email: string) {
 }
 
 export function isAllowedAuthEmail(email: string) {
-  const normalized = normalizeEmail(email);
-  return isWaterlooEmail(normalized) || normalized === MODERATOR_SIGN_IN_EMAIL;
+  return isWaterlooEmail(email);
 }

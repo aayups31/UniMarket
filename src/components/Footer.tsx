@@ -3,7 +3,8 @@ import Link from 'next/link';
 import { BrandMark } from '@/components/BrandMark';
 
 const productLinks = [
-  { href: '/marketplace', label: 'Browse marketplace' },
+  { href: '/waterloo-marketplace', label: 'Waterloo marketplace' },
+  { href: '/marketplace', label: 'Search live listings' },
   { href: '/listings/new', label: 'Create a listing' },
   { href: '#how-it-works', label: 'How it works' },
   { href: '#categories', label: 'Categories' },

@@ -77,11 +77,12 @@ moderator
 
 # Moderator Account
 
-Create a moderator account:
+Provision a moderator account through a trusted administrative path using an
+exact Waterloo address:
 
 ```
 Email:
-aayupsuw@gmail.com
+moderator@uwaterloo.ca
 ```
 
 Requirements:

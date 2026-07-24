@@ -218,7 +218,7 @@ describe('auth server actions', () => {
       expect(context.signOut).not.toHaveBeenCalled();
     });
 
-    it('rejects public moderator signup before creating a Supabase client', async () => {
+    it('rejects Gmail before creating a Supabase client', async () => {
       const result = await signupAction({
         confirmPassword: strongPassword,
         email: 'aayupsuw@gmail.com',
@@ -409,32 +409,16 @@ describe('auth server actions', () => {
   });
 
   describe('loginAction', () => {
-    it.each([
-      {
-        email: 'student@uwaterloo.ca',
-        label: 'a student who completed onboarding',
-        profile: {
-          data: {
-            email_verified: true,
-            onboarding_completed_at: '2026-07-15T12:00:00.000Z',
-            role: 'student' as const,
-          },
-          error: null,
+    it('routes a student who completed onboarding directly to the safe destination', async () => {
+      const email = 'student@uwaterloo.ca';
+      const profile = {
+        data: {
+          email_verified: true,
+          onboarding_completed_at: '2026-07-15T12:00:00.000Z',
+          role: 'student' as const,
         },
-      },
-      {
-        email: 'aayupsuw@gmail.com',
-        label: 'the provisioned moderator',
-        profile: {
-          data: {
-            email_verified: true,
-            onboarding_completed_at: null,
-            role: 'moderator' as const,
-          },
-          error: null,
-        },
-      },
-    ])('routes $label directly to the safe destination', async ({ email, profile }) => {
+        error: null,
+      };
       const cookieStore = { set: vi.fn() };
       mocks.cookies.mockResolvedValue(cookieStore);
       const context = arrangeSupabase({ loginEmail: email, profile });
@@ -466,6 +450,16 @@ describe('auth server actions', () => {
         expect.stringMatching(/^\d{13}$/),
         expect.objectContaining({ httpOnly: true, path: '/', sameSite: 'lax' }),
       );
+    });
+
+    it('rejects Gmail before password authentication', async () => {
+      const result = await loginAction({
+        email: 'aayupsuw@gmail.com',
+        password: strongPassword,
+      });
+
+      expect(result).toEqual({ ok: false, message: 'Use your @uwaterloo.ca email address.' });
+      expect(mocks.createClient).not.toHaveBeenCalled();
     });
 
     it('routes an incomplete student to onboarding with the safe destination', async () => {
@@ -545,22 +539,26 @@ describe('auth server actions', () => {
   });
 
   describe('requestPasswordResetAction', () => {
-    it.each(['student@uwaterloo.ca', 'aayupsuw@gmail.com'])(
-      'requests recovery without revealing whether %s exists',
-      async (email) => {
-        const context = arrangeSupabase();
+    it('requests recovery without revealing whether a Waterloo account exists', async () => {
+      const context = arrangeSupabase();
 
-        const result = await requestPasswordResetAction({ email });
+      const result = await requestPasswordResetAction({ email: 'student@uwaterloo.ca' });
 
-        expect(result).toEqual({
-          ok: true,
-          message: 'If an eligible account exists, a password recovery email is on its way.',
-        });
-        expect(context.resetPasswordForEmail).toHaveBeenCalledWith(email, {
-          redirectTo: `${siteUrl}/auth/recovery-callback`,
-        });
-      },
-    );
+      expect(result).toEqual({
+        ok: true,
+        message: 'If an eligible account exists, a password recovery email is on its way.',
+      });
+      expect(context.resetPasswordForEmail).toHaveBeenCalledWith('student@uwaterloo.ca', {
+        redirectTo: `${siteUrl}/auth/recovery-callback`,
+      });
+    });
+
+    it('rejects Gmail recovery before requesting email delivery', async () => {
+      const result = await requestPasswordResetAction({ email: 'aayupsuw@gmail.com' });
+
+      expect(result).toEqual({ ok: false, message: 'Use your @uwaterloo.ca email address.' });
+      expect(mocks.createClient).not.toHaveBeenCalled();
+    });
   });
 
   describe('updatePasswordAction', () => {

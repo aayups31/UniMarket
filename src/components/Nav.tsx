@@ -39,9 +39,9 @@ export function Nav() {
           </Link>
           <Link
             className="inline-flex min-h-11 items-center rounded-sm px-1 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-300"
-            href="#categories"
+            href="/waterloo-marketplace"
           >
-            Categories
+            Search guide
           </Link>
         </div>
 

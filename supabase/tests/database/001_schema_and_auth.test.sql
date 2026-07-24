@@ -48,9 +48,9 @@ select is(
 select is(
   public.hook_restrict_signup(
     '{"user":{"email":"aayupsuw@gmail.com"}}'::jsonb
-  ),
-  '{}'::jsonb,
-  'the explicitly allowlisted moderator email is accepted'
+  ) #>> '{error,http_code}',
+  '403',
+  'Gmail is rejected without exceptions'
 );
 
 select is(

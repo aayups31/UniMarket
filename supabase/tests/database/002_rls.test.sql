@@ -5,6 +5,13 @@ set local search_path = public, extensions, pg_catalog;
 
 select plan(18);
 
+insert into private.admin_user_allowlist (email, role, note)
+values (
+  'rls.moderator@uwaterloo.ca',
+  'moderator',
+  'Transaction-scoped database test moderator.'
+);
+
 insert into auth.users (
   id,
   instance_id,
@@ -62,7 +69,7 @@ values
     '00000000-0000-0000-0000-000000000000',
     'authenticated',
     'authenticated',
-    'aayupsuw@gmail.com',
+    'rls.moderator@uwaterloo.ca',
     '',
     now(),
     '{"provider":"email","providers":["email"]}',
@@ -209,7 +216,7 @@ select is(
 reset role;
 update private.admin_user_allowlist
 set is_active = false
-where email = 'aayupsuw@gmail.com';
+where email = 'rls.moderator@uwaterloo.ca';
 set local role authenticated;
 
 select is(
@@ -233,7 +240,7 @@ select throws_ok(
 reset role;
 update private.admin_user_allowlist
 set is_active = true
-where email = 'aayupsuw@gmail.com';
+where email = 'rls.moderator@uwaterloo.ca';
 update auth.users
 set email_confirmed_at = null
 where id = '30000000-0000-4000-8000-000000000003';
@@ -290,7 +297,7 @@ select throws_ok(
     )
   $$,
   '22023',
-  'UniMarket requires an @uwaterloo.ca email or an active administrative allowlist entry.',
+  'UniMarket requires an @uwaterloo.ca email address.',
   'the database trigger blocks a non-Waterloo Auth user'
 );
 

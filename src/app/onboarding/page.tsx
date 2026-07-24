@@ -13,6 +13,12 @@ import { getCurrentIdentity, getViewer } from '@/lib/auth/session';
 export const metadata: Metadata = {
   title: 'Set up your profile',
   description: 'Complete your private Waterloo student profile.',
+  robots: {
+    index: false,
+    follow: false,
+    noarchive: true,
+    nocache: true,
+  },
 };
 
 type OnboardingPageProps = {

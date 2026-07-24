@@ -12,7 +12,7 @@ const categories = [
     title: 'Electronics',
     eyebrow: 'Class to co-op',
     description: 'Monitors, calculators, and the gear behind a working term.',
-    href: '/marketplace?category=electronics',
+    href: '/waterloo-marketplace/electronics',
     image: '/waterloo/category-electronics-campus-upscaled.webp',
     imagePosition: 'center center',
     imageTransform: 'translate3d(0, 0, 0) scale(1.025)',
@@ -23,7 +23,7 @@ const categories = [
     title: 'Books',
     eyebrow: 'Learn it. Pass it on.',
     description: 'Textbooks and course reads ready for the next set of notes.',
-    href: '/marketplace?category=books',
+    href: '/waterloo-marketplace/books',
     image: '/waterloo/category-books-waterloo-city-upscaled.webp',
     imagePosition: 'center 46%',
     imageTransform: 'translate3d(-0.4%, -0.5%, 0) scale(1.04)',
@@ -34,7 +34,7 @@ const categories = [
     title: 'Household',
     eyebrow: 'The student place',
     description: 'The essentials that make a student room work.',
-    href: '/marketplace?category=household-items',
+    href: '/waterloo-marketplace/household-items',
     image: '/waterloo/category-household-board-upscaled.webp',
     imagePosition: '54% center',
     imageTransform: 'translate3d(-0.35%, 0, 0) scale(1.035)',
@@ -45,7 +45,7 @@ const categories = [
     title: 'Clothing',
     eyebrow: 'Waterloo weather',
     description: 'Waterloo layers with more than one term left in them.',
-    href: '/marketplace?category=clothing',
+    href: '/waterloo-marketplace/clothing',
     image: '/waterloo/category-clothing-dp-library-upscaled.webp',
     imagePosition: 'center center',
     imageTransform: 'translate3d(0, -0.35%, 0) scale(1.035)',
@@ -83,7 +83,7 @@ export function Categories() {
             </p>
             <Link
               className="group mt-6 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-um-gold-300 underline decoration-um-gold-500/65 underline-offset-4 transition-colors hover:text-um-gold-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-um-gold-400"
-              href="/marketplace"
+              href="/waterloo-marketplace"
             >
               Browse everything
               <ArrowRight

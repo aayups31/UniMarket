@@ -26,7 +26,7 @@ type SupabaseOptions = {
 };
 
 function arrangeSupabase({
-  email = 'aayupsuw@gmail.com',
+  email = 'student@uwaterloo.ca',
   emailConfirmedAt = '2026-07-15T12:00:00.000Z',
   exchangeError = null,
   profile = { data: { email_verified: true }, error: null },

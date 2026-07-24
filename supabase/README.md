@@ -40,13 +40,11 @@ Before deploying:
 2. In **Authentication → Email Templates → Confirm signup**, set the subject to `Your UniMarket verification code` and paste `templates/confirmation.html`. Keep `{{ .Token }}` and remove every `{{ .ConfirmationURL }}`.
 3. In the hosted email Auth settings, keep email confirmation enabled and set OTP length to `6`, expiry to `900` seconds, and minimum resend interval to `60` seconds.
 4. Keep the deployed `/auth/recovery-callback` and required localhost recovery callbacks in the hosted redirect allowlist.
-5. In **Authentication → Users**, create `aayupsuw@gmail.com` through a trusted admin path. That exact address is in the private administrative allowlist, and the profile trigger assigns it the `moderator` role. The migration never creates credentials or sends an invitation.
+5. If moderator access is needed, add an exact `@uwaterloo.ca` address to `private.admin_user_allowlist` through a trusted administrative path before creating or promoting that account. Non-Waterloo moderator exceptions are not permitted.
 
 Deploy the OTP-capable app before changing the hosted confirmation template. Keep new signups disabled during the switch and until the previous hosted confirmation-link expiry has elapsed, so every already-issued scanner-consumable link is dead. Test one new account end to end and only then re-enable signup. Accounts that were already auto-confirmed by a mail scanner must be deleted and recreated if their ownership was not independently established.
 
-The previously provisioned moderator has no shared or committed password. Use the app's password-recovery flow to set one privately. When SMTP is added later, keep its credentials out of source control and enter them directly in the Supabase Dashboard.
-
-The public signup path accepts only addresses matching the exact `@uwaterloo.ca` domain. A database trigger repeats that check for user-creation paths that do not invoke the Auth hook. Account email changes are disabled because the verified university email is an immutable identity field.
+Moderator accounts must use the same exact `@uwaterloo.ca` domain as students. The public signup path, server actions, Auth hook, and database trigger all repeat that check. Account email changes are disabled because the verified university email is an immutable identity field.
 
 ## Listing image contract
 

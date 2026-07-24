@@ -20,10 +20,10 @@ describe('loginSchema', () => {
     expect(result.email).toBe('student@uwaterloo.ca');
   });
 
-  it('accepts the separately provisioned moderator', () => {
+  it('rejects Gmail even when it previously belonged to a provisioned moderator', () => {
     expect(
       loginSchema.safeParse({ email: 'aayupsuw@gmail.com', password: strongPassword }).success,
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it('rejects any other non-Waterloo account', () => {
@@ -45,7 +45,7 @@ describe('signupSchema', () => {
   });
 
   it.each(['aayupsuw@gmail.com', 'student@gmail.com'])(
-    'rejects non-Waterloo public signup: %s',
+    'rejects every non-Waterloo signup address: %s',
     (email) => {
       expect(
         signupSchema.safeParse({
@@ -82,9 +82,9 @@ describe('signupSchema', () => {
 });
 
 describe('password recovery schemas', () => {
-  it('allows the moderator to request password recovery', () => {
+  it('rejects password recovery for a Gmail account', () => {
     expect(passwordResetRequestSchema.safeParse({ email: 'aayupsuw@gmail.com' }).success).toBe(
-      true,
+      false,
     );
   });
 
@@ -112,6 +112,15 @@ describe('verifySignupOtpSchema', () => {
         token: ' 123456 ',
       }),
     ).toEqual({ email: 'student@uwaterloo.ca', token: '123456' });
+  });
+
+  it('rejects a Gmail account for OTP verification', () => {
+    expect(
+      verifySignupOtpSchema.safeParse({
+        email: 'aayupsuw@gmail.com',
+        token: '123456',
+      }).success,
+    ).toBe(false);
   });
 
   it.each(['12345', '1234567', '12a456', ''])('rejects an invalid code: %s', (token) => {
