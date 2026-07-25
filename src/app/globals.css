@@ -223,12 +223,26 @@ svg {
     ),
     radial-gradient(
       ellipse 82% 70% at 92% 74%,
-      rgb(40 106 99 / 9%) 0%,
-      rgb(23 56 64 / 5%) 38%,
+      rgb(41 91 158 / 13%) 0%,
+      rgb(20 51 96 / 8%) 38%,
       transparent 72%
     ),
-    radial-gradient(ellipse 72% 52% at 68% 30%, rgb(31 52 78 / 11%), transparent 74%),
+    radial-gradient(ellipse 72% 52% at 68% 30%, rgb(45 76 124 / 13%), transparent 74%),
     linear-gradient(145deg, #06070a 0%, #090c12 46%, #05080b 100%);
+}
+
+.um-marketing-ambient::after,
+.um-public-atmosphere::after,
+.um-public-hero-field::after,
+.um-public-dark-section::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: '';
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.3'/%3E%3C/svg%3E");
+  background-size: 13rem 13rem;
+  mix-blend-mode: soft-light;
+  opacity: 0.055;
 }
 
 .um-marketing-page {
@@ -264,8 +278,8 @@ svg {
   height: 112vmax;
   background: radial-gradient(
     circle,
-    rgb(46 113 105 / 12%) 0%,
-    rgb(25 63 74 / 9%) 31%,
+    rgb(42 91 158 / 16%) 0%,
+    rgb(20 52 100 / 11%) 31%,
     transparent 70%
   );
   animation: um-ambient-drift-secondary 72s ease-in-out infinite alternate;
@@ -278,12 +292,69 @@ svg {
   height: 72vmax;
   background: radial-gradient(
     ellipse,
-    rgb(242 213 111 / 8%) 0%,
-    rgb(31 52 78 / 10%) 38%,
+    rgb(242 213 111 / 9%) 0%,
+    rgb(35 69 122 / 13%) 38%,
     transparent 72%
   );
   opacity: 0.5;
   animation: um-ambient-drift-tertiary 64s ease-in-out infinite alternate;
+}
+
+.um-public-atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 74% 50% at 9% 5%, rgb(231 188 53 / 13%), transparent 66%),
+    radial-gradient(ellipse 80% 66% at 92% 36%, rgb(42 90 158 / 15%), transparent 70%),
+    radial-gradient(ellipse 58% 42% at 44% 88%, rgb(201 152 18 / 7%), transparent 72%),
+    linear-gradient(148deg, #08090d 0%, #0a101a 47%, #07090d 100%);
+}
+
+.um-public-atmosphere::before {
+  position: absolute;
+  top: -25%;
+  right: -18%;
+  width: min(70rem, 90vw);
+  height: min(70rem, 90vw);
+  border-radius: 999px;
+  pointer-events: none;
+  content: '';
+  background: radial-gradient(
+    circle,
+    rgb(54 112 190 / 12%) 0%,
+    rgb(29 65 119 / 7%) 36%,
+    transparent 70%
+  );
+  filter: blur(4rem);
+}
+
+.um-public-hero-field {
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 56% 48% at 8% 12%, rgb(231 188 53 / 16%), transparent 72%),
+    radial-gradient(ellipse 68% 58% at 90% 22%, rgb(50 105 181 / 18%), transparent 73%),
+    radial-gradient(ellipse 55% 48% at 48% 100%, rgb(28 66 119 / 10%), transparent 76%),
+    linear-gradient(145deg, #080a0e 0%, #0b121e 52%, #080a0e 100%);
+}
+
+.um-public-dark-section {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 52% 55% at 90% 20%, rgb(45 96 169 / 11%), transparent 72%),
+    radial-gradient(ellipse 46% 44% at 7% 84%, rgb(231 188 53 / 7%), transparent 75%),
+    linear-gradient(145deg, rgb(8 11 16 / 96%), rgb(11 18 30 / 95%) 52%, rgb(7 10 15 / 97%));
+}
+
+.um-public-dark-section--reverse {
+  background:
+    radial-gradient(ellipse 50% 52% at 8% 18%, rgb(45 96 169 / 12%), transparent 72%),
+    radial-gradient(ellipse 44% 46% at 92% 82%, rgb(231 188 53 / 8%), transparent 76%),
+    linear-gradient(155deg, rgb(8 11 16 / 97%), rgb(12 19 31 / 95%) 50%, rgb(7 10 15 / 97%));
 }
 
 .um-campus-glow {

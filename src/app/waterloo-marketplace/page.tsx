@@ -131,10 +131,7 @@ export default function WaterlooMarketplacePage() {
       />
 
       <section className="relative isolate overflow-hidden border-b border-white/[0.08]">
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_12%_12%,rgba(231,188,53,0.14),transparent_24rem),radial-gradient(circle_at_88%_68%,rgba(47,83,79,0.18),transparent_30rem),#080a0e]"
-        />
+        <div aria-hidden="true" className="um-public-hero-field absolute inset-0 -z-20" />
 
         <div className="mx-auto grid min-h-[calc(100svh-4.5rem)] max-w-[92rem] lg:grid-cols-[0.9fr_1.1fr]">
           <div className="flex items-center px-5 py-16 sm:px-8 sm:py-20 lg:px-12 xl:px-16">
@@ -285,7 +282,7 @@ export default function WaterlooMarketplacePage() {
         </div>
       </section>
 
-      <section className="border-y border-white/[0.08] bg-[#0a0d12]">
+      <section className="um-public-dark-section border-y border-white/[0.08]">
         <div className="mx-auto max-w-um-content px-5 py-20 sm:px-8 sm:py-24">
           <div className="max-w-2xl">
             <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-um-gold-300">
@@ -332,7 +329,7 @@ export default function WaterlooMarketplacePage() {
         </div>
       </section>
 
-      <section className="bg-[#080a0e]">
+      <section className="um-public-dark-section um-public-dark-section--reverse">
         <div className="mx-auto max-w-um-content px-5 py-20 sm:px-8 sm:py-24 lg:py-28">
           <div className="grid gap-12 lg:grid-cols-[0.78fr_1.22fr] lg:gap-20">
             <div>

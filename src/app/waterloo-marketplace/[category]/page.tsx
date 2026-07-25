@@ -114,10 +114,7 @@ export default async function CategorySearchPage({ params }: CategoryPageProps) 
       />
 
       <section className="relative isolate overflow-hidden border-b border-white/[0.08]">
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_10%_18%,rgba(231,188,53,0.12),transparent_22rem),#080a0e]"
-        />
+        <div aria-hidden="true" className="um-public-hero-field absolute inset-0 -z-20" />
         <div className="mx-auto grid min-h-[calc(100svh-4.5rem)] max-w-[92rem] lg:grid-cols-[0.86fr_1.14fr]">
           <div className="flex items-center px-5 py-14 sm:px-8 sm:py-20 lg:px-12 xl:px-16">
             <div className="w-full max-w-[40rem]">
@@ -239,7 +236,7 @@ export default async function CategorySearchPage({ params }: CategoryPageProps) 
         </div>
       </section>
 
-      <section className="border-t border-white/[0.08] bg-[#0a0d12]">
+      <section className="um-public-dark-section border-t border-white/[0.08]">
         <div className="mx-auto grid max-w-um-content gap-10 px-5 py-20 sm:px-8 sm:py-24 lg:grid-cols-[0.7fr_1.3fr] lg:gap-16">
           <div>
             <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-um-gold-300">

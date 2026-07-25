@@ -5,10 +5,10 @@ import { SEARCH_CATEGORIES, categoryHref } from '@/features/seo/search-targets';
 
 export function PublicMarketplaceFooter() {
   return (
-    <footer className="border-t border-white/[0.08] bg-[#07090d] text-white">
+    <footer className="border-t border-white/[0.08] bg-[#07090d]/90 text-white backdrop-blur-xl">
       <div className="mx-auto grid max-w-um-content gap-12 px-4 py-14 sm:px-6 md:grid-cols-[1fr_auto] lg:px-8 lg:py-16">
         <div>
-          <BrandMark href="/waterloo-marketplace" tone="light" />
+          <BrandMark href="/" tone="light" />
           <p className="mt-5 max-w-md text-sm leading-6 text-white/42">
             Built for Waterloo students. Independent from the University of Waterloo.
           </p>

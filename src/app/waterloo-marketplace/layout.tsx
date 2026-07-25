@@ -5,10 +5,13 @@ import { PublicMarketplaceHeader } from '@/features/seo/components/PublicMarketp
 
 export default function WaterlooMarketplaceLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#080a0e] text-white">
+    <div className="relative min-h-screen overflow-x-hidden bg-[#080a0e] text-white">
+      <div aria-hidden="true" className="um-public-atmosphere" />
       <PublicMarketplaceHeader />
-      <main>{children}</main>
-      <PublicMarketplaceFooter />
+      <main className="relative z-10">{children}</main>
+      <div className="relative z-10">
+        <PublicMarketplaceFooter />
+      </div>
     </div>
   );
 }

@@ -13,7 +13,7 @@ export function PublicMarketplaceHeader() {
       >
         <BrandMark
           className="[&>span:last-child>span:first-child]:text-base"
-          href="/waterloo-marketplace"
+          href="/"
           tone="light"
         />
 

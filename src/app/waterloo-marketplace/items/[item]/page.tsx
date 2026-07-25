@@ -109,10 +109,7 @@ export default async function ItemSearchPage({ params }: ItemPageProps) {
       />
 
       <section className="relative isolate overflow-hidden border-b border-white/[0.08]">
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_10%_18%,rgba(231,188,53,0.11),transparent_22rem),#080a0e]"
-        />
+        <div aria-hidden="true" className="um-public-hero-field absolute inset-0 -z-20" />
         <div className="mx-auto grid min-h-[calc(100svh-4.5rem)] max-w-[92rem] lg:grid-cols-[0.92fr_1.08fr]">
           <div className="flex items-center px-5 py-14 sm:px-8 sm:py-20 lg:px-12 xl:px-16">
             <div className="max-w-[43rem]">
@@ -246,7 +243,7 @@ export default async function ItemSearchPage({ params }: ItemPageProps) {
         </div>
       </section>
 
-      <section className="border-t border-white/[0.08] bg-[#0a0d12]">
+      <section className="um-public-dark-section border-t border-white/[0.08]">
         <div className="mx-auto max-w-um-content px-5 py-16 sm:px-8 sm:py-20">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
