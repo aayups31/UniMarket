@@ -5,24 +5,23 @@ import { SEARCH_CATEGORIES, categoryHref } from '@/features/seo/search-targets';
 
 export function PublicMarketplaceFooter() {
   return (
-    <footer className="border-t border-white/[0.08] bg-[#06080c] text-white">
-      <div className="mx-auto grid max-w-um-content gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1fr_auto] lg:px-8">
+    <footer className="border-t border-white/[0.08] bg-[#07090d] text-white">
+      <div className="mx-auto grid max-w-um-content gap-12 px-4 py-14 sm:px-6 md:grid-cols-[1fr_auto] lg:px-8 lg:py-16">
         <div>
-          <BrandMark tone="light" />
-          <p className="mt-5 max-w-lg text-sm leading-6 text-white/48">
-            An independent student-built marketplace. UniMarket is not affiliated with or endorsed
-            by the University of Waterloo.
+          <BrandMark href="/waterloo-marketplace" tone="light" />
+          <p className="mt-5 max-w-md text-sm leading-6 text-white/42">
+            Built for Waterloo students. Independent from the University of Waterloo.
           </p>
         </div>
-        <nav aria-label="Search categories">
-          <p className="font-condensed text-[0.65rem] font-bold uppercase tracking-[0.17em] text-um-gold-300">
-            Browse by category
+        <nav aria-label="Marketplace categories">
+          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-um-gold-300">
+            Explore
           </p>
-          <ul className="mt-4 grid grid-cols-2 gap-x-8 gap-y-1 text-sm text-white/58">
+          <ul className="mt-3 grid grid-cols-2 gap-x-10 gap-y-0.5 text-sm text-white/52">
             {SEARCH_CATEGORIES.map((category) => (
               <li key={category.slug}>
                 <Link
-                  className="inline-flex min-h-10 items-center transition hover:text-white"
+                  className="inline-flex min-h-9 items-center transition hover:text-white"
                   href={categoryHref(category.slug)}
                 >
                   {category.shortName}
@@ -31,6 +30,10 @@ export function PublicMarketplaceFooter() {
             ))}
           </ul>
         </nav>
+      </div>
+      <div className="mx-auto flex max-w-um-content items-center justify-between border-t border-white/[0.07] px-4 py-5 text-[0.7rem] text-white/30 sm:px-6 lg:px-8">
+        <span>UniMarket Waterloo</span>
+        <span>Student to student</span>
       </div>
     </footer>
   );

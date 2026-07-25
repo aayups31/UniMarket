@@ -109,133 +109,184 @@ export default async function ItemSearchPage({ params }: ItemPageProps) {
       />
 
       <section className="relative isolate overflow-hidden border-b border-white/[0.08]">
-        <Image
-          alt=""
-          className="-z-30 object-cover opacity-32 blur-[1px]"
-          fill
-          priority
-          quality={90}
-          sizes="100vw"
-          src={category.image}
-          style={{ objectPosition: category.imagePosition }}
-        />
         <div
           aria-hidden="true"
-          className="absolute inset-0 -z-20 bg-[linear-gradient(90deg,#070a0f_0%,rgba(7,10,15,0.88)_54%,rgba(7,10,15,0.64)),linear-gradient(0deg,#070a0f_0%,transparent_72%)]"
+          className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_10%_18%,rgba(231,188,53,0.11),transparent_22rem),#080a0e]"
         />
-        <div className="mx-auto max-w-um-content px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-          <Link
-            className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-white/52 transition hover:text-white"
-            href={categoryHref(category.slug)}
-          >
-            <ArrowLeft aria-hidden="true" className="size-4" />
-            {category.name}
-          </Link>
-          <p className="mt-10 font-condensed text-[0.67rem] font-bold uppercase tracking-[0.19em] text-um-gold-300">
-            UniMarket Waterloo · {category.shortName}
-          </p>
-          <h1 className="mt-4 max-w-5xl text-[clamp(3rem,7vw,6.8rem)] font-black leading-[0.93] tracking-[-0.06em] text-white">
-            {item.title}
-          </h1>
-          <p className="mt-7 max-w-2xl text-lg leading-8 text-white/62">{item.description}</p>
-          <Link
-            className="group mt-8 inline-flex min-h-12 items-center gap-3 rounded-full bg-um-gold-300 px-6 text-sm font-black text-um-ink-950 transition hover:bg-um-gold-200"
-            href={`/login?next=${encodeURIComponent(`/marketplace?q=${item.query}`)}`}
-            prefetch={false}
-          >
-            <Search aria-hidden="true" className="size-4" />
-            Search {item.name.toLowerCase()}
-            <ArrowRight
-              aria-hidden="true"
-              className="size-4 transition-transform group-hover:translate-x-0.5"
+        <div className="mx-auto grid min-h-[calc(100svh-4.5rem)] max-w-[92rem] lg:grid-cols-[0.92fr_1.08fr]">
+          <div className="flex items-center px-5 py-14 sm:px-8 sm:py-20 lg:px-12 xl:px-16">
+            <div className="max-w-[43rem]">
+              <Link
+                className="group inline-flex min-h-11 items-center gap-2 text-sm font-medium text-white/46 transition hover:text-white"
+                href={categoryHref(category.slug)}
+              >
+                <ArrowLeft
+                  aria-hidden="true"
+                  className="size-4 transition-transform group-hover:-translate-x-0.5"
+                />
+                {category.name}
+              </Link>
+
+              <p className="mt-12 text-[0.66rem] font-semibold uppercase tracking-[0.19em] text-um-gold-300">
+                Waterloo search guide · {category.shortName}
+              </p>
+
+              <h1 className="um-balanced mt-6 text-[clamp(3.15rem,5.5vw,5.65rem)] font-semibold leading-[0.94] tracking-[-0.058em] text-[#f6f1e8]">
+                {item.title}
+              </h1>
+
+              <p className="um-pretty mt-7 max-w-xl text-[1.03rem] leading-8 text-white/54 sm:text-lg">
+                {item.description}
+              </p>
+
+              <Link
+                className="group mt-9 inline-flex min-h-[3.15rem] items-center gap-3 rounded-full bg-um-gold-300 px-5 text-sm font-bold text-um-ink-950 transition hover:bg-[#ffe48d] focus-visible:ring-2 focus-visible:ring-white"
+                href={`/login?next=${encodeURIComponent(`/marketplace?q=${item.query}`)}`}
+                prefetch={false}
+              >
+                <Search aria-hidden="true" className="size-4" />
+                Search {item.name.toLowerCase()}
+                <ArrowRight
+                  aria-hidden="true"
+                  className="size-4 transition-transform group-hover:translate-x-0.5"
+                />
+              </Link>
+            </div>
+          </div>
+
+          <div className="relative min-h-[30rem] overflow-hidden border-t border-white/[0.08] lg:min-h-full lg:border-l lg:border-t-0">
+            <Image
+              alt={`${category.name} in the Waterloo student marketplace`}
+              className="object-cover"
+              fill
+              priority
+              quality={92}
+              sizes="(max-width: 1024px) 100vw, 54vw"
+              src={category.image}
+              style={{ objectPosition: category.imagePosition }}
             />
-          </Link>
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,10,14,0.03),rgba(8,10,14,0.24)_52%,rgba(8,10,14,0.9)),linear-gradient(90deg,rgba(8,10,14,0.25),transparent_45%)]"
+            />
+
+            <div className="absolute inset-x-6 bottom-6 sm:inset-x-8 sm:bottom-8">
+              <p className="text-[0.61rem] font-semibold uppercase tracking-[0.18em] text-um-gold-300">
+                Common matches
+              </p>
+              <ul className="mt-3 flex flex-wrap gap-2">
+                {item.examples.map((example) => (
+                  <li
+                    className="rounded-full border border-white/14 bg-black/30 px-3.5 py-2 text-xs text-white/66 backdrop-blur-md"
+                    key={example}
+                  >
+                    {example}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-um-content gap-12 px-4 py-20 sm:px-6 sm:py-24 lg:grid-cols-[1.15fr_0.85fr] lg:gap-20 lg:px-8">
-        <article>
-          <p className="font-condensed text-[0.67rem] font-bold uppercase tracking-[0.18em] text-um-gold-300">
-            Buying near campus
-          </p>
-          <h2 className="mt-4 text-4xl font-black leading-tight tracking-[-0.05em] text-white sm:text-5xl">
-            Know what to look for.
-          </h2>
-          <p className="mt-6 max-w-3xl text-lg leading-8 text-white/56">{item.summary}</p>
-
-          <div className="mt-10 border-y border-white/[0.09] py-6">
-            <p className="text-xs font-bold uppercase tracking-[0.12em] text-white/34">
-              Common matches
+      <section className="bg-[#eee9df] text-[#11151c]">
+        <div className="mx-auto grid max-w-um-content gap-12 px-5 py-20 sm:px-8 sm:py-24 lg:grid-cols-[1.08fr_0.92fr] lg:gap-20 lg:py-28">
+          <article>
+            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[#8c6900]">
+              Buying near campus
             </p>
-            <ul className="mt-4 flex flex-wrap gap-2">
+            <h2 className="um-balanced mt-5 text-[clamp(2.7rem,4.7vw,4.5rem)] font-semibold leading-[0.98] tracking-[-0.055em]">
+              Know what matters.
+            </h2>
+            <p className="um-pretty mt-7 max-w-3xl text-lg leading-8 text-black/56">
+              {item.summary}
+            </p>
+
+            <div className="mt-10 flex flex-wrap gap-2 border-t border-black/12 pt-6">
               {item.examples.map((example) => (
-                <li
-                  className="rounded-full border border-white/[0.1] bg-white/[0.035] px-4 py-2 text-sm text-white/58"
+                <span
+                  className="rounded-full border border-black/12 bg-white/35 px-4 py-2 text-sm text-black/58"
                   key={example}
                 >
                   {example}
+                </span>
+              ))}
+            </div>
+          </article>
+
+          <aside className="self-start rounded-[1.4rem] bg-[#10141a] p-6 text-white shadow-um-md sm:p-8">
+            <p className="text-[0.66rem] font-semibold uppercase tracking-[0.18em] text-um-gold-300">
+              Before meeting
+            </p>
+            <ol className="mt-6 border-t border-white/[0.1]">
+              {category.checklist.map((check, index) => (
+                <li
+                  className="grid grid-cols-[2rem_1fr] gap-3 border-b border-white/[0.1] py-5"
+                  key={check}
+                >
+                  <span className="font-mono text-[0.58rem] text-um-gold-300">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <p className="text-sm leading-6 text-white/54">{check}</p>
                 </li>
               ))}
-            </ul>
-          </div>
-        </article>
+            </ol>
 
-        <aside className="rounded-[1.35rem] border border-white/[0.1] bg-[#0b1119] p-6 sm:p-8">
-          <p className="font-condensed text-[0.65rem] font-bold uppercase tracking-[0.17em] text-um-gold-300">
-            Before meeting
-          </p>
-          <ol className="mt-5 space-y-5">
-            {category.checklist.map((check, index) => (
-              <li className="grid grid-cols-[1.7rem_1fr] gap-3" key={check}>
-                <span className="font-mono text-[0.62rem] font-bold text-um-gold-300">
-                  {String(index + 1).padStart(2, '0')}
-                </span>
-                <p className="text-sm leading-6 text-white/54">{check}</p>
-              </li>
-            ))}
-          </ol>
-          <div className="mt-8 space-y-3 border-t border-white/[0.09] pt-6 text-sm leading-6 text-white/48">
-            <p className="flex gap-3">
-              <BadgeCheck aria-hidden="true" className="mt-1 size-4 shrink-0 text-um-gold-300" />
-              Sign in with verified access before messaging a seller.
-            </p>
-            <p className="flex gap-3">
-              <ShieldCheck aria-hidden="true" className="mt-1 size-4 shrink-0 text-um-gold-300" />
-              Inspect the item and meet somewhere appropriate before exchanging.
-            </p>
-          </div>
-        </aside>
+            <div className="mt-6 grid gap-4 text-sm leading-6 text-white/48 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+              <p className="flex gap-3">
+                <BadgeCheck aria-hidden="true" className="mt-1 size-4 shrink-0 text-um-gold-300" />
+                Verified access before messaging.
+              </p>
+              <p className="flex gap-3">
+                <ShieldCheck aria-hidden="true" className="mt-1 size-4 shrink-0 text-um-gold-300" />
+                Inspect before exchanging.
+              </p>
+            </div>
+          </aside>
+        </div>
       </section>
 
-      <section className="border-t border-white/[0.08] bg-[#0a0f17]">
-        <div className="mx-auto max-w-um-content px-4 py-16 sm:px-6 lg:px-8">
-          <div className="flex items-end justify-between gap-4">
+      <section className="border-t border-white/[0.08] bg-[#0a0d12]">
+        <div className="mx-auto max-w-um-content px-5 py-16 sm:px-8 sm:py-20">
+          <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="font-condensed text-[0.65rem] font-bold uppercase tracking-[0.17em] text-um-gold-300">
+              <p className="text-[0.66rem] font-semibold uppercase tracking-[0.18em] text-um-gold-300">
                 More in {category.shortName}
               </p>
-              <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-white">
-                Related searches
+              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-[#f4efe6] sm:text-4xl">
+                Keep looking
               </h2>
             </div>
             <Link
-              className="hidden text-sm font-bold text-white/52 transition hover:text-white sm:inline-flex"
+              className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-white/48 transition hover:text-white"
               href={categoryHref(category.slug)}
             >
               View category
+              <ArrowRight aria-hidden="true" className="size-4" />
             </Link>
           </div>
-          <ul className="mt-8 grid gap-px overflow-hidden rounded-[1rem] border border-white/[0.09] bg-white/[0.09] sm:grid-cols-2 lg:grid-cols-4">
-            {relatedItems.map((related) => (
-              <li className="bg-[#080d14]" key={related.slug}>
+
+          <ul className="mt-8 grid border-t border-white/[0.1] sm:grid-cols-2 lg:grid-cols-4">
+            {relatedItems.map((related, index) => (
+              <li
+                className="border-b border-white/[0.1] lg:border-r lg:last:border-r-0"
+                key={related.slug}
+              >
                 <Link
-                  className="group flex min-h-24 items-center justify-between gap-4 p-5 font-bold text-white/62 transition hover:bg-white/[0.035] hover:text-white"
+                  className="group flex min-h-28 items-center justify-between gap-4 px-1 py-5 sm:px-5 lg:px-6"
                   href={itemHref(related.slug)}
                 >
-                  {related.name}
+                  <span>
+                    <span className="font-mono text-[0.55rem] text-white/24">
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
+                    <span className="mt-2 block font-semibold tracking-[-0.02em] text-white/62 transition group-hover:text-white">
+                      {related.name}
+                    </span>
+                  </span>
                   <ArrowRight
                     aria-hidden="true"
-                    className="size-4 shrink-0 text-um-gold-300 transition-transform group-hover:translate-x-0.5"
+                    className="size-4 shrink-0 text-um-gold-300/52 transition group-hover:translate-x-0.5 group-hover:text-um-gold-300"
                   />
                 </Link>
               </li>

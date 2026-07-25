@@ -5,7 +5,7 @@ import { PublicMarketplaceHeader } from '@/features/seo/components/PublicMarketp
 
 export default function WaterlooMarketplaceLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-[#070a0f] text-white">
+    <div className="min-h-screen overflow-x-hidden bg-[#080a0e] text-white">
       <PublicMarketplaceHeader />
       <main>{children}</main>
       <PublicMarketplaceFooter />

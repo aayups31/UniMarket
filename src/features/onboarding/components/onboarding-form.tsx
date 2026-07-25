@@ -20,7 +20,7 @@ type OnboardingFormProps = {
 };
 
 const inputClassName =
-  'h-12 w-full rounded-none border-0 border-b border-black/20 bg-transparent px-0 text-base text-um-text-strong outline-none transition placeholder:text-um-text-muted hover:border-black/40 focus:border-um-gold-600 focus:ring-0 disabled:cursor-not-allowed disabled:text-um-text-muted';
+  'mt-2 h-[3.25rem] w-full rounded-[0.8rem] border border-black/[0.11] bg-white/55 px-4 text-[0.95rem] text-um-text-strong outline-none transition placeholder:text-black/32 hover:border-black/20 hover:bg-white/72 focus:border-[#a17800] focus:bg-white focus:ring-4 focus:ring-um-gold-400/15 disabled:cursor-not-allowed disabled:text-um-text-muted';
 
 export function OnboardingForm({ email, initialValues, nextPath }: OnboardingFormProps) {
   const [serverError, setServerError] = useState<string | null>(null);
@@ -53,25 +53,25 @@ export function OnboardingForm({ email, initialValues, nextPath }: OnboardingFor
   });
 
   return (
-    <form className="mt-10 space-y-9" noValidate onSubmit={onSubmit}>
+    <form className="mt-8 space-y-7" noValidate onSubmit={onSubmit}>
       <input type="hidden" {...register('next')} />
 
-      <div className="grid gap-x-7 gap-y-8 sm:grid-cols-2">
-        <div className="border-l-2 border-um-gold-500 bg-white/35 px-4 py-3 sm:col-span-2">
-          <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="grid gap-x-4 gap-y-5 sm:grid-cols-2">
+        <div className="rounded-[1rem] bg-[#11161d] px-4 py-3.5 text-white shadow-um-sm sm:col-span-2">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <label
-              className="font-condensed text-xs font-bold uppercase tracking-[0.14em] text-um-text-muted"
+              className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-white/42"
               htmlFor="email"
             >
-              University email
+              Waterloo account
             </label>
-            <p className="flex items-center gap-1.5 font-condensed text-[0.68rem] font-bold uppercase tracking-[0.12em] text-um-success">
+            <p className="flex items-center gap-1.5 text-[0.64rem] font-semibold uppercase tracking-[0.12em] text-[#77d4a7]">
               <BadgeCheck aria-hidden="true" className="size-3.5" />
-              Verified Waterloo account
+              Verified
             </p>
           </div>
           <input
-            className="mt-1 w-full border-0 bg-transparent p-0 text-sm font-semibold text-um-text-muted outline-none"
+            className="mt-1.5 w-full border-0 bg-transparent p-0 text-sm font-medium text-white/76 outline-none"
             disabled
             id="email"
             type="email"
@@ -80,7 +80,7 @@ export function OnboardingForm({ email, initialValues, nextPath }: OnboardingFor
         </div>
 
         <div className="sm:col-span-2">
-          <label className="text-sm font-bold text-um-text-strong" htmlFor="full-name">
+          <label className="text-[0.78rem] font-semibold text-um-text-strong" htmlFor="full-name">
             Full name
           </label>
           <input
@@ -95,14 +95,14 @@ export function OnboardingForm({ email, initialValues, nextPath }: OnboardingFor
             {...register('fullName')}
           />
           {errors.fullName ? (
-            <p className="text-sm font-medium text-red-700" id="name-error">
+            <p className="mt-1.5 text-sm font-medium text-red-700" id="name-error">
               {errors.fullName.message}
             </p>
           ) : null}
         </div>
 
         <div>
-          <label className="text-sm font-bold text-um-text-strong" htmlFor="program">
+          <label className="text-[0.78rem] font-semibold text-um-text-strong" htmlFor="program">
             Program
           </label>
           <input
@@ -117,14 +117,14 @@ export function OnboardingForm({ email, initialValues, nextPath }: OnboardingFor
             {...register('program')}
           />
           {errors.program ? (
-            <p className="text-sm font-medium text-red-700" id="program-error">
+            <p className="mt-1.5 text-sm font-medium text-red-700" id="program-error">
               {errors.program.message}
             </p>
           ) : null}
         </div>
 
         <div>
-          <label className="text-sm font-bold text-um-text-strong" htmlFor="year">
+          <label className="text-[0.78rem] font-semibold text-um-text-strong" htmlFor="year">
             Academic year
           </label>
           <select
@@ -143,15 +143,18 @@ export function OnboardingForm({ email, initialValues, nextPath }: OnboardingFor
             ))}
           </select>
           {errors.academicYear ? (
-            <p className="text-sm font-medium text-red-700" id="year-error">
+            <p className="mt-1.5 text-sm font-medium text-red-700" id="year-error">
               {errors.academicYear.message}
             </p>
           ) : null}
         </div>
 
         <div className="sm:col-span-2">
-          <label className="text-sm font-bold text-um-text-strong" htmlFor="residence-area">
-            Residence or area <span className="font-normal text-um-text-muted">(optional)</span>
+          <label
+            className="text-[0.78rem] font-semibold text-um-text-strong"
+            htmlFor="residence-area"
+          >
+            Residence or area <span className="font-normal text-black/42">Optional</span>
           </label>
           <select
             aria-describedby="residence-hint"
@@ -167,8 +170,8 @@ export function OnboardingForm({ email, initialValues, nextPath }: OnboardingFor
               </option>
             ))}
           </select>
-          <p className="mt-2 text-xs leading-5 text-um-text-muted" id="residence-hint">
-            This stays private. Sellers choose a separate, broad pickup area for each listing.
+          <p className="mt-1.5 text-xs leading-5 text-black/42" id="residence-hint">
+            Private by default. Listings use their own pickup location.
           </p>
         </div>
       </div>
@@ -183,12 +186,12 @@ export function OnboardingForm({ email, initialValues, nextPath }: OnboardingFor
         </div>
       ) : null}
 
-      <div className="border-t border-black/10 pt-6 sm:flex sm:items-center sm:justify-between sm:gap-6">
-        <p className="mb-4 max-w-xs text-xs leading-5 text-um-text-muted sm:mb-0">
-          One profile. Verified access to listings from Waterloo students.
+      <div className="border-t border-black/10 pt-5 sm:flex sm:items-center sm:justify-between sm:gap-6">
+        <p className="mb-4 max-w-xs text-xs leading-5 text-black/42 sm:mb-0">
+          Your profile can be edited later.
         </p>
         <button
-          className="flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-um-sm bg-um-ink-950 px-6 text-sm font-bold text-white shadow-um-sm transition hover:-translate-y-0.5 hover:bg-um-ink-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-um-gold-400/50 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+          className="group flex h-[3.2rem] w-full shrink-0 items-center justify-center gap-2 rounded-full bg-um-ink-950 px-6 text-sm font-bold text-white shadow-um-sm transition hover:-translate-y-0.5 hover:bg-[#1a2028] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-um-gold-400/40 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
           disabled={isPending}
           type="submit"
         >
@@ -200,7 +203,10 @@ export function OnboardingForm({ email, initialValues, nextPath }: OnboardingFor
           ) : (
             <>
               Enter the marketplace
-              <ArrowRight aria-hidden="true" className="size-4 text-um-gold-400" />
+              <ArrowRight
+                aria-hidden="true"
+                className="size-4 text-um-gold-300 transition-transform group-hover:translate-x-0.5"
+              />
             </>
           )}
         </button>

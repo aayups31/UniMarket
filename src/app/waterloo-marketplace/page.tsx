@@ -47,6 +47,24 @@ const faqItems = [
   },
 ] as const;
 
+const campusPromises = [
+  {
+    icon: BadgeCheck,
+    title: 'Verified access',
+    text: 'Browsing, profiles, listings, and messages stay inside the Waterloo student community.',
+  },
+  {
+    icon: MapPin,
+    title: 'Close by',
+    text: 'Find useful things already moving through the neighbourhoods around campus.',
+  },
+  {
+    icon: BookOpen,
+    title: 'Built for term life',
+    text: 'Searches follow the way students actually move, study, furnish, and prepare for co-op.',
+  },
+] as const;
+
 export default function WaterlooMarketplacePage() {
   return (
     <>
@@ -113,159 +131,196 @@ export default function WaterlooMarketplacePage() {
       />
 
       <section className="relative isolate overflow-hidden border-b border-white/[0.08]">
-        <Image
-          alt=""
-          className="-z-30 object-cover object-[50%_48%] opacity-40"
-          fill
-          priority
-          quality={90}
-          sizes="100vw"
-          src="/waterloo/campus-aerial-restored.webp"
-        />
         <div
           aria-hidden="true"
-          className="absolute inset-0 -z-20 bg-[linear-gradient(90deg,#070a0f_0%,rgba(7,10,15,0.88)_42%,rgba(7,10,15,0.46)_100%),linear-gradient(0deg,#070a0f_0%,transparent_68%)]"
-        />
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_72%_24%,rgba(242,213,111,0.18),transparent_25rem)]"
+          className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_12%_12%,rgba(231,188,53,0.14),transparent_24rem),radial-gradient(circle_at_88%_68%,rgba(47,83,79,0.18),transparent_30rem),#080a0e]"
         />
 
-        <div className="mx-auto max-w-um-content px-4 py-20 sm:px-6 sm:py-28 lg:px-8 lg:py-36">
-          <div className="max-w-5xl">
-            <p className="font-condensed text-[0.68rem] font-bold uppercase tracking-[0.2em] text-um-gold-300">
-              University of Waterloo marketplace
-            </p>
-            <h1 className="mt-6 text-[clamp(3.5rem,8.4vw,8.2rem)] font-black leading-[0.88] tracking-[-0.065em] text-[#f5f0e7]">
-              Find it around
-              <span className="block text-um-gold-300">Waterloo.</span>
-            </h1>
-            <p className="mt-8 max-w-2xl text-lg leading-8 text-white/64 sm:text-xl">
-              Used textbooks, electronics, clothing, and home essentials—organized for the Waterloo
-              student community.
-            </p>
+        <div className="mx-auto grid min-h-[calc(100svh-4.5rem)] max-w-[92rem] lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="flex items-center px-5 py-16 sm:px-8 sm:py-20 lg:px-12 xl:px-16">
+            <div className="max-w-[42rem]">
+              <div className="flex items-center gap-3 text-[0.68rem] font-semibold uppercase tracking-[0.19em] text-um-gold-300">
+                <span aria-hidden="true" className="size-1.5 rounded-full bg-um-gold-300" />
+                University of Waterloo
+              </div>
 
-            <div className="mt-9 flex flex-wrap gap-3">
-              <Link
-                className="group inline-flex min-h-[3.25rem] items-center gap-3 rounded-full bg-um-gold-300 px-6 text-sm font-black text-um-ink-950 transition hover:bg-um-gold-200 focus-visible:ring-2 focus-visible:ring-white"
-                href="/login?next=%2Fmarketplace"
-                prefetch={false}
-              >
-                <Search aria-hidden="true" className="size-4" />
-                Search live listings
-                <ArrowRight
-                  aria-hidden="true"
-                  className="size-4 transition-transform group-hover:translate-x-0.5"
-                />
-              </Link>
-              <Link
-                className="inline-flex min-h-[3.25rem] items-center rounded-full border border-white/16 bg-black/20 px-6 text-sm font-bold text-white/76 backdrop-blur transition hover:border-white/28 hover:text-white focus-visible:ring-2 focus-visible:ring-um-gold-300"
-                href="/signup"
-              >
-                Join with Waterloo
-              </Link>
+              <h1 className="um-balanced mt-7 text-[clamp(3.45rem,6.35vw,6.4rem)] font-semibold leading-[0.92] tracking-[-0.062em] text-[#f6f1e8]">
+                Everything you need.
+                <span className="block text-um-gold-300">Already nearby.</span>
+              </h1>
+
+              <p className="um-pretty mt-7 max-w-xl text-[1.05rem] leading-8 text-white/55 sm:text-lg">
+                A private student marketplace for the useful things that move between Waterloo
+                terms.
+              </p>
+
+              <div className="mt-9 flex flex-wrap gap-3">
+                <Link
+                  className="group inline-flex min-h-[3.15rem] items-center gap-3 rounded-full bg-um-gold-300 px-5 text-sm font-bold text-um-ink-950 transition hover:bg-[#ffe48d] focus-visible:ring-2 focus-visible:ring-white"
+                  href="/login?next=%2Fmarketplace"
+                  prefetch={false}
+                >
+                  <Search aria-hidden="true" className="size-4" />
+                  Search live listings
+                  <ArrowRight
+                    aria-hidden="true"
+                    className="size-4 transition-transform group-hover:translate-x-0.5"
+                  />
+                </Link>
+                <Link
+                  className="inline-flex min-h-[3.15rem] items-center rounded-full border border-white/14 px-5 text-sm font-semibold text-white/72 transition hover:border-white/28 hover:bg-white/[0.045] hover:text-white focus-visible:ring-2 focus-visible:ring-um-gold-300"
+                  href="/signup"
+                >
+                  Join with Waterloo
+                </Link>
+              </div>
+
+              <div className="mt-12 flex flex-wrap gap-x-7 gap-y-2 border-t border-white/[0.08] pt-5 text-xs text-white/38">
+                <span>Verified Waterloo access</span>
+                <span>Student to student</span>
+                <span>Independent by design</span>
+              </div>
             </div>
+          </div>
+
+          <div className="relative min-h-[36rem] overflow-hidden border-t border-white/[0.08] lg:min-h-full lg:border-l lg:border-t-0">
+            <Image
+              alt="Aerial view of the University of Waterloo campus"
+              className="object-cover object-[54%_48%]"
+              fill
+              priority
+              quality={92}
+              sizes="(max-width: 1024px) 100vw, 55vw"
+              src="/waterloo/campus-aerial-restored.webp"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,10,14,0.04),rgba(8,10,14,0.38)_50%,rgba(8,10,14,0.94)),linear-gradient(90deg,rgba(8,10,14,0.35),transparent_44%)]"
+            />
+
+            <p className="absolute left-6 top-6 rounded-full border border-white/15 bg-black/25 px-3 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-white/68 backdrop-blur-md sm:left-8 sm:top-8">
+              One campus · one exchange
+            </p>
+
+            <nav
+              aria-label="Browse marketplace categories"
+              className="absolute inset-x-5 bottom-5 overflow-hidden rounded-[1.35rem] border border-white/[0.12] bg-[#090b10]/78 shadow-2xl backdrop-blur-xl sm:inset-x-8 sm:bottom-8"
+            >
+              {SEARCH_CATEGORIES.map((category, index) => (
+                <Link
+                  className="group grid min-h-[4.5rem] grid-cols-[2rem_1fr_auto] items-center gap-3 border-b border-white/[0.08] px-4 text-white last:border-0 transition hover:bg-white/[0.065] sm:min-h-[5rem] sm:grid-cols-[2.4rem_1fr_auto] sm:px-5"
+                  href={categoryHref(category.slug)}
+                  key={category.slug}
+                >
+                  <span className="font-mono text-[0.58rem] text-um-gold-300/80">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <span className="text-lg font-semibold tracking-[-0.025em] sm:text-xl">
+                    {category.name}
+                  </span>
+                  <ArrowRight
+                    aria-hidden="true"
+                    className="size-4 text-white/34 transition group-hover:translate-x-0.5 group-hover:text-um-gold-300"
+                  />
+                </Link>
+              ))}
+            </nav>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-um-content px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
-        <div className="grid gap-6 lg:grid-cols-[0.7fr_1.3fr] lg:gap-14">
-          <div>
-            <p className="font-condensed text-[0.67rem] font-bold uppercase tracking-[0.18em] text-um-gold-300">
-              Browse the exchange
-            </p>
-            <h2 className="mt-4 max-w-md text-4xl font-black leading-[0.98] tracking-[-0.05em] text-[#f3eee5] sm:text-5xl">
-              Start with what you need.
-            </h2>
-            <p className="mt-5 max-w-md leading-7 text-white/52">
-              Every category leads into the private, verified marketplace when you are ready to
-              browse or message a seller.
-            </p>
-          </div>
+      <section className="bg-[#eee9df] text-[#11151c]">
+        <div className="mx-auto max-w-um-content px-5 py-20 sm:px-8 sm:py-24 lg:py-28">
+          <div className="grid gap-8 lg:grid-cols-[0.7fr_1.3fr] lg:gap-16">
+            <div>
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[#8c6900]">
+                Four parts of student life
+              </p>
+              <h2 className="um-balanced mt-5 max-w-lg text-[clamp(2.6rem,4.8vw,4.6rem)] font-semibold leading-[0.96] tracking-[-0.055em]">
+                Start where the problem is.
+              </h2>
+              <p className="mt-6 max-w-md text-base leading-7 text-black/52">
+                From a missing charger to an empty apartment, find the right corner of Waterloo in
+                one move.
+              </p>
+            </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            {SEARCH_CATEGORIES.map((category) => (
-              <Link
-                className="group relative min-h-72 overflow-hidden rounded-[1.3rem] border border-white/[0.1] bg-[#0d131c] focus-visible:ring-2 focus-visible:ring-um-gold-300"
-                href={categoryHref(category.slug)}
-                key={category.slug}
-              >
-                <Image
-                  alt=""
-                  className="object-cover opacity-52 saturate-[0.82] transition duration-700 ease-um-out group-hover:scale-[1.025] group-hover:opacity-62"
-                  fill
-                  quality={90}
-                  sizes="(max-width: 640px) 100vw, 40vw"
-                  src={category.image}
-                  style={{ objectPosition: category.imagePosition }}
-                />
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-0 bg-[linear-gradient(0deg,rgba(5,7,11,0.96),rgba(5,7,11,0.1)_72%)]"
-                />
-                <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-6">
+            <div className="border-t border-black/12">
+              {SEARCH_CATEGORIES.map((category, index) => (
+                <Link
+                  className="group grid gap-4 border-b border-black/12 py-5 transition sm:grid-cols-[2.5rem_1fr_12rem_2rem] sm:items-center sm:py-6"
+                  href={categoryHref(category.slug)}
+                  key={category.slug}
+                >
+                  <span className="font-mono text-[0.58rem] text-black/35">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
                   <div>
-                    <h3 className="text-2xl font-black tracking-[-0.04em] text-white">
+                    <h3 className="text-2xl font-semibold tracking-[-0.035em] transition group-hover:text-[#7d5e00]">
                       {category.name}
                     </h3>
-                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/54">
+                    <p className="mt-1 max-w-xl text-sm leading-6 text-black/48">
                       {category.description}
                     </p>
                   </div>
+                  <div className="relative hidden aspect-[16/9] overflow-hidden rounded-[0.8rem] bg-black/5 sm:block">
+                    <Image
+                      alt=""
+                      className="object-cover grayscale-[0.2] transition duration-700 ease-um-out group-hover:scale-[1.035] group-hover:grayscale-0"
+                      fill
+                      quality={88}
+                      sizes="12rem"
+                      src={category.image}
+                      style={{ objectPosition: category.imagePosition }}
+                    />
+                  </div>
                   <ArrowRight
                     aria-hidden="true"
-                    className="mb-1 size-5 shrink-0 text-um-gold-300 transition-transform group-hover:translate-x-1"
+                    className="hidden size-4 text-black/36 transition group-hover:translate-x-0.5 group-hover:text-black sm:block"
                   />
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="border-y border-white/[0.08] bg-[#0a0f17]">
-        <div className="mx-auto max-w-um-content px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
-          <div className="flex flex-wrap items-end justify-between gap-5">
-            <div>
-              <p className="font-condensed text-[0.67rem] font-bold uppercase tracking-[0.18em] text-um-gold-300">
-                Popular item searches
-              </p>
-              <h2 className="mt-4 text-4xl font-black tracking-[-0.05em] text-white sm:text-5xl">
-                Search like a student.
-              </h2>
-            </div>
-            <p className="max-w-md text-sm leading-6 text-white/46">
-              From a missing laptop charger to a complete co-op setup, these guides take you to the
-              right part of UniMarket.
+      <section className="border-y border-white/[0.08] bg-[#0a0d12]">
+        <div className="mx-auto max-w-um-content px-5 py-20 sm:px-8 sm:py-24">
+          <div className="max-w-2xl">
+            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-um-gold-300">
+              Search by the thing
             </p>
+            <h2 className="um-balanced mt-5 text-[clamp(2.6rem,4.8vw,4.5rem)] font-semibold leading-[0.98] tracking-[-0.05em] text-[#f4efe6]">
+              Less browsing. More finding.
+            </h2>
           </div>
 
-          <div className="mt-12 space-y-12">
+          <div className="mt-12 grid gap-x-10 gap-y-12 md:grid-cols-2 lg:grid-cols-4">
             {SEARCH_CATEGORIES.map((category) => (
               <section aria-labelledby={`${category.slug}-searches`} key={category.slug}>
-                <div className="flex items-center gap-4 border-b border-white/[0.09] pb-4">
+                <div className="flex items-end justify-between gap-3 border-b border-white/[0.1] pb-3">
                   <h3
-                    className="text-xl font-black tracking-[-0.03em] text-white"
+                    className="text-base font-semibold tracking-[-0.02em] text-white"
                     id={`${category.slug}-searches`}
                   >
-                    {category.name}
+                    {category.shortName}
                   </h3>
-                  <span className="font-mono text-[0.56rem] uppercase tracking-[0.16em] text-white/28">
-                    {getItemsForCategory(category.slug).length} searches
+                  <span className="font-mono text-[0.55rem] text-white/28">
+                    {String(getItemsForCategory(category.slug).length).padStart(2, '0')}
                   </span>
                 </div>
-                <ul className="mt-3 grid sm:grid-cols-2 lg:grid-cols-4">
+                <ul className="mt-2">
                   {getItemsForCategory(category.slug).map((item) => (
-                    <li className="border-b border-white/[0.07]" key={item.slug}>
+                    <li key={item.slug}>
                       <Link
-                        className="group flex min-h-14 items-center justify-between gap-3 py-3 pr-4 text-sm font-semibold text-white/58 transition hover:text-white"
+                        className="group flex min-h-10 items-center justify-between gap-3 text-sm text-white/48 transition hover:text-white"
                         href={itemHref(item.slug)}
                       >
                         {item.name}
                         <ArrowRight
                           aria-hidden="true"
-                          className="size-3.5 text-um-gold-300/60 transition-transform group-hover:translate-x-0.5"
+                          className="size-3 text-um-gold-300/0 transition group-hover:translate-x-0.5 group-hover:text-um-gold-300"
                         />
                       </Link>
                     </li>
@@ -277,37 +332,49 @@ export default function WaterlooMarketplacePage() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-um-content gap-12 px-4 py-20 sm:px-6 sm:py-24 lg:grid-cols-[0.8fr_1.2fr] lg:px-8">
-        <div>
-          <p className="font-condensed text-[0.67rem] font-bold uppercase tracking-[0.18em] text-um-gold-300">
-            Made for one campus
-          </p>
-          <h2 className="mt-4 text-4xl font-black leading-tight tracking-[-0.05em] text-white sm:text-5xl">
-            Local by design.
-          </h2>
-          <div className="mt-7 space-y-4 text-sm leading-7 text-white/52">
-            <p className="flex gap-3">
-              <BadgeCheck aria-hidden="true" className="mt-1 size-4 shrink-0 text-um-gold-300" />
-              Browsing, listing, profiles, and messaging are reserved for verified student access.
-            </p>
-            <p className="flex gap-3">
-              <MapPin aria-hidden="true" className="mt-1 size-4 shrink-0 text-um-gold-300" />
-              Listings are organized around the Waterloo community and nearby exchange.
-            </p>
-            <p className="flex gap-3">
-              <BookOpen aria-hidden="true" className="mt-1 size-4 shrink-0 text-um-gold-300" />
-              Search pages help people find the right category without exposing seller information.
-            </p>
-          </div>
-        </div>
+      <section className="bg-[#080a0e]">
+        <div className="mx-auto max-w-um-content px-5 py-20 sm:px-8 sm:py-24 lg:py-28">
+          <div className="grid gap-12 lg:grid-cols-[0.78fr_1.22fr] lg:gap-20">
+            <div>
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-um-gold-300">
+                Made for one campus
+              </p>
+              <h2 className="um-balanced mt-5 text-[clamp(2.7rem,4.8vw,4.7rem)] font-semibold leading-[0.96] tracking-[-0.055em] text-[#f4efe6]">
+                Familiar by design.
+              </h2>
+            </div>
 
-        <div className="divide-y divide-white/[0.09] border-y border-white/[0.09]">
-          {faqItems.map((item) => (
-            <section className="py-6" key={item.question}>
-              <h3 className="text-lg font-black tracking-[-0.025em] text-white">{item.question}</h3>
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-white/52">{item.answer}</p>
-            </section>
-          ))}
+            <div>
+              <div className="grid gap-px overflow-hidden rounded-[1.2rem] border border-white/[0.09] bg-white/[0.09] md:grid-cols-3">
+                {campusPromises.map((promise) => {
+                  const Icon = promise.icon;
+                  return (
+                    <article className="bg-[#0c1016] p-6 sm:p-7" key={promise.title}>
+                      <Icon aria-hidden="true" className="size-5 text-um-gold-300" />
+                      <h3 className="mt-8 text-lg font-semibold tracking-[-0.025em] text-white">
+                        {promise.title}
+                      </h3>
+                      <p className="mt-3 text-sm leading-6 text-white/46">{promise.text}</p>
+                    </article>
+                  );
+                })}
+              </div>
+
+              <div className="mt-14 divide-y divide-white/[0.09] border-y border-white/[0.09]">
+                {faqItems.map((item) => (
+                  <section
+                    className="grid gap-3 py-6 md:grid-cols-[0.75fr_1.25fr]"
+                    key={item.question}
+                  >
+                    <h3 className="text-base font-semibold tracking-[-0.02em] text-white">
+                      {item.question}
+                    </h3>
+                    <p className="text-sm leading-7 text-white/46">{item.answer}</p>
+                  </section>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </>
