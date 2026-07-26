@@ -1004,6 +1004,8 @@ svg {
 .um-motion-film-frame {
   position: relative;
   isolation: isolate;
+  width: 100%;
+  min-width: 0;
   aspect-ratio: 4 / 5;
   overflow: hidden;
   background: #020508;
@@ -1031,7 +1033,8 @@ svg {
 }
 
 .um-motion-film {
-  position: relative;
+  position: absolute;
+  inset: 0;
   z-index: 1;
   display: block;
   width: 100%;
@@ -1128,6 +1131,13 @@ svg {
 }
 
 @media (max-width: 767px) {
+  .um-motion-card {
+    /* The fixed intrinsic placeholder was taller than the real phone card,
+       so the browser visibly corrected its size when the card entered view. */
+    content-visibility: visible;
+    contain-intrinsic-size: none;
+  }
+
   .um-marketing-ambient__field {
     animation: none;
     will-change: auto;
