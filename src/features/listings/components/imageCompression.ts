@@ -80,6 +80,20 @@ export async function compressImageFile(
   if (detectedType === 'image/heic' || detectedType === 'image/heif') {
     workingFile = await convertHeicToJpeg(workingFile, quality);
   }
+  const DIRECT_UPLOAD_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+]);
+
+// Normal phone photos already below the bucket limit do not need
+// expensive browser-side canvas compression.
+if (
+  DIRECT_UPLOAD_TYPES.has(workingFile.type) &&
+  workingFile.size <= 4_500_000
+) {
+  return workingFile;
+}
 
   try {
     const compressed = await imageCompression(workingFile, {
@@ -88,7 +102,7 @@ export async function compressImageFile(
       initialQuality: quality,
       maxIteration: 10,
       fileType: 'image/jpeg',
-      useWebWorker: typeof Worker !== 'undefined',
+      useWebWorker: false,
     });
 
     if (!compressed || compressed.size === 0) {
@@ -110,6 +124,22 @@ export async function compressImageFile(
       size: originalFile.size,
       error,
     });
+    if (
+  DIRECT_UPLOAD_TYPES.has(workingFile.type) &&
+  workingFile.size <= 5_000_000
+) {
+  console.warn(
+    '[Image compression failed; uploading original instead]',
+    {
+      name: workingFile.name,
+      type: workingFile.type,
+      size: workingFile.size,
+      error,
+    },
+  );
+
+  return workingFile;
+}
 
     throw new Error(
       `The image could not be compressed. ${getErrorMessage(error)}`,

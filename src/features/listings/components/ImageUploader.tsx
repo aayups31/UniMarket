@@ -781,7 +781,7 @@ for (let attempt = 0; attempt < 3; attempt += 1) {
   .from('listing-images')
   .upload(item.path, file, {
     cacheControl: '3600',
-    contentType: 'image/jpeg',
+    contentType: file.type,
     upsert: false,
   });
 
