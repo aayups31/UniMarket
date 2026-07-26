@@ -18,6 +18,7 @@ export type MarketplaceImage = {
   storagePath: string;
   position: number;
   url: string | null;
+  focusPosition?: string;
 };
 
 export type MarketplaceListing = {

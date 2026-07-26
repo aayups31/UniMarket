@@ -40,8 +40,6 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
   });
   const activeCategory = data.categories.find((item) => item.slug === data.category);
   const isFiltered = Boolean(data.query || data.category);
-  const rangeStart = data.total === 0 ? 0 : (data.page - 1) * data.pageSize + 1;
-  const rangeEnd = Math.min(data.page * data.pageSize, data.total);
   const clearHref = marketplaceHref({});
 
   return (
@@ -65,17 +63,9 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
               </span>
               Live at Waterloo
             </div>
-            <h1 className="mt-3 truncate text-[clamp(2rem,3.3vw,3.15rem)] font-bold leading-none tracking-[-0.052em] text-white">
+            <h1 className="um-display-safe mt-3 max-w-full break-words text-[clamp(2rem,3.2vw,3.1rem)] font-bold leading-[1.12] tracking-[-0.04em] text-white sm:leading-[1.08]">
               {firstName ? `${getTorontoGreeting()}, ${firstName}.` : 'Made for Waterloo.'}
             </h1>
-            <p className="mt-3 text-sm text-white/45">
-              <span className="font-semibold tabular-nums text-white/72">{data.total}</span>{' '}
-              {data.query || data.category
-                ? data.total === 1
-                  ? 'result'
-                  : 'results'
-                : `${data.total === 1 ? 'listing' : 'listings'} in the exchange`}
-            </p>
           </div>
           <MarketplaceSearch category={data.category} query={data.query} />
         </div>
@@ -137,11 +127,6 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
             </div>
 
             <div className="flex shrink-0 items-center gap-3 text-xs font-medium text-white/48 sm:text-sm">
-              {data.total > 0 ? (
-                <span className="tabular-nums">
-                  {rangeStart}–{rangeEnd} of {data.total}
-                </span>
-              ) : null}
               {isFiltered ? (
                 <Link
                   className="inline-flex min-h-11 items-center gap-1.5 rounded-[0.6rem] px-2.5 text-white/62 transition duration-160 hover:bg-white/[0.07] hover:text-white focus-visible:ring-2 focus-visible:ring-um-gold-300"

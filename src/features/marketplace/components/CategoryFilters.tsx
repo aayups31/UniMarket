@@ -41,11 +41,10 @@ export function CategoryFilters({ categories, activeCategory, query }: CategoryF
       </div>
 
       <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[1.15rem] border border-white/[0.1] bg-white/[0.08] shadow-[0_24px_70px_rgba(0,0,0,0.18)] sm:grid-cols-4">
-        {categories.map((category, index) => (
+        {categories.map((category) => (
           <CategoryLink
             active={activeCategory === category.slug}
             href={marketplaceCategoryHref(category.slug, { query })}
-            index={index}
             key={category.id}
             label={category.label}
             slug={category.slug}
@@ -59,12 +58,11 @@ export function CategoryFilters({ categories, activeCategory, query }: CategoryF
 type CategoryLinkProps = {
   href: string;
   active: boolean;
-  index: number;
   label: string;
   slug: string;
 };
 
-function CategoryLink({ href, active, index, label, slug }: CategoryLinkProps) {
+function CategoryLink({ href, active, label, slug }: CategoryLinkProps) {
   const presentation = getMarketplaceCategoryPresentation(slug);
 
   return (
@@ -93,10 +91,7 @@ function CategoryLink({ href, active, index, label, slug }: CategoryLinkProps) {
         className={`absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t ${presentation.accent} via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover/category:opacity-100 group-focus-visible/category:opacity-100`}
       />
 
-      <span className="absolute inset-x-0 top-0 z-10 flex items-center justify-between p-3.5 sm:p-4">
-        <span className="font-mono text-[0.6rem] font-semibold tabular-nums tracking-[0.16em] text-white/44">
-          {String(index + 1).padStart(2, '0')}
-        </span>
+      <span className="absolute inset-x-0 top-0 z-10 flex items-center justify-end p-3.5 sm:p-4">
         <span className="grid size-8 place-items-center rounded-full border border-white/[0.12] bg-black/20 text-white/50 backdrop-blur-md transition duration-300 group-hover/category:border-um-gold-300/45 group-hover/category:bg-um-gold-300 group-hover/category:text-um-ink-950 group-focus-visible/category:border-um-gold-300/45 group-focus-visible/category:bg-um-gold-300 group-focus-visible/category:text-um-ink-950 sm:size-9">
           <ArrowUpRight aria-hidden="true" className="size-3.5" strokeWidth={1.8} />
         </span>

@@ -6,6 +6,20 @@ import { useState } from 'react';
 
 import type { MarketplaceImage, MarketplaceListing } from '../types';
 
+function toObjectPositionValue(value?: string) {
+  if (!value) return '50% 35%';
+  if (value.startsWith('object-[') && value.includes('_')) {
+    const match = value.match(/object-\[(\d+)%_(\d+)%\]/);
+    if (match) {
+      return `${match[1]}% ${match[2]}%`;
+    }
+  }
+  if (value.startsWith('object-position:')) {
+    return value.replace('object-position:', '').trim();
+  }
+  return value;
+}
+
 export function ListingGallery({ listing }: { listing: MarketplaceListing }) {
   const availableImages = listing.images.filter(
     (image): image is MarketplaceImage & { url: string } => Boolean(image.url),
@@ -28,6 +42,7 @@ export function ListingGallery({ listing }: { listing: MarketplaceListing }) {
             priority
             sizes="(min-width: 1024px) 66vw, 100vw"
             src={selectedImage.url}
+            style={{ objectFit: 'cover', objectPosition: toObjectPositionValue(selectedImage.focusPosition) }}
           />
         ) : (
           <div className="relative isolate grid h-full place-items-center overflow-hidden bg-[radial-gradient(circle_at_50%_35%,rgba(231,188,53,0.09),transparent_18rem),#111923] px-8 text-center">
@@ -75,6 +90,7 @@ export function ListingGallery({ listing }: { listing: MarketplaceListing }) {
                   fill
                   sizes="(min-width: 1024px) 10vw, 25vw"
                   src={image.url}
+                  style={{ objectFit: 'cover', objectPosition: toObjectPositionValue(image.focusPosition) }}
                 />
               </button>
             );

@@ -8,7 +8,6 @@ import { useState } from 'react';
 const categories = [
   {
     id: 'electronics',
-    number: '01',
     title: 'Electronics',
     eyebrow: 'Class to co-op',
     description: 'Monitors, calculators, and the gear behind a working term.',
@@ -19,7 +18,6 @@ const categories = [
   },
   {
     id: 'books',
-    number: '02',
     title: 'Books',
     eyebrow: 'Learn it. Pass it on.',
     description: 'Textbooks and course reads ready for the next set of notes.',
@@ -30,7 +28,6 @@ const categories = [
   },
   {
     id: 'household-items',
-    number: '03',
     title: 'Household',
     eyebrow: 'The student place',
     description: 'The essentials that make a student room work.',
@@ -41,7 +38,6 @@ const categories = [
   },
   {
     id: 'clothing',
-    number: '04',
     title: 'Clothing',
     eyebrow: 'Waterloo weather',
     description: 'Waterloo layers with more than one term left in them.',
@@ -69,7 +65,7 @@ export function Categories() {
             <p className="font-condensed text-xs font-bold uppercase tracking-[0.18em] text-um-gold-400">
               Marketplace categories
             </p>
-            <h2 className="um-balanced mt-5 max-w-5xl text-[clamp(2.9rem,5.8vw,5.8rem)] font-bold leading-[0.98] tracking-[-0.028em]">
+            <h2 className="um-balanced um-display-safe mt-5 max-w-5xl text-[clamp(2.75rem,5.65vw,5.65rem)] font-bold leading-[1.02] tracking-[-0.025em] sm:leading-[0.99]">
               What Waterloo
               <span className="block font-editorial font-normal tracking-[-0.01em] text-um-gold-300">
                 passes on.
@@ -144,13 +140,10 @@ export function Categories() {
                 <p className="font-condensed text-xs font-bold uppercase tracking-[0.19em] text-um-gold-300">
                   {active.eyebrow}
                 </p>
-                <h3 className="mt-3 text-[clamp(3.5rem,7.4vw,7.8rem)] font-bold leading-[0.86] tracking-[-0.055em] text-[#f0ebe2]">
+                <h3 className="um-display-safe mt-3 text-[clamp(3.25rem,7vw,7.2rem)] font-bold leading-[0.99] tracking-[-0.042em] text-[#f0ebe2]">
                   {active.title}
                 </h3>
-                <div className="mt-7 flex max-w-lg items-start gap-5 border-t border-white/[0.16] pt-5">
-                  <span className="font-mono text-[0.57rem] font-semibold tracking-[0.17em] text-um-gold-300/72">
-                    {active.number} / 04
-                  </span>
+                <div className="mt-7 max-w-lg border-t border-white/[0.16] pt-5">
                   <p className="max-w-sm text-sm leading-6 text-white/66 sm:text-base sm:leading-7">
                     {active.description}
                   </p>
@@ -173,7 +166,7 @@ export function Categories() {
                     >
                       <Link
                         aria-current={isActive ? 'true' : undefined}
-                        className={`group relative grid h-full min-h-[5.5rem] grid-cols-[2.5rem_1fr_auto] items-center gap-3 overflow-hidden px-5 py-5 transition-colors duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-um-gold-400 sm:min-h-[6.25rem] sm:px-7 lg:min-h-0 lg:px-9 xl:px-11 ${
+                        className={`group relative grid h-full min-h-[5.5rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 overflow-hidden px-5 py-5 transition-colors duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-um-gold-400 sm:min-h-[6.25rem] sm:px-7 lg:min-h-0 lg:px-9 xl:px-11 ${
                           isActive
                             ? 'text-[#f3eee4]'
                             : 'text-[#d2cbc0]/58 hover:bg-white/[0.035] hover:text-[#eee8de]'
@@ -188,14 +181,7 @@ export function Categories() {
                             isActive ? 'scale-y-100' : 'scale-y-0'
                           }`}
                         />
-                        <span
-                          className={`font-mono text-[0.55rem] font-semibold tracking-[0.16em] transition-colors duration-500 ${
-                            isActive ? 'text-um-gold-300' : 'text-white/24'
-                          }`}
-                        >
-                          {category.number}
-                        </span>
-                        <span className="text-[clamp(1.35rem,2.2vw,2.25rem)] font-black tracking-[-0.04em]">
+                        <span className="min-w-0 text-[clamp(1.35rem,2.2vw,2.25rem)] font-black leading-tight tracking-[-0.035em]">
                           {category.title}
                         </span>
                         <span

@@ -9,23 +9,19 @@ type MotionSceneName = 'access' | 'browse' | 'network';
 type MotionScene = {
   caption: string;
   name: MotionSceneName;
-  number: string;
 };
 
 const motionScenes: MotionScene[] = [
   {
     name: 'access',
-    number: '01',
     caption: 'One Waterloo email. Your campus opens.',
   },
   {
     name: 'browse',
-    number: '02',
     caption: 'Find what Waterloo already has.',
   },
   {
     name: 'network',
-    number: '03',
     caption: 'One university identity brings everyone closer.',
   },
 ];
@@ -44,7 +40,7 @@ export function HowItWorks() {
               Inside UniMarket
             </p>
             <h2
-              className="um-balanced mt-4 max-w-3xl text-[clamp(2.6rem,5vw,5.25rem)] font-bold leading-[0.96] tracking-[-0.038em]"
+              className="um-balanced um-display-safe mt-4 max-w-3xl text-[clamp(2.55rem,5vw,5.25rem)] font-bold leading-[1.01] tracking-[-0.032em] sm:leading-[0.99]"
               id="inside-unimarket-heading"
             >
               Your campus,
@@ -88,12 +84,6 @@ function MotionStory({ scene }: { scene: MotionScene }) {
       <MotionFilm scene={scene.name} />
 
       <figcaption className="um-motion-caption">
-        <span
-          aria-hidden="true"
-          className="font-mono text-[0.58rem] font-semibold tracking-[0.18em] text-um-gold-400/68"
-        >
-          {scene.number}
-        </span>
         <span className="text-[1.03rem] font-semibold leading-6 tracking-[-0.012em] text-[#e9e4d9]">
           {scene.caption}
         </span>
@@ -105,29 +95,18 @@ function MotionStory({ scene }: { scene: MotionScene }) {
 function MotionFilm({ scene }: { scene: MotionSceneName }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const loopIsCoveredRef = useRef(false);
-  const loopRevealIsPendingRef = useRef(false);
-  const loopRevealFrameRef = useRef<number | null>(null);
-  const loopRevealAnimationFrameRef = useRef<number | null>(null);
-  const loopRevealVideoRef = useRef<HTMLVideoElement | null>(null);
   const [motionPreference, setMotionPreference] = useState<MotionPreference>('pending');
   const [sourceIsAttached, setSourceIsAttached] = useState(false);
   const [stageIsVisible, setStageIsVisible] = useState(false);
   const [pageIsVisible, setPageIsVisible] = useState(true);
   const [videoHasDecodedFrame, setVideoHasDecodedFrame] = useState(false);
-  const [loopIsCovered, setLoopIsCovered] = useState(false);
 
   const poster = `/motion/${scene}-poster.webp`;
   const video = `/motion/${scene}.webm`;
-  const loopCoverIsEnabled = scene === 'browse';
-
   useEffect(() => {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)');
     const syncPreference = () => {
       if (query.matches) {
-        loopIsCoveredRef.current = false;
-        loopRevealIsPendingRef.current = false;
-        setLoopIsCovered(false);
         setVideoHasDecodedFrame(false);
       }
 
@@ -228,66 +207,6 @@ function MotionFilm({ scene }: { scene: MotionSceneName }) {
     };
   }, [motionPreference, pageIsVisible, sourceIsAttached, stageIsVisible]);
 
-  useEffect(
-    () => () => {
-      if (loopRevealAnimationFrameRef.current !== null) {
-        window.cancelAnimationFrame(loopRevealAnimationFrameRef.current);
-      }
-
-      const videoElement = loopRevealVideoRef.current;
-      if (videoElement && loopRevealFrameRef.current !== null) {
-        videoElement.cancelVideoFrameCallback?.(loopRevealFrameRef.current);
-      }
-    },
-    [],
-  );
-
-  const coverLoopBoundary = () => {
-    if (loopIsCoveredRef.current) return;
-
-    loopIsCoveredRef.current = true;
-    setLoopIsCovered(true);
-  };
-
-  const revealLoopStart = (element: HTMLVideoElement) => {
-    if (loopRevealIsPendingRef.current) return;
-
-    loopRevealIsPendingRef.current = true;
-    loopRevealVideoRef.current = element;
-
-    const reveal = () => {
-      loopRevealAnimationFrameRef.current = window.requestAnimationFrame(() => {
-        loopRevealAnimationFrameRef.current = null;
-        loopRevealFrameRef.current = null;
-        loopRevealVideoRef.current = null;
-        loopRevealIsPendingRef.current = false;
-        loopIsCoveredRef.current = false;
-        setLoopIsCovered(false);
-      });
-    };
-
-    if (typeof element.requestVideoFrameCallback === 'function') {
-      loopRevealFrameRef.current = element.requestVideoFrameCallback(reveal);
-    } else {
-      reveal();
-    }
-  };
-
-  const handleTimeUpdate = (element: HTMLVideoElement) => {
-    if (!loopCoverIsEnabled) return;
-    if (!Number.isFinite(element.duration) || element.duration <= 0) return;
-
-    const timeRemaining = element.duration - element.currentTime;
-
-    // Cover the decoder before it reaches the container boundary. Once the
-    // native loop has wrapped, wait for a real first frame before revealing it.
-    if (!loopIsCoveredRef.current && timeRemaining <= 1.05) {
-      coverLoopBoundary();
-    } else if (loopIsCoveredRef.current && element.currentTime <= 0.35) {
-      revealLoopStart(element);
-    }
-  };
-
   return (
     <div className={`um-motion-film-frame um-motion-film-frame--${scene}`} ref={stageRef}>
       <Image
@@ -313,7 +232,6 @@ function MotionFilm({ scene }: { scene: MotionSceneName }) {
           onEmptied={() => setVideoHasDecodedFrame(false)}
           onLoadedData={() => setVideoHasDecodedFrame(true)}
           onPlaying={() => setVideoHasDecodedFrame(true)}
-          onTimeUpdate={(event) => handleTimeUpdate(event.currentTarget)}
           playsInline
           preload="none"
           ref={videoRef}
@@ -321,13 +239,6 @@ function MotionFilm({ scene }: { scene: MotionSceneName }) {
         >
           {sourceIsAttached ? <source src={video} type="video/webm" /> : null}
         </video>
-      ) : null}
-
-      {loopCoverIsEnabled ? (
-        <span
-          aria-hidden="true"
-          className={`um-motion-loop-cover ${loopIsCovered ? 'um-motion-loop-cover--active' : ''}`}
-        />
       ) : null}
     </div>
   );

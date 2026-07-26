@@ -35,7 +35,7 @@ export function FinalCTA() {
           </div>
 
           <div className="max-w-5xl py-16 sm:py-20">
-            <h2 className="um-balanced text-[clamp(3rem,6.4vw,6.4rem)] font-bold leading-[0.94] tracking-[-0.038em]">
+            <h2 className="um-balanced um-display-safe text-[clamp(2.85rem,6.15vw,6.1rem)] font-bold leading-[1.01] tracking-[-0.03em] sm:leading-[0.98]">
               Keep the good stuff
               <span className="block font-editorial font-normal tracking-[-0.02em] text-um-gold-300">
                 on campus.

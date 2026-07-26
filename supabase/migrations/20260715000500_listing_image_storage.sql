@@ -61,7 +61,7 @@ begin
   end if;
 
   -- Upload authorization is a reservation: the app must register this exact
-  -- path as pending metadata before TUS creates the object. Uploaded/failed
+  -- path as pending metadata before Storage creates the object. Uploaded/failed
   -- rows cannot be overwritten, and unregistered objects are rejected.
   if not exists (
     select 1
@@ -119,7 +119,7 @@ begin
   end if;
   if v_listing_status = 'removed' then
     -- Preserve uploaded evidence on moderated listings, while still allowing
-    -- the owner to clean up a TUS object whose pending metadata never became a
+    -- the owner to clean up a Storage object whose pending metadata never became a
     -- visible listing image.
     return not exists (
       select 1

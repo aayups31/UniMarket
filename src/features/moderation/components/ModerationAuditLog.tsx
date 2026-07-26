@@ -186,10 +186,6 @@ function AuditPagination({ page, totalPages }: { page: number; totalPages: numbe
         <span aria-hidden="true" />
       )}
 
-      <p className="font-mono text-[0.62rem] tabular-nums tracking-[0.1em] text-white/28">
-        {String(page).padStart(2, '0')} / {String(totalPages).padStart(2, '0')}
-      </p>
-
       {page < totalPages ? (
         <Link
           className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-um-gold-300 px-3.5 text-xs font-bold text-um-ink-950 transition-colors duration-220 ease-um-out hover:bg-um-gold-200"

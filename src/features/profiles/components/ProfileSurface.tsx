@@ -101,9 +101,8 @@ export function ProfileSurface({ profile, variant }: ProfileSurfaceProps) {
             ) : null}
           </div>
 
-          <dl className="mt-9 grid max-w-3xl grid-cols-3 divide-x divide-white/[0.08] border-y border-white/[0.08] sm:mt-11">
+          <dl className="mt-9 grid max-w-2xl grid-cols-2 divide-x divide-white/[0.08] border-y border-white/[0.08] sm:mt-11">
             <ProfileStat label="Joined" value={formatProfileJoinedDate(profile.joinedAt)} />
-            <ProfileStat label="Active" value={String(listingCount)} />
             <ProfileStat label="Rating" value="No ratings yet" />
           </dl>
         </div>
@@ -125,11 +124,6 @@ export function ProfileSurface({ profile, variant }: ProfileSurfaceProps) {
               Active listings
             </h2>
           </div>
-          {listingCount > 0 ? (
-            <span className="font-mono text-[0.64rem] font-semibold tracking-[0.13em] text-white/32">
-              {String(listingCount).padStart(2, '0')}
-            </span>
-          ) : null}
         </div>
 
         {listingCount > 0 ? (

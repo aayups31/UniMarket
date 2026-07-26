@@ -59,7 +59,6 @@ export default async function CategorySearchPage({ params }: CategoryPageProps) 
 
   const items = getItemsForCategory(category.slug);
   const canonical = categoryHref(category.slug);
-  const categoryIndex = SEARCH_CATEGORIES.findIndex((entry) => entry.slug === category.slug) + 1;
 
   return (
     <>
@@ -130,14 +129,11 @@ export default async function CategorySearchPage({ params }: CategoryPageProps) 
               </Link>
 
               <div className="mt-12 flex items-center gap-3 text-[0.66rem] font-semibold uppercase tracking-[0.19em] text-um-gold-300">
-                <span className="font-mono text-white/30">
-                  {String(categoryIndex).padStart(2, '0')}
-                </span>
                 <span aria-hidden="true" className="h-px w-8 bg-um-gold-300/65" />
                 {category.shortName}
               </div>
 
-              <h1 className="um-balanced mt-6 text-[clamp(3.5rem,6.2vw,6.25rem)] font-semibold leading-[0.92] tracking-[-0.062em] text-[#f6f1e8]">
+              <h1 className="um-balanced um-display-safe mt-6 text-[clamp(3.1rem,5.9vw,5.9rem)] font-semibold leading-[1.01] tracking-[-0.044em] text-[#f6f1e8] sm:leading-[0.98]">
                 {category.name}
                 <span className="block text-white/38">for Waterloo.</span>
               </h1>
@@ -176,16 +172,13 @@ export default async function CategorySearchPage({ params }: CategoryPageProps) 
               aria-hidden="true"
               className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,10,14,0.05),rgba(8,10,14,0.18)_48%,rgba(8,10,14,0.82)),linear-gradient(90deg,rgba(8,10,14,0.28),transparent_48%)]"
             />
-            <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 border-t border-white/[0.12] bg-[#090b10]/60 px-6 py-5 backdrop-blur-lg sm:px-8">
+            <div className="absolute inset-x-0 bottom-0 border-t border-white/[0.12] bg-[#090b10]/60 px-6 py-5 backdrop-blur-lg sm:px-8">
               <div>
                 <p className="text-[0.61rem] font-semibold uppercase tracking-[0.18em] text-um-gold-300">
                   Around campus
                 </p>
                 <p className="mt-1 text-sm text-white/62">{category.description}</p>
               </div>
-              <span className="font-mono text-[0.6rem] text-white/36">
-                {String(items.length).padStart(2, '0')} searches
-              </span>
             </div>
           </div>
         </div>
@@ -207,7 +200,7 @@ export default async function CategorySearchPage({ params }: CategoryPageProps) 
             </div>
 
             <ol className="grid border-t border-black/12 sm:grid-cols-2">
-              {items.map((item, index) => (
+              {items.map((item) => (
                 <li
                   className="border-b border-black/12 sm:odd:border-r sm:odd:pr-7 sm:even:pl-7"
                   key={item.slug}
@@ -216,10 +209,7 @@ export default async function CategorySearchPage({ params }: CategoryPageProps) 
                     className="group flex min-h-[6.6rem] items-center justify-between gap-5 py-5"
                     href={itemHref(item.slug)}
                   >
-                    <span className="flex min-w-0 items-center gap-4">
-                      <span className="font-mono text-[0.56rem] text-black/28">
-                        {String(index + 1).padStart(2, '0')}
-                      </span>
+                    <span className="flex min-w-0 items-center">
                       <span className="text-lg font-semibold tracking-[-0.025em] transition group-hover:text-[#765900] sm:text-xl">
                         {item.name}
                       </span>
@@ -247,14 +237,8 @@ export default async function CategorySearchPage({ params }: CategoryPageProps) 
             </h2>
           </div>
           <ol className="border-t border-white/[0.1]">
-            {category.checklist.map((check, index) => (
-              <li
-                className="grid grid-cols-[2.5rem_1fr] gap-4 border-b border-white/[0.1] py-6"
-                key={check}
-              >
-                <span className="font-mono text-[0.6rem] text-um-gold-300">
-                  {String(index + 1).padStart(2, '0')}
-                </span>
+            {category.checklist.map((check) => (
+              <li className="border-b border-white/[0.1] py-6" key={check}>
                 <p className="max-w-2xl text-sm leading-7 text-white/52">{check}</p>
               </li>
             ))}

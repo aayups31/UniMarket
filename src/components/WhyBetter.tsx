@@ -31,7 +31,7 @@ export function WhyBetter() {
             <p className="font-condensed text-xs font-bold uppercase tracking-[0.18em] text-um-gold-400">
               Why Waterloo
             </p>
-            <h2 className="um-balanced mt-5 max-w-5xl text-[clamp(2.9rem,6vw,6rem)] font-bold leading-[0.95] tracking-[-0.038em]">
+            <h2 className="um-balanced um-display-safe mt-5 max-w-5xl text-[clamp(2.7rem,5.8vw,5.75rem)] font-bold leading-[1.02] tracking-[-0.03em] sm:leading-[0.99]">
               One campus changes
               <span className="font-editorial block font-normal tracking-[-0.02em] text-um-gold-300">
                 the whole marketplace.
@@ -68,7 +68,7 @@ export function WhyBetter() {
           </div>
 
           <blockquote className="absolute bottom-8 left-6 max-w-3xl sm:bottom-10 sm:left-10 lg:bottom-12 lg:left-12">
-            <p className="font-editorial text-[clamp(2.65rem,5vw,5.35rem)] leading-[0.98] tracking-[-0.025em] text-[#f4efe6]">
+            <p className="um-display-safe font-editorial text-[clamp(2.55rem,5vw,5.2rem)] leading-[1.02] tracking-[-0.02em] text-[#f4efe6]">
               Verified here.
               <span className="block text-um-gold-300">Picked up nearby.</span>
             </p>

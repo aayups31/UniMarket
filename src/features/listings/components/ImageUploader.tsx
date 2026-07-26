@@ -19,17 +19,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import {
-  ArrowDown,
-  ArrowUp,
-  CheckCircle2,
-  GripVertical,
-  ImagePlus,
-  Loader2,
-  RotateCcw,
-  Trash2,
-} from 'lucide-react';
-import { Upload } from 'tus-js-client';
+import { CheckCircle2, GripVertical, ImagePlus, Loader2, RotateCcw, Trash2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import {
@@ -37,8 +27,10 @@ import {
   registerListingImageAction,
   removeListingImageAction,
   reorderListingImagesAction,
+  reverifyListingImagesAction,
 } from '../actions';
 import { LISTING_IMAGE_MAX_BYTES, LISTING_IMAGE_MAX_COUNT } from '../schemas';
+import { compressImageFile } from './imageCompression';
 
 export type ComposerImage = {
   id: string;
@@ -47,7 +39,22 @@ export type ComposerImage = {
   progress: number;
   status: 'uploading' | 'uploaded' | 'failed';
   name: string;
+  focusPosition?: string;
 };
+
+function toObjectPositionValue(value?: string) {
+  if (!value) return '50% 35%';
+  if (value.startsWith('object-[') && value.includes('_')) {
+    const match = value.match(/object-\[(\d+)%_(\d+)%\]/);
+    if (match) {
+      return `${match[1]}% ${match[2]}%`;
+    }
+  }
+  if (value.startsWith('object-position:')) {
+    return value.replace('object-position:', '').trim();
+  }
+  return value;
+}
 
 type ImageUploaderProps = {
   listingId: string | null;
@@ -66,9 +73,10 @@ export function ImageUploader({
 }: ImageUploaderProps) {
   const [images, setImages] = useState(initialImages);
   const [message, setMessage] = useState('');
+  const [bannerMessage, setBannerMessage] = useState<string | null>(null);
   const [isDraggingFiles, setIsDraggingFiles] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const uploadsRef = useRef(new Map<string, Upload>());
+  const cancelledUploadsRef = useRef(new Set<string>());
   const imagesRef = useRef(images);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -82,13 +90,41 @@ export function ImageUploader({
 
   useEffect(
     () => () => {
-      uploadsRef.current.forEach((upload) => void upload.abort());
       imagesRef.current.forEach((image) => {
         if (image.url.startsWith('blob:')) URL.revokeObjectURL(image.url);
       });
     },
     [],
   );
+
+  // On mount, try to reconcile any pending uploads for this listing.
+  useEffect(() => {
+    if (!listingId) return;
+    let mounted = true;
+    void (async () => {
+      try {
+        const result = await reverifyListingImagesAction({ listingId });
+        if (!mounted) return;
+        if (result.ok && result.data.updated.length > 0) {
+          setImages((current) =>
+            current.map((img) =>
+              result.data.updated.includes(img.id)
+                ? { ...img, status: 'uploaded', progress: 100 }
+                : img,
+            ),
+          );
+          setMessage(
+            `Recovered ${result.data.updated.length} uploaded photo${result.data.updated.length > 1 ? 's' : ''}.`,
+          );
+        }
+      } catch {
+        // ignore
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [listingId]);
 
   const uploadFiles = useCallback(
     async (selected: File[]) => {
@@ -97,6 +133,7 @@ export function ImageUploader({
       const files = selected.slice(0, available);
       const supportedFiles: File[] = [];
       let validationMessage = '';
+      let compressedCount = 0;
 
       if (selected.length > available) {
         validationMessage = `You can add ${available} more image${available === 1 ? '' : 's'}.`;
@@ -107,18 +144,38 @@ export function ImageUploader({
       }
 
       for (const file of files) {
-        if (!ACCEPTED_TYPES.has(file.type)) {
-          validationMessage = `${file.name} is not supported. Use JPEG, PNG, or WebP.`;
+        let preparedFile: File;
+        try {
+          preparedFile = await compressImageFile(file);
+        } catch {
+          // Likely an unsupported encode/decoding error (e.g. HEIC). Show a clear banner.
+          setBannerMessage(
+            `${file.name} could not be prepared. If this is an iPhone photo, choose "Most Compatible" in Camera settings or export as JPEG/PNG before uploading.`,
+          );
           continue;
         }
-        if (file.size > LISTING_IMAGE_MAX_BYTES) {
+
+        if (preparedFile.size < file.size) compressedCount += 1;
+
+        if (!ACCEPTED_TYPES.has(preparedFile.type)) {
+          setBannerMessage(
+            `${file.name} is in an unsupported format (${preparedFile.type}). Use JPEG, PNG, or WebP.`,
+          );
+          continue;
+        }
+        if (preparedFile.size > LISTING_IMAGE_MAX_BYTES) {
           validationMessage = `${file.name} is larger than 5 MB.`;
           continue;
         }
-        supportedFiles.push(file);
+        supportedFiles.push(preparedFile);
       }
 
       if (validationMessage) setMessage(validationMessage);
+      if (compressedCount > 0 && !validationMessage) {
+        setMessage(
+          `We reduced ${compressedCount} large photo${compressedCount === 1 ? '' : 's'} to keep the upload reliable.`,
+        );
+      }
       if (supportedFiles.length === 0) return;
 
       const draftId = listingId ?? (await ensureDraft());
@@ -149,11 +206,12 @@ export function ImageUploader({
             progress: 0,
             status: 'uploading',
             name: file.name,
+            focusPosition: '50% 35%',
           };
           setImages((current) => [...current, item]);
-          await startTusUpload(file, draftId, item, setImages, uploadsRef, setMessage);
+          await uploadListingImage(file, draftId, item, setImages, cancelledUploadsRef, setMessage);
         } catch {
-          setMessage(
+          setBannerMessage(
             `${file.name} could not be prepared. Check your connection or try a different image.`,
           );
         }
@@ -164,20 +222,26 @@ export function ImageUploader({
 
   const handleDragEnd = async ({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id) return;
-    const oldIndex = images.findIndex((image) => image.id === active.id);
-    const newIndex = images.findIndex((image) => image.id === over.id);
-    const previousOrder = images.map((image) => image.id);
-    const next = arrayMove(images, oldIndex, newIndex);
+    const currentImages = imagesRef.current;
+    const oldIndex = currentImages.findIndex((image) => image.id === active.id);
+    const newIndex = currentImages.findIndex((image) => image.id === over.id);
+    const previousOrder = currentImages.map((image) => image.id);
+    const next = arrayMove(currentImages, oldIndex, newIndex);
     setImages(next);
     const draftId = listingId ?? (await ensureDraft());
     if (!draftId) {
       setImages((current) => restoreImageOrder(current, previousOrder));
       return;
     }
+
+    // If some images failed to upload, exclude them from the server-side reorder
+    // so the RPC only sees valid image rows. The local order still includes
+    // failed placeholders so users can remove or retry them.
+    const imageIdsToSave = next.filter((img) => img.status !== 'failed').map((image) => image.id);
     try {
       const result = await reorderListingImagesAction({
         listingId: draftId,
-        imageIds: next.map((image) => image.id),
+        imageIds: imageIdsToSave,
       });
       if (!result.ok) {
         setImages((current) => restoreImageOrder(current, previousOrder));
@@ -189,39 +253,16 @@ export function ImageUploader({
     }
   };
 
-  const moveImage = async (index: number, direction: -1 | 1) => {
-    const target = index + direction;
-    if (target < 0 || target >= images.length) return;
-    const previousOrder = images.map((image) => image.id);
-    const next = arrayMove(images, index, target);
-    setImages(next);
-    const draftId = listingId ?? (await ensureDraft());
-    if (!draftId) {
-      setImages((current) => restoreImageOrder(current, previousOrder));
-      return;
-    }
-    try {
-      const result = await reorderListingImagesAction({
-        listingId: draftId,
-        imageIds: next.map((image) => image.id),
-      });
-      if (!result.ok) {
-        setImages((current) => restoreImageOrder(current, previousOrder));
-        setMessage(`${result.message} Your previous order was restored.`);
-      }
-    } catch {
-      setImages((current) => restoreImageOrder(current, previousOrder));
-      setMessage('The image order could not be saved. Your previous order was restored.');
-    }
-  };
+  // Drag-and-drop reordering handled via dnd-kit; arrow/cover/crop controls removed.
 
   const removeImage = async (image: ComposerImage) => {
-    uploadsRef.current.get(image.id)?.abort();
+    cancelledUploadsRef.current.add(image.id);
     const draftId = listingId ?? (await ensureDraft());
     if (!draftId) return;
     try {
       const result = await removeListingImageAction({ listingId: draftId, imageId: image.id });
       if (!result.ok) {
+        cancelledUploadsRef.current.delete(image.id);
         setImages((current) =>
           current.map((item) =>
             item.id === image.id && item.status === 'uploading'
@@ -235,6 +276,7 @@ export function ImageUploader({
       if (image.url.startsWith('blob:')) URL.revokeObjectURL(image.url);
       setImages((current) => current.filter((item) => item.id !== image.id));
     } catch {
+      cancelledUploadsRef.current.delete(image.id);
       setImages((current) =>
         current.map((item) =>
           item.id === image.id && item.status === 'uploading'
@@ -261,15 +303,11 @@ export function ImageUploader({
       ? `${failedCount} photo${failedCount === 1 ? ' needs' : 's need'} attention. Remove the failed photo${failedCount === 1 ? '' : 's'} before publishing.`
       : isWaitingForUpload
         ? 'Finishing your photo upload… keep this page open until it is ready.'
-        : 'JPEG, PNG, or WebP · up to 5 MB each · drag to reorder';
-
+        : 'JPEG, PNG, or WebP · up to 5 MB each · drag to reorder · the first photo is the cover';
   return (
     <section id="images" aria-labelledby="images-heading" className="scroll-mt-32 pb-12 sm:pb-14">
-      <div className="mb-6 grid gap-4 sm:grid-cols-[3.25rem_1fr_auto] sm:items-start">
-        <span className="font-condensed flex h-10 items-start border-l-2 border-um-gold-500 pl-3 pt-0.5 text-xs font-bold tracking-[0.1em] text-um-gold-700">
-          01
-        </span>
-        <div>
+      <div className="mb-6 grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
+        <div className="border-l-2 border-um-gold-500 pl-4">
           <p className="font-condensed text-xs font-bold uppercase tracking-[0.15em] text-um-gold-700">
             Add photos
           </p>
@@ -304,6 +342,23 @@ export function ImageUploader({
             : `${uploadedCount} / ${LISTING_IMAGE_MAX_COUNT} ready`}
         </span>
       </div>
+
+      {bannerMessage ? (
+        <div className="mb-4 rounded-um-sm border border-red-500/30 bg-red-600/95 p-3 text-sm font-semibold text-white">
+          <div className="flex items-start justify-between gap-3">
+            <div>{bannerMessage}</div>
+            <button
+              type="button"
+              onClick={() => setBannerMessage(null)}
+              className="ml-4 rounded bg-white/10 px-2 py-1 text-xs font-medium text-white/90"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {/* crop modal removed — simplified UX: keep item centered when uploading */}
 
       <div
         onDragEnter={(event) => {
@@ -359,8 +414,6 @@ export function ImageUploader({
                     key={image.id}
                     image={image}
                     index={index}
-                    total={images.length}
-                    onMove={moveImage}
                     onRemove={removeImage}
                   />
                 ))}
@@ -384,7 +437,7 @@ export function ImageUploader({
           aria-describedby="image-upload-help"
           aria-label="Upload listing photos"
           className="sr-only"
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/*"
           multiple
           onChange={(event) => {
             void uploadFiles(Array.from(event.target.files ?? []));
@@ -411,22 +464,33 @@ export function ImageUploader({
 function SortableImage({
   image,
   index,
-  total,
-  onMove,
   onRemove,
 }: {
   image: ComposerImage;
   index: number;
-  total: number;
-  onMove: (index: number, direction: -1 | 1) => void;
   onRemove: (image: ComposerImage) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: image.id,
   });
+  const safeAttributes = {
+    ...attributes,
+    'aria-describedby': undefined,
+  };
+  const safeListeners = {
+    ...listeners,
+    onKeyDown: (event: React.KeyboardEvent) => {
+      if (event.key === ' ' || event.key === 'Enter') {
+        event.preventDefault();
+      }
+      listeners?.onKeyDown?.(event);
+    },
+  };
   return (
     <div
       ref={setNodeRef}
+      {...safeAttributes}
+      {...safeListeners}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={cn(
         'group relative aspect-[4/3] overflow-hidden rounded-um-sm bg-um-ink-800 shadow-um-xs ring-1 ring-white/[0.14]',
@@ -440,10 +504,11 @@ function SortableImage({
         fill
         unoptimized
         className="object-cover"
+        style={{ objectFit: 'cover', objectPosition: toObjectPositionValue(image.focusPosition) }}
       />
       <div className="absolute inset-x-0 top-0 flex items-center justify-between bg-gradient-to-b from-black/60 to-transparent p-2 text-white">
         <span className="font-condensed rounded-full bg-um-ink-950/80 px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-[0.1em] text-white">
-          {index === 0 ? 'Cover' : index + 1}
+          {index + 1}
         </span>
         {image.status === 'failed' ? (
           <span className="rounded-full bg-red-500/90 px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-white">
@@ -454,8 +519,6 @@ function SortableImage({
             type="button"
             className="grid size-11 touch-none place-items-center rounded-um-sm bg-black/[0.55] transition hover:bg-black/75 focus-visible:ring-2 focus-visible:ring-white"
             aria-label={`Drag ${image.name} to reorder`}
-            {...attributes}
-            {...listeners}
           >
             <GripVertical aria-hidden="true" className="size-4" />
           </button>
@@ -495,30 +558,12 @@ function SortableImage({
             </button>
           </div>
         ) : (
-          <div className="flex items-center justify-end gap-1 opacity-100 sm:opacity-0 sm:transition sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
-            <button
-              type="button"
-              disabled={index === 0}
-              onClick={() => onMove(index, -1)}
-              aria-label="Move image earlier"
-              className="grid size-11 place-items-center rounded-um-sm bg-black/[0.55] text-white transition hover:bg-black/75 focus-visible:ring-2 focus-visible:ring-white disabled:opacity-30"
-            >
-              <ArrowUp aria-hidden="true" className="size-3.5" />
-            </button>
-            <button
-              type="button"
-              disabled={index === total - 1}
-              onClick={() => onMove(index, 1)}
-              aria-label="Move image later"
-              className="grid size-11 place-items-center rounded-um-sm bg-black/[0.55] text-white transition hover:bg-black/75 focus-visible:ring-2 focus-visible:ring-white disabled:opacity-30"
-            >
-              <ArrowDown aria-hidden="true" className="size-3.5" />
-            </button>
+          <div className="flex items-center justify-end gap-1">
             <button
               type="button"
               onClick={() => onRemove(image)}
               aria-label={`Remove ${image.name}`}
-              className="grid size-11 place-items-center rounded-um-sm bg-black/[0.55] text-white transition hover:bg-um-danger focus-visible:ring-2 focus-visible:ring-white"
+              className="grid size-10 place-items-center rounded-um-sm bg-black/[0.55] text-white transition hover:bg-um-danger focus-visible:ring-2 focus-visible:ring-white"
             >
               <Trash2 aria-hidden="true" className="size-3.5" />
             </button>
@@ -530,22 +575,30 @@ function SortableImage({
 }
 
 async function getImageDimensions(file: File) {
-  if ('createImageBitmap' in window) {
-    const bitmap = await createImageBitmap(file);
-    const dimensions = { width: bitmap.width, height: bitmap.height };
-    bitmap.close();
-    return dimensions;
+  // Try fast bitmap API first, but fall back to image element if it fails
+  if (typeof window !== 'undefined' && 'createImageBitmap' in window) {
+    try {
+      const bitmap = await createImageBitmap(file);
+      const dimensions = { width: bitmap.width, height: bitmap.height };
+      bitmap.close();
+      return dimensions;
+    } catch (err) {
+      // Continue to fallback below
+      // Log to help debugging in the wild
+      console.warn('createImageBitmap failed, falling back to Image element', err);
+    }
   }
 
-  return new Promise<{ width: number; height: number }>((resolve, reject) => {
+  return await new Promise<{ width: number; height: number }>((resolve, reject) => {
     const url = URL.createObjectURL(file);
     const image = new window.Image();
     image.onload = () => {
       resolve({ width: image.naturalWidth, height: image.naturalHeight });
       URL.revokeObjectURL(url);
     };
-    image.onerror = () => {
+    image.onerror = (e) => {
       URL.revokeObjectURL(url);
+      console.error('Image failed to load for dimension extraction', e);
       reject(new Error('Invalid image'));
     };
     image.src = url;
@@ -564,92 +617,154 @@ function restoreImageOrder(images: ComposerImage[], orderedIds: string[]) {
   return [...restored, ...byId.values()];
 }
 
-async function startTusUpload(
+type FinalizeImageResult = Awaited<ReturnType<typeof finalizeListingImageAction>>;
+
+async function finalizeUploadedImage(
+  listingId: string,
+  imageId: string,
+  maxAttempts: number,
+): Promise<FinalizeImageResult> {
+  let lastResult: FinalizeImageResult | null = null;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    const result = await finalizeListingImageAction({ listingId, imageId });
+    lastResult = result;
+    if (result.ok) return result;
+
+    const objectMayStillBeSettling = result.message.toLowerCase().includes('did not finish');
+    if (!objectMayStillBeSettling || attempt === maxAttempts - 1) return result;
+    await new Promise((resolve) => setTimeout(resolve, 300 * 2 ** attempt));
+  }
+
+  return (
+    lastResult ?? {
+      ok: false,
+      message: 'The uploaded image could not be verified.',
+    }
+  );
+}
+
+function getStorageErrorText(error: unknown) {
+  if (!error || typeof error !== 'object') return String(error ?? '');
+  const details = error as {
+    message?: unknown;
+    error?: unknown;
+    statusCode?: unknown;
+    originalError?: unknown;
+  };
+  return [details.statusCode, details.error, details.message, details.originalError]
+    .filter(Boolean)
+    .map(String)
+    .join(' ')
+    .toLowerCase();
+}
+
+function isAuthenticationStorageError(error: unknown) {
+  const text = getStorageErrorText(error);
+  return (
+    text.includes('401') ||
+    text.includes('403') ||
+    text.includes('unauthorized') ||
+    text.includes('jwt') ||
+    text.includes('jws')
+  );
+}
+
+async function uploadListingImage(
   file: File,
   listingId: string,
   item: ComposerImage,
   setImages: React.Dispatch<React.SetStateAction<ComposerImage[]>>,
-  uploadsRef: React.MutableRefObject<Map<string, Upload>>,
+  cancelledUploadsRef: React.MutableRefObject<Set<string>>,
   setMessage: React.Dispatch<React.SetStateAction<string>>,
 ) {
   const supabase = createClient();
-  const { data } = await supabase.auth.getSession();
-  const accessToken = data.session?.access_token;
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-
-  if (!accessToken || !url || !publishableKey) {
+  const updateProgress = (progress: number) => {
+    setImages((current) =>
+      current.map((image) => (image.id === item.id ? { ...image, progress } : image)),
+    );
+  };
+  const failUpload = (errorMessage?: string) => {
     setImages((current) =>
       current.map((image) => (image.id === item.id ? { ...image, status: 'failed' } : image)),
     );
-    setMessage('Your session expired. Sign in again before uploading.');
+    setMessage(errorMessage ?? `${file.name} did not finish uploading. Remove it and try again.`);
+  };
+
+  const session = await supabase.auth.getSession();
+  if (!session.data.session) {
+    failUpload('Your session expired. Sign in again before uploading.');
     return;
   }
 
-  await new Promise<void>((resolve) => {
-    const upload = new Upload(file, {
-      endpoint: `${url}/storage/v1/upload/resumable`,
-      retryDelays: [0, 1_000, 3_000, 5_000],
-      headers: {
-        authorization: `Bearer ${accessToken}`,
-        apikey: publishableKey,
-        'x-upsert': 'false',
-      },
-      uploadDataDuringCreation: true,
-      removeFingerprintOnSuccess: true,
-      metadata: {
-        bucketName: 'listing-images',
-        objectName: item.path,
-        contentType: file.type,
-        cacheControl: '3600',
-      },
-      onError: () => {
-        setImages((current) =>
-          current.map((image) => (image.id === item.id ? { ...image, status: 'failed' } : image)),
-        );
-        uploadsRef.current.delete(item.id);
-        setMessage(`${file.name} did not finish uploading. Remove it and try again.`);
-        resolve();
-      },
-      onProgress: (uploaded, total) => {
-        const progress = total > 0 ? (uploaded / total) * 100 : 0;
-        setImages((current) =>
-          current.map((image) => (image.id === item.id ? { ...image, progress } : image)),
-        );
-      },
-      onSuccess: async () => {
-        try {
-          const result = await finalizeListingImageAction({ listingId, imageId: item.id });
-          setImages((current) =>
-            current.map((image) =>
-              image.id === item.id
-                ? {
-                    ...image,
-                    progress: result.ok ? 100 : image.progress,
-                    status: result.ok ? 'uploaded' : 'failed',
-                  }
-                : image,
-            ),
-          );
-          if (!result.ok) setMessage(result.message);
-        } catch {
-          setImages((current) =>
-            current.map((image) => (image.id === item.id ? { ...image, status: 'failed' } : image)),
-          );
-          setMessage(`${file.name} uploaded but could not be verified. Remove it and try again.`);
-        } finally {
-          uploadsRef.current.delete(item.id);
-          resolve();
-        }
-      },
+  let lastError: unknown = null;
+
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    if (cancelledUploadsRef.current.has(item.id)) return;
+
+    if (attempt > 0) {
+      updateProgress(18);
+      await supabase.auth.refreshSession().catch(() => undefined);
+      await new Promise((resolve) => setTimeout(resolve, 650));
+    } else {
+      updateProgress(10);
+    }
+
+    const { error } = await supabase.storage.from('listing-images').upload(item.path, file, {
+      cacheControl: '3600',
+      contentType: file.type,
+      upsert: false,
     });
-    uploadsRef.current.set(item.id, upload);
-    void upload
-      .findPreviousUploads()
-      .catch(() => [])
-      .then((previous) => {
-        if (previous[0]) upload.resumeFromPreviousUpload(previous[0]);
-        upload.start();
-      });
-  });
+
+    if (!error) {
+      lastError = null;
+      updateProgress(84);
+      break;
+    }
+
+    lastError = error;
+
+    // Mobile connections can drop after Storage accepted the body but before
+    // the browser received the response. Reconcile before sending it again.
+    try {
+      const recovered = await finalizeUploadedImage(listingId, item.id, 1);
+      if (recovered.ok) {
+        lastError = null;
+        break;
+      }
+    } catch {
+      // The normal retry below is still safe because every image path is unique.
+    }
+  }
+
+  if (cancelledUploadsRef.current.has(item.id)) {
+    await removeListingImageAction({ listingId, imageId: item.id }).catch(() => undefined);
+    return;
+  }
+
+  if (lastError) {
+    failUpload(
+      isAuthenticationStorageError(lastError)
+        ? 'Your session could not be verified. Sign out, sign in again, and retry the photo.'
+        : undefined,
+    );
+    return;
+  }
+
+  try {
+    const finalized = await finalizeUploadedImage(listingId, item.id, 5);
+    if (!finalized.ok) {
+      failUpload(finalized.message);
+      return;
+    }
+
+    setImages((current) =>
+      current.map((image) =>
+        image.id === item.id ? { ...image, progress: 100, status: 'uploaded' } : image,
+      ),
+    );
+    setMessage('');
+  } catch {
+    failUpload(`${file.name} uploaded but could not be verified. Remove it and try again.`);
+  }
 }

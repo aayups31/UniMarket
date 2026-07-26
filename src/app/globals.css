@@ -157,6 +157,10 @@ svg {
     text-wrap: balance;
   }
 
+  .um-display-safe {
+    padding-bottom: 0.1em;
+  }
+
   .um-pretty {
     text-wrap: pretty;
   }
@@ -1049,28 +1053,10 @@ svg {
   opacity: 1;
 }
 
-.um-motion-loop-cover {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-  opacity: 0;
-  background:
-    radial-gradient(circle at 16% 7%, rgb(77 57 12 / 15%), transparent 38%),
-    radial-gradient(circle at 85% 78%, rgb(9 34 54 / 18%), transparent 44%), #020508;
-  transition: opacity 900ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.um-motion-loop-cover--active {
-  opacity: 1;
-}
-
 .um-motion-caption {
-  display: grid;
-  grid-template-columns: 1.5rem minmax(0, 1fr);
+  display: flex;
   min-height: 6.5rem;
   align-items: center;
-  gap: 0.9rem;
   border-top: 1px solid rgb(255 255 255 / 9%);
   background: linear-gradient(145deg, #12181b, #070a0e);
   padding: 1.25rem 1.5rem;

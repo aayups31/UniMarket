@@ -141,7 +141,7 @@ export default function WaterlooMarketplacePage() {
                 University of Waterloo
               </div>
 
-              <h1 className="um-balanced mt-7 text-[clamp(3.45rem,6.35vw,6.4rem)] font-semibold leading-[0.92] tracking-[-0.062em] text-[#f6f1e8]">
+              <h1 className="um-balanced um-display-safe mt-7 text-[clamp(3.1rem,6vw,6rem)] font-semibold leading-[1.01] tracking-[-0.044em] text-[#f6f1e8] sm:leading-[0.98]">
                 Everything you need.
                 <span className="block text-um-gold-300">Already nearby.</span>
               </h1>
@@ -201,17 +201,14 @@ export default function WaterlooMarketplacePage() {
 
             <nav
               aria-label="Browse marketplace categories"
-              className="absolute inset-x-5 bottom-5 overflow-hidden rounded-[1.35rem] border border-white/[0.12] bg-[#090b10]/78 shadow-2xl backdrop-blur-xl sm:inset-x-8 sm:bottom-8"
+              className="absolute inset-x-5 bottom-5 isolate overflow-hidden rounded-[1.35rem] border border-[#8d7437]/45 bg-[#02060c]/58 shadow-[0_28px_80px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(242,205,82,0.1)] backdrop-blur-lg sm:inset-x-8 sm:bottom-8"
             >
-              {SEARCH_CATEGORIES.map((category, index) => (
+              {SEARCH_CATEGORIES.map((category) => (
                 <Link
-                  className="group grid min-h-[4.5rem] grid-cols-[2rem_1fr_auto] items-center gap-3 border-b border-white/[0.08] px-4 text-white last:border-0 transition hover:bg-white/[0.065] sm:min-h-[5rem] sm:grid-cols-[2.4rem_1fr_auto] sm:px-5"
+                  className="group grid min-h-[4.5rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-[#8d7437]/25 bg-black/25 px-4 text-white transition-[background-color,border-color] duration-300 last:border-b-0 even:bg-black/15 hover:border-[#d6b653]/35 hover:bg-[#171711]/70 sm:min-h-[5rem] sm:px-5"
                   href={categoryHref(category.slug)}
                   key={category.slug}
                 >
-                  <span className="font-mono text-[0.58rem] text-um-gold-300/80">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
                   <span className="text-lg font-semibold tracking-[-0.025em] sm:text-xl">
                     {category.name}
                   </span>
@@ -233,7 +230,7 @@ export default function WaterlooMarketplacePage() {
               <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[#8c6900]">
                 Four parts of student life
               </p>
-              <h2 className="um-balanced mt-5 max-w-lg text-[clamp(2.6rem,4.8vw,4.6rem)] font-semibold leading-[0.96] tracking-[-0.055em]">
+              <h2 className="um-balanced um-display-safe mt-5 max-w-lg text-[clamp(2.5rem,4.6vw,4.4rem)] font-semibold leading-[1.02] tracking-[-0.04em] sm:leading-[0.99]">
                 Start where the problem is.
               </h2>
               <p className="mt-6 max-w-md text-base leading-7 text-black/52">
@@ -243,15 +240,12 @@ export default function WaterlooMarketplacePage() {
             </div>
 
             <div className="border-t border-black/12">
-              {SEARCH_CATEGORIES.map((category, index) => (
+              {SEARCH_CATEGORIES.map((category) => (
                 <Link
-                  className="group grid gap-4 border-b border-black/12 py-5 transition sm:grid-cols-[2.5rem_1fr_12rem_2rem] sm:items-center sm:py-6"
+                  className="group grid gap-4 border-b border-black/12 py-5 transition sm:grid-cols-[minmax(0,1fr)_12rem_2rem] sm:items-center sm:py-6"
                   href={categoryHref(category.slug)}
                   key={category.slug}
                 >
-                  <span className="font-mono text-[0.58rem] text-black/35">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
                   <div>
                     <h3 className="text-2xl font-semibold tracking-[-0.035em] transition group-hover:text-[#7d5e00]">
                       {category.name}
@@ -303,9 +297,6 @@ export default function WaterlooMarketplacePage() {
                   >
                     {category.shortName}
                   </h3>
-                  <span className="font-mono text-[0.55rem] text-white/28">
-                    {String(getItemsForCategory(category.slug).length).padStart(2, '0')}
-                  </span>
                 </div>
                 <ul className="mt-2">
                   {getItemsForCategory(category.slug).map((item) => (

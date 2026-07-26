@@ -519,12 +519,9 @@ export function ListingComposer({ sellerName, categories, initial }: ListingComp
           {STEPS.map((step, index) => (
             <li className="flex items-center" key={step.href}>
               <a
-                className="group inline-flex min-h-14 items-center gap-2.5 px-3 text-xs font-semibold text-white/55 transition-colors duration-160 ease-um-out hover:text-white sm:px-5 sm:text-sm"
+                className="group inline-flex min-h-14 items-center px-3 text-xs font-semibold text-white/55 transition-colors duration-160 ease-um-out hover:text-white sm:px-5 sm:text-sm"
                 href={step.href}
               >
-                <span className="font-condensed text-[0.66rem] font-bold tracking-[0.12em] text-um-gold-400">
-                  {String(index + 1).padStart(2, '0')}
-                </span>
                 {step.label}
               </a>
               {index < STEPS.length - 1 ? (
@@ -554,7 +551,6 @@ export function ListingComposer({ sellerName, categories, initial }: ListingComp
           >
             <SectionHeading
               eyebrow="Item details"
-              number="02"
               title="Tell students what they need to know"
               id="details-heading"
             />
@@ -730,7 +726,6 @@ export function ListingComposer({ sellerName, categories, initial }: ListingComp
             <SectionHeading
               eyebrow="Price & pickup"
               id="pricing-heading"
-              number="03"
               title="Make the exchange easy"
             />
 
@@ -817,7 +812,7 @@ export function ListingComposer({ sellerName, categories, initial }: ListingComp
                 </span>
                 <div>
                   <p className="font-condensed text-[0.68rem] font-bold uppercase tracking-[0.16em] text-um-gold-400">
-                    04 / Publish
+                    Publish
                   </p>
                   <h2 className="mt-1.5 text-xl font-bold tracking-[-0.025em] text-white">
                     Listed for Waterloo.
@@ -1041,33 +1036,18 @@ function GoldBands() {
   );
 }
 
-function SectionHeading({
-  eyebrow,
-  number,
-  title,
-  id,
-}: {
-  eyebrow: string;
-  number: string;
-  title: string;
-  id: string;
-}) {
+function SectionHeading({ eyebrow, title, id }: { eyebrow: string; title: string; id: string }) {
   return (
-    <div className="grid gap-4 sm:grid-cols-[3.25rem_1fr]">
-      <span className="font-condensed flex h-10 items-start border-l-2 border-um-gold-500 pl-3 pt-0.5 text-xs font-bold tracking-[0.1em] text-um-gold-700">
-        {number}
-      </span>
-      <div>
-        <p className="font-condensed text-xs font-bold uppercase tracking-[0.15em] text-um-gold-700">
-          {eyebrow}
-        </p>
-        <h2
-          className="mt-1.5 break-words pb-0.5 text-2xl font-bold leading-tight tracking-[-0.035em] text-um-text-strong"
-          id={id}
-        >
-          {title}
-        </h2>
-      </div>
+    <div className="border-l-2 border-um-gold-500 pl-4">
+      <p className="font-condensed text-xs font-bold uppercase tracking-[0.15em] text-um-gold-700">
+        {eyebrow}
+      </p>
+      <h2
+        className="mt-1.5 break-words pb-0.5 text-2xl font-bold leading-tight tracking-[-0.035em] text-um-text-strong"
+        id={id}
+      >
+        {title}
+      </h2>
     </div>
   );
 }

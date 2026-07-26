@@ -103,7 +103,7 @@ export default async function MyListingsPage() {
               const Icon = group.icon;
               return (
                 <section aria-labelledby={`${group.status}-heading`} key={group.status}>
-                  <div className="mb-5 flex items-center justify-between gap-5 border-b border-white/[0.075] pb-4">
+                  <div className="mb-5 flex items-center gap-5 border-b border-white/[0.075] pb-4">
                     <div className="flex items-center gap-2.5">
                       <Icon
                         aria-hidden="true"
@@ -117,9 +117,6 @@ export default async function MyListingsPage() {
                         {group.label}
                       </h2>
                     </div>
-                    <span className="font-mono text-[0.62rem] font-semibold tracking-[0.13em] text-white/32">
-                      {String(groupListings.length).padStart(2, '0')}
-                    </span>
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-5">

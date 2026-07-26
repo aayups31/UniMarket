@@ -178,26 +178,6 @@ static void DrawVignette(CGFloat opacity) {
   DrawRadialGlow(830, 450, 520, RGB(0, 0, 0, 1), 0.34 * opacity);
 }
 
-static void DrawDarkLoopDissolve(CGFloat time) {
-  // Fade the completed scene as a single composite. Fading the translucent
-  // glass materials independently makes AppKit resolve their low-alpha color
-  // channels toward pale grey, which reads as a white flash in the encoded
-  // loop. A short dark hold gives the decoder a visually identical hand-off.
-  CGFloat fadeIn = 1 - EaseInOut(Phase(time, 0.00, 0.055));
-  CGFloat fadeOut = EaseInOut(Phase(time, 0.82, 0.965));
-  CGFloat opacity = MAX(fadeIn, fadeOut);
-  if (opacity <= 0.001)
-    return;
-
-  CGContextRef context = [NSGraphicsContext currentContext].CGContext;
-  CGContextSaveGState(context);
-  CGContextSetBlendMode(context, kCGBlendModeNormal);
-  CGContextSetRGBFillColor(context, 2.0 / 255.0, 5.0 / 255.0,
-                           8.0 / 255.0, opacity);
-  CGContextFillRect(context, CGRectMake(0, 0, kWidth, kHeight));
-  CGContextRestoreGState(context);
-}
-
 static void DrawMetalPlate(NSRect topRect, CGFloat radius, CGFloat depth,
                            NSColor *topColor, NSColor *bottomColor,
                            CGFloat alpha) {
@@ -538,9 +518,16 @@ static void DrawBrowseScene(CGFloat time, UMAssets assets) {
   CGFloat reveal = intro;
   if (reveal <= 0.001) {
     DrawVignette(1);
-    DrawDarkLoopDissolve(time);
     return;
   }
+
+  // The star field is the permanent plate for this scene. Fade only the
+  // interface composite so the end of the loop never collapses to black.
+  CGFloat interfaceOpacity = 1 - EaseInOut(Phase(time, 0.82, 0.965));
+  CGContextRef interfaceContext = [NSGraphicsContext currentContext].CGContext;
+  CGContextSaveGState(interfaceContext);
+  CGContextSetAlpha(interfaceContext, interfaceOpacity);
+  CGContextBeginTransparencyLayer(interfaceContext, NULL);
 
   CGFloat deviceScale = Mix(0.89, 1.0, intro);
   CGFloat deviceRotation = Mix(5.4, -1.1, intro) + sin(time * M_PI) * 0.18;
@@ -675,8 +662,9 @@ static void DrawBrowseScene(CGFloat time, UMAssets assets) {
                reveal * (1 - Phase(time, 0.70, 0.78)));
   }
 
+  CGContextEndTransparencyLayer(interfaceContext);
+  CGContextRestoreGState(interfaceContext);
   DrawVignette(1);
-  DrawDarkLoopDissolve(time);
 }
 
 static NSBezierPath *FiberPath(NSPoint startTop, NSPoint control1Top,

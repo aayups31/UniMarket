@@ -346,6 +346,54 @@ export async function reorderListingImagesAction(input: {
   return { ok: true, data: { imageIds: input.imageIds } };
 }
 
+export async function reverifyListingImagesAction(input: { listingId: string }): Promise<ListingActionResult<{ updated: string[] }>> {
+  const viewer = await requireStudentSeller('/listings/new');
+  const parsed = listingIdSchema.safeParse(input.listingId);
+  if (!parsed.success) return { ok: false, message: 'Invalid listing id.' };
+
+  const supabase = untyped(await createClient());
+
+  const { data: pending } = await supabase
+    .from('listing_images')
+    .select('id,storage_path,upload_status')
+    .eq('listing_id', parsed.data)
+    .neq('upload_status', 'uploaded');
+
+  if (!pending || pending.length === 0) return { ok: true, data: { updated: [] } };
+
+  const updated: string[] = [];
+  for (const row of pending) {
+    try {
+      const path = String(row.storage_path);
+      const segments = path.split('/');
+      const fileName = segments.pop();
+      const folder = segments.join('/');
+      if (!fileName) continue;
+      const { data: objects, error: storageError } = await supabase.storage
+        .from('listing-images')
+        .list(folder, { search: fileName, limit: 2 });
+      if (!storageError && objects?.some((o) => o.name === fileName)) {
+        const { error } = await supabase
+          .from('listing_images')
+          .update({ upload_status: 'uploaded' })
+          .eq('id', row.id);
+        if (!error) updated.push(row.id);
+      }
+    } catch (err) {
+      // continue with others
+      // eslint-disable-next-line no-console
+      console.warn('reverifyListingImagesAction error', err);
+    }
+  }
+
+  if (updated.length > 0) {
+    revalidatePath('/marketplace');
+    revalidatePath(`/listings/${parsed.data}`);
+  }
+
+  return { ok: true, data: { updated } };
+}
+
 export async function archiveOwnListingAction(
   listingId: unknown,
 ): Promise<ListingActionResult<{ id: string }>> {

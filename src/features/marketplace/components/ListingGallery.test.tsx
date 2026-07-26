@@ -54,4 +54,24 @@ describe('ListingGallery', () => {
       'true',
     );
   });
+
+  it('uses the configured focus position when rendering a photo', () => {
+    render(
+      <ListingGallery
+        listing={{
+          ...listing,
+          images: [
+            {
+              ...listing.images[0],
+              focusPosition: '80% 20%',
+            },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByRole('img', { name: 'Desk lamp, photo 1 of 1' })).toHaveStyle({
+      objectPosition: '80% 20%',
+    });
+  });
 });

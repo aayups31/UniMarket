@@ -43,7 +43,7 @@ export function Hero() {
               </p>
             </div>
 
-            <h1 className="um-hero-reveal um-hero-reveal--two um-balanced mt-7 max-w-[62rem] text-[clamp(3.4rem,7.2vw,7.35rem)] font-bold leading-[0.91] tracking-[-0.042em] text-[#f5f0e7]">
+            <h1 className="um-hero-reveal um-hero-reveal--two um-balanced um-display-safe mt-7 max-w-[62rem] text-[clamp(3.15rem,7.05vw,7.1rem)] font-bold leading-[0.99] tracking-[-0.032em] text-[#f5f0e7] sm:leading-[0.96]">
               Your university.
               <span className="block">Your people.</span>
               <span className="font-editorial block font-normal tracking-[-0.025em] text-um-gold-300">

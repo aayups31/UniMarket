@@ -128,7 +128,7 @@ export default async function ItemSearchPage({ params }: ItemPageProps) {
                 Waterloo search guide · {category.shortName}
               </p>
 
-              <h1 className="um-balanced mt-6 text-[clamp(3.15rem,5.5vw,5.65rem)] font-semibold leading-[0.94] tracking-[-0.058em] text-[#f6f1e8]">
+              <h1 className="um-balanced um-display-safe mt-6 text-[clamp(2.9rem,5.25vw,5.35rem)] font-semibold leading-[1.02] tracking-[-0.042em] text-[#f6f1e8] sm:leading-[0.99]">
                 {item.title}
               </h1>
 
@@ -216,14 +216,8 @@ export default async function ItemSearchPage({ params }: ItemPageProps) {
               Before meeting
             </p>
             <ol className="mt-6 border-t border-white/[0.1]">
-              {category.checklist.map((check, index) => (
-                <li
-                  className="grid grid-cols-[2rem_1fr] gap-3 border-b border-white/[0.1] py-5"
-                  key={check}
-                >
-                  <span className="font-mono text-[0.58rem] text-um-gold-300">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
+              {category.checklist.map((check) => (
+                <li className="border-b border-white/[0.1] py-5" key={check}>
                   <p className="text-sm leading-6 text-white/54">{check}</p>
                 </li>
               ))}
@@ -264,7 +258,7 @@ export default async function ItemSearchPage({ params }: ItemPageProps) {
           </div>
 
           <ul className="mt-8 grid border-t border-white/[0.1] sm:grid-cols-2 lg:grid-cols-4">
-            {relatedItems.map((related, index) => (
+            {relatedItems.map((related) => (
               <li
                 className="border-b border-white/[0.1] lg:border-r lg:last:border-r-0"
                 key={related.slug}
@@ -274,10 +268,7 @@ export default async function ItemSearchPage({ params }: ItemPageProps) {
                   href={itemHref(related.slug)}
                 >
                   <span>
-                    <span className="font-mono text-[0.55rem] text-white/24">
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                    <span className="mt-2 block font-semibold tracking-[-0.02em] text-white/62 transition group-hover:text-white">
+                    <span className="block font-semibold tracking-[-0.02em] text-white/62 transition group-hover:text-white">
                       {related.name}
                     </span>
                   </span>

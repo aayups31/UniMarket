@@ -346,6 +346,7 @@ async function hydrateListings(
       storagePath: image.storage_path,
       position: image.position,
       url: signedUrls.get(image.storage_path) ?? null,
+      focusPosition: image.position === 1 ? 'object-[50%_50%]' : 'object-[50%_35%]',
     };
     const existing = imagesByListing.get(image.listing_id) ?? [];
     existing.push(mapped);
