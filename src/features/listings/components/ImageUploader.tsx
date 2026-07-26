@@ -409,6 +409,10 @@ export function ImageUploader({
   unreliable on phones. For best results, save your draft and add photos
   from a laptop or desktop. We’re working on a fix.
 </div>
+      <div className="mb-4 rounded-um-sm border border-white/15 bg-white/[0.05] p-3 text-sm leading-5 text-um-text-muted">
+  <strong className="text-white">Not seeing an uploaded photo?</strong>{' '}
+  Refresh the page once. Your listing inputs will remain saved.
+</div>
 
       <div
         onDragEnter={(event) => {
