@@ -1,98 +1,41 @@
 'use client';
 
-import {
-  BadgeCheck,
-  Bike,
-  BookOpen,
-  Building2,
-  ChevronRight,
-  Heart,
-  KeyRound,
-  Mail,
-  Monitor,
-  MousePointer2,
-  Package,
-  Search,
-  Shirt,
-  ShieldCheck,
-  UserRound,
-  type LucideIcon,
-} from 'lucide-react';
+import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 
-const marketplaceItems: {
-  color: string;
-  icon: LucideIcon;
-  meta: string;
-  price: string;
-  title: string;
-}[] = [
+type MotionPreference = 'allow' | 'pending' | 'reduce';
+type MotionSceneName = 'access' | 'browse' | 'network';
+
+type MotionScene = {
+  caption: string;
+  name: MotionSceneName;
+  number: string;
+};
+
+const motionScenes: MotionScene[] = [
   {
-    title: '27” Monitor',
-    meta: 'Like new · SLC',
-    price: '$145',
-    icon: Monitor,
-    color: '#d8c9aa',
+    name: 'access',
+    number: '01',
+    caption: 'One Waterloo email. Your campus opens.',
   },
   {
-    title: 'MATH 239',
-    meta: 'Good · DC',
-    price: '$38',
-    icon: BookOpen,
-    color: '#c5b573',
+    name: 'browse',
+    number: '02',
+    caption: 'Find what Waterloo already has.',
   },
   {
-    title: 'City bike',
-    meta: 'Good · UWP',
-    price: '$210',
-    icon: Bike,
-    color: '#9ca98d',
-  },
-  {
-    title: 'Warriors crew',
-    meta: 'Like new · ICON',
-    price: '$32',
-    icon: Shirt,
-    color: '#c7a14c',
-  },
-  {
-    title: 'Move-in box',
-    meta: 'New · Lester',
-    price: '$12',
-    icon: Package,
-    color: '#b89978',
-  },
-  {
-    title: 'Desk display',
-    meta: 'Fair · Campus',
-    price: '$75',
-    icon: Monitor,
-    color: '#889b9b',
+    name: 'network',
+    number: '03',
+    caption: 'One university identity brings everyone closer.',
   },
 ];
 
 export function HowItWorks() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const [motionIsLive, setMotionIsLive] = useState(false);
-
-  useEffect(() => {
-    const section = sectionRef.current;
-    if (!section || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    const observer = new IntersectionObserver(([entry]) => setMotionIsLive(entry.isIntersecting), {
-      rootMargin: '10% 0px 10%',
-      threshold: 0.12,
-    });
-
-    observer.observe(section);
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <section
+      aria-labelledby="inside-unimarket-heading"
       className="relative scroll-mt-24 overflow-hidden bg-transparent px-4 py-20 text-[#eee9df] sm:px-6 sm:py-28 lg:py-36"
       id="how-it-works"
-      ref={sectionRef}
     >
       <div className="relative mx-auto max-w-um-content">
         <header className="mb-12 flex flex-col gap-5 sm:mb-16 sm:flex-row sm:items-end sm:justify-between">
@@ -100,7 +43,10 @@ export function HowItWorks() {
             <p className="font-condensed text-xs font-bold uppercase tracking-[0.18em] text-um-gold-400">
               Inside UniMarket
             </p>
-            <h2 className="um-balanced mt-4 max-w-3xl text-[clamp(2.6rem,5vw,5.25rem)] font-bold leading-[0.96] tracking-[-0.038em]">
+            <h2
+              className="um-balanced mt-4 max-w-3xl text-[clamp(2.6rem,5vw,5.25rem)] font-bold leading-[0.96] tracking-[-0.038em]"
+              id="inside-unimarket-heading"
+            >
               Your campus,
               <span className="font-editorial font-normal tracking-[-0.02em] text-um-gold-300">
                 {' '}
@@ -113,410 +59,276 @@ export function HowItWorks() {
           </p>
         </header>
 
-        <div className="grid gap-5 lg:grid-cols-3">
-          <MotionCard line="One Waterloo email. Your campus opens." number="01">
-            <AccessSequence motionIsLive={motionIsLive} />
-          </MotionCard>
-
-          <MotionCard line="Find what Waterloo already has." number="02">
-            <BrowseSequence motionIsLive={motionIsLive} />
-          </MotionCard>
-
-          <MotionCard line="One university identity brings everyone closer." number="03">
-            <CampusNetwork motionIsLive={motionIsLive} />
-          </MotionCard>
-        </div>
+        <ol className="grid list-none gap-x-5 gap-y-12 p-0 md:grid-cols-2 xl:grid-cols-[0.96fr_1.08fr_0.96fr] xl:items-start">
+          {motionScenes.map((scene, index) => (
+            <li
+              className={
+                index === 2
+                  ? 'md:col-span-2 md:mx-auto md:w-[calc(50%-0.625rem)] xl:col-span-1 xl:w-full'
+                  : index === 1
+                    ? 'xl:-mt-7'
+                    : ''
+              }
+              key={scene.name}
+            >
+              <MotionStory scene={scene} />
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   );
 }
 
-function MotionCard({
-  children,
-  line,
-  number,
-}: {
-  children: React.ReactNode;
-  line: string;
-  number: string;
-}) {
+function MotionStory({ scene }: { scene: MotionScene }) {
   return (
-    <article className="um-motion-card group relative min-w-0 overflow-hidden rounded-[1.65rem] border border-white/[0.12] bg-[#09100f] shadow-[0_30px_80px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,0.055)] transition-[transform,border-color] duration-500 ease-um-out hover:-translate-y-1 hover:border-white/[0.18] sm:rounded-[2rem]">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-[1px] z-30 rounded-[calc(1.65rem-1px)] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),inset_1px_0_0_rgba(255,255,255,0.025),inset_-1px_0_0_rgba(255,255,255,0.025)] sm:rounded-[calc(2rem-1px)]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-[8%] top-0 z-40 h-px bg-gradient-to-r from-transparent via-[#fff7d8]/70 to-transparent"
-      />
-      <div className="relative h-[29rem] overflow-hidden sm:h-[31rem] lg:h-[32rem]">{children}</div>
-      <div className="relative flex min-h-[6.5rem] items-center gap-4 border-t border-white/[0.09] bg-[linear-gradient(145deg,#12181b,#070a0e)] px-6 py-5 sm:px-7">
-        <span className="font-mono text-[0.58rem] font-semibold tracking-[0.18em] text-um-gold-400/72">
-          {number}
+    <figure
+      className={`um-motion-card um-motion-card--${scene.name} group relative min-w-0 overflow-hidden`}
+    >
+      <MotionFilm scene={scene.name} />
+
+      <figcaption className="um-motion-caption">
+        <span
+          aria-hidden="true"
+          className="font-mono text-[0.58rem] font-semibold tracking-[0.18em] text-um-gold-400/68"
+        >
+          {scene.number}
         </span>
-        <p className="text-[1.03rem] font-semibold leading-6 tracking-[-0.012em] text-[#e9e4d9]">
-          {line}
-        </p>
-      </div>
-    </article>
+        <span className="text-[1.03rem] font-semibold leading-6 tracking-[-0.012em] text-[#e9e4d9]">
+          {scene.caption}
+        </span>
+      </figcaption>
+    </figure>
   );
 }
 
-function AmbientStage({
-  children,
-  motionIsLive,
-}: {
-  children: React.ReactNode;
-  motionIsLive: boolean;
-}) {
+function MotionFilm({ scene }: { scene: MotionSceneName }) {
+  const stageRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const loopIsCoveredRef = useRef(false);
+  const loopRevealIsPendingRef = useRef(false);
+  const loopRevealFrameRef = useRef<number | null>(null);
+  const loopRevealAnimationFrameRef = useRef<number | null>(null);
+  const loopRevealVideoRef = useRef<HTMLVideoElement | null>(null);
+  const [motionPreference, setMotionPreference] = useState<MotionPreference>('pending');
+  const [sourceIsAttached, setSourceIsAttached] = useState(false);
+  const [stageIsVisible, setStageIsVisible] = useState(false);
+  const [pageIsVisible, setPageIsVisible] = useState(true);
+  const [videoHasDecodedFrame, setVideoHasDecodedFrame] = useState(false);
+  const [loopIsCovered, setLoopIsCovered] = useState(false);
+
+  const poster = `/motion/${scene}-poster.webp`;
+  const video = `/motion/${scene}.webm`;
+  const loopCoverIsEnabled = scene === 'browse';
+
+  useEffect(() => {
+    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const syncPreference = () => {
+      if (query.matches) {
+        loopIsCoveredRef.current = false;
+        loopRevealIsPendingRef.current = false;
+        setLoopIsCovered(false);
+        setVideoHasDecodedFrame(false);
+      }
+
+      setMotionPreference(query.matches ? 'reduce' : 'allow');
+    };
+
+    syncPreference();
+    query.addEventListener('change', syncPreference);
+
+    return () => query.removeEventListener('change', syncPreference);
+  }, []);
+
+  useEffect(() => {
+    const syncPageVisibility = () => setPageIsVisible(document.visibilityState === 'visible');
+
+    syncPageVisibility();
+    document.addEventListener('visibilitychange', syncPageVisibility);
+
+    return () => document.removeEventListener('visibilitychange', syncPageVisibility);
+  }, []);
+
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage || motionPreference !== 'allow') return;
+
+    const preloadObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+
+        setSourceIsAttached(true);
+        preloadObserver.disconnect();
+      },
+      {
+        rootMargin: '480px 0px',
+        threshold: 0,
+      },
+    );
+
+    preloadObserver.observe(stage);
+
+    return () => preloadObserver.disconnect();
+  }, [motionPreference]);
+
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage || motionPreference !== 'allow') {
+      setStageIsVisible(false);
+      return;
+    }
+
+    const playbackObserver = new IntersectionObserver(
+      ([entry]) => {
+        setStageIsVisible(entry.isIntersecting && entry.intersectionRatio >= 0.18);
+      },
+      {
+        threshold: [0, 0.18, 0.5],
+      },
+    );
+
+    playbackObserver.observe(stage);
+
+    return () => playbackObserver.disconnect();
+  }, [motionPreference]);
+
+  useEffect(() => {
+    if (!sourceIsAttached || motionPreference !== 'allow') return;
+
+    videoRef.current?.load();
+  }, [motionPreference, sourceIsAttached]);
+
+  useEffect(() => {
+    const element = videoRef.current;
+    if (!element) return;
+
+    if (!sourceIsAttached || motionPreference !== 'allow' || !stageIsVisible || !pageIsVisible) {
+      element.pause();
+      return;
+    }
+
+    let cancelled = false;
+    const play = () => {
+      if (cancelled) return;
+
+      void element.play().catch(() => {
+        // The poster remains visible if a browser declines programmatic playback.
+      });
+    };
+
+    if (element.readyState >= 2) {
+      play();
+    } else {
+      element.addEventListener('canplay', play, { once: true });
+    }
+
+    return () => {
+      cancelled = true;
+      element.removeEventListener('canplay', play);
+    };
+  }, [motionPreference, pageIsVisible, sourceIsAttached, stageIsVisible]);
+
+  useEffect(
+    () => () => {
+      if (loopRevealAnimationFrameRef.current !== null) {
+        window.cancelAnimationFrame(loopRevealAnimationFrameRef.current);
+      }
+
+      const videoElement = loopRevealVideoRef.current;
+      if (videoElement && loopRevealFrameRef.current !== null) {
+        videoElement.cancelVideoFrameCallback?.(loopRevealFrameRef.current);
+      }
+    },
+    [],
+  );
+
+  const coverLoopBoundary = () => {
+    if (loopIsCoveredRef.current) return;
+
+    loopIsCoveredRef.current = true;
+    setLoopIsCovered(true);
+  };
+
+  const revealLoopStart = (element: HTMLVideoElement) => {
+    if (loopRevealIsPendingRef.current) return;
+
+    loopRevealIsPendingRef.current = true;
+    loopRevealVideoRef.current = element;
+
+    const reveal = () => {
+      loopRevealAnimationFrameRef.current = window.requestAnimationFrame(() => {
+        loopRevealAnimationFrameRef.current = null;
+        loopRevealFrameRef.current = null;
+        loopRevealVideoRef.current = null;
+        loopRevealIsPendingRef.current = false;
+        loopIsCoveredRef.current = false;
+        setLoopIsCovered(false);
+      });
+    };
+
+    if (typeof element.requestVideoFrameCallback === 'function') {
+      loopRevealFrameRef.current = element.requestVideoFrameCallback(reveal);
+    } else {
+      reveal();
+    }
+  };
+
+  const handleTimeUpdate = (element: HTMLVideoElement) => {
+    if (!loopCoverIsEnabled) return;
+    if (!Number.isFinite(element.duration) || element.duration <= 0) return;
+
+    const timeRemaining = element.duration - element.currentTime;
+
+    // Cover the decoder before it reaches the container boundary. Once the
+    // native loop has wrapped, wait for a real first frame before revealing it.
+    if (!loopIsCoveredRef.current && timeRemaining <= 1.05) {
+      coverLoopBoundary();
+    } else if (loopIsCoveredRef.current && element.currentTime <= 0.35) {
+      revealLoopStart(element);
+    }
+  };
+
   return (
-    <div
-      className={`relative flex h-full items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_50%_38%,rgba(206,162,35,0.13),transparent_34%),linear-gradient(160deg,#0d1917_0%,#080d11_54%,#07090d_100%)] p-5 sm:p-7 ${motionIsLive ? 'um-motion-live' : ''}`}
-    >
-      <div
+    <div className={`um-motion-film-frame um-motion-film-frame--${scene}`} ref={stageRef}>
+      <Image
+        alt=""
         aria-hidden="true"
-        className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(242,213,111,0.075),transparent_27%),radial-gradient(circle_at_86%_86%,rgba(74,139,126,0.07),transparent_30%)]"
+        className={`um-motion-film-poster object-cover ${
+          videoHasDecodedFrame ? 'um-motion-film-poster--video-ready' : ''
+        }`}
+        fill
+        priority={false}
+        sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
+        src={poster}
       />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-[1px] rounded-[inherit] bg-[linear-gradient(135deg,rgba(255,255,255,0.035),transparent_24%,transparent_70%,rgba(231,188,53,0.025))] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-      />
-      <div className="relative h-full w-full">{children}</div>
-    </div>
-  );
-}
 
-function AccessSequence({ motionIsLive }: { motionIsLive: boolean }) {
-  return (
-    <AmbientStage motionIsLive={motionIsLive}>
-      <div aria-hidden="true" className="relative mx-auto h-full max-w-[22rem]">
-        <div
-          className="um-access-signin-panel absolute inset-x-0 top-[11%] z-20 mx-auto w-full max-w-[19rem] overflow-hidden rounded-[1.45rem] border border-white/[0.2] bg-[linear-gradient(145deg,#273236,#0a0f14)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_30px_72px_rgba(0,0,0,0.52)]"
-          data-motion="signin-panel"
+      {motionPreference === 'allow' ? (
+        <video
+          aria-hidden="true"
+          className={`um-motion-film ${videoHasDecodedFrame ? 'um-motion-film--ready' : ''}`}
+          controls={false}
+          disablePictureInPicture
+          loop
+          muted
+          onEmptied={() => setVideoHasDecodedFrame(false)}
+          onLoadedData={() => setVideoHasDecodedFrame(true)}
+          onPlaying={() => setVideoHasDecodedFrame(true)}
+          onTimeUpdate={(event) => handleTimeUpdate(event.currentTarget)}
+          playsInline
+          preload="none"
+          ref={videoRef}
+          tabIndex={-1}
         >
-          <GlassSpecular />
-          <div className="flex items-center justify-between border-b border-white/[0.08] px-5 py-4">
-            <div className="flex items-center gap-2">
-              <span className="grid size-7 place-items-center rounded-full bg-um-gold-400 text-[0.62rem] font-black text-um-ink-950">
-                UM
-              </span>
-              <span className="text-xs font-bold tracking-[-0.01em] text-[#e8e3d8]">UniMarket</span>
-            </div>
-            <span className="size-1.5 rounded-full bg-um-gold-400 shadow-[0_0_12px_rgba(231,188,53,0.8)]" />
-          </div>
+          {sourceIsAttached ? <source src={video} type="video/webm" /> : null}
+        </video>
+      ) : null}
 
-          <div className="p-5">
-            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.15em] text-white/38">
-              Student sign in
-            </p>
-            <div className="mt-4 space-y-2.5">
-              <DemoField icon={Mail} value="alex@uwaterloo.ca" />
-              <DemoField icon={KeyRound} value="••••••••••••" />
-            </div>
-            <div
-              className="um-access-signin-button relative mt-4 flex h-11 items-center justify-center overflow-hidden rounded-xl bg-um-gold-300 text-sm font-black text-um-ink-950"
-              data-motion="signin-button"
-            >
-              <span className="um-access-click-ripple absolute size-5 rounded-full border border-um-ink-950/35" />
-              <span className="relative">Sign in</span>
-              <ChevronRight className="ml-1 size-4" strokeWidth={2.2} />
-            </div>
-          </div>
-        </div>
-
-        <div
-          className="um-access-cursor pointer-events-none absolute left-[62%] top-[57%] z-40 text-[#fff0b0] drop-shadow-[0_7px_12px_rgba(0,0,0,0.72)]"
-          data-motion="signin-cursor"
-        >
-          <MousePointer2 className="size-6" fill="#fff0b0" strokeWidth={1.15} />
-        </div>
-
-        <div
-          className="um-access-welcome-panel absolute inset-x-0 top-[29%] z-30 mx-auto w-full max-w-[19rem] overflow-hidden rounded-[1.45rem] border border-[#fff2ba]/25 bg-[linear-gradient(145deg,#242f23,#0a100d)] shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_32px_78px_rgba(0,0,0,0.58)]"
-          data-motion="welcome-panel"
-        >
-          <GlassSpecular />
-          <div className="relative p-6">
-            <div
-              aria-hidden="true"
-              className="absolute -right-10 -top-12 size-32 rounded-full bg-um-gold-400/10 blur-3xl"
-            />
-            <div className="relative flex items-start justify-between gap-5">
-              <div>
-                <p className="text-[0.66rem] font-semibold uppercase tracking-[0.17em] text-um-gold-400">
-                  Saturday · 6:42 PM
-                </p>
-                <p className="mt-4 text-3xl font-semibold leading-none tracking-[-0.045em] text-[#f0ecdf]">
-                  Welcome back,
-                  <span className="font-editorial block font-normal text-um-gold-300">Alex.</span>
-                </p>
-              </div>
-              <span className="grid size-10 shrink-0 place-items-center rounded-full border border-um-gold-300/25 bg-um-gold-300/10 text-um-gold-300">
-                <BadgeCheck className="size-5" strokeWidth={1.8} />
-              </span>
-            </div>
-            <div className="mt-7 flex items-center gap-3 border-t border-white/[0.09] pt-4 text-xs text-white/48">
-              <span className="size-1.5 rounded-full bg-[#43a573] shadow-[0_0_12px_rgba(67,165,115,0.55)]" />
-              Waterloo is ready for you.
-            </div>
-          </div>
-        </div>
-
-        <div className="absolute inset-x-[14%] bottom-[10%] h-10 rounded-[50%] bg-black/50 blur-lg" />
-      </div>
-    </AmbientStage>
-  );
-}
-
-function DemoField({ icon: Icon, value }: { icon: LucideIcon; value: string }) {
-  return (
-    <div className="flex h-11 items-center gap-3 rounded-xl border border-white/[0.11] bg-white/[0.045] px-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.055)]">
-      <Icon className="size-3.5 text-um-gold-400" strokeWidth={1.8} />
-      <span className="truncate text-xs text-white/62">{value}</span>
-    </div>
-  );
-}
-
-function GlassSpecular() {
-  return (
-    <>
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-30 rounded-[inherit] bg-[linear-gradient(132deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.045)_14%,transparent_31%,transparent_72%,rgba(242,213,111,0.035)_100%)]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-[12%] top-0 z-30 h-px bg-gradient-to-r from-transparent via-white/70 to-transparent"
-      />
-    </>
-  );
-}
-
-function BrowseSequence({ motionIsLive }: { motionIsLive: boolean }) {
-  return (
-    <AmbientStage motionIsLive={motionIsLive}>
-      <div aria-hidden="true" className="flex h-full items-center justify-center">
-        <div className="um-browse-device relative h-[25.5rem] w-full max-w-[21rem] overflow-hidden rounded-[1.45rem] border border-white/[0.19] bg-[linear-gradient(145deg,#1f2a2e,#080d12)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_32px_78px_rgba(0,0,0,0.56)]">
-          <GlassSpecular />
-          <div className="border-b border-white/[0.07] px-4 pb-3 pt-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="grid size-6 place-items-center rounded-full bg-um-gold-400 text-[0.52rem] font-black text-um-ink-950">
-                  UM
-                </span>
-                <span className="text-[0.68rem] font-bold text-[#e7e1d5]">Marketplace</span>
-              </div>
-              <Heart className="size-3.5 text-white/30" />
-            </div>
-            <div className="mt-3 flex h-9 items-center gap-2 rounded-lg border border-white/[0.07] bg-[#080b10] px-3 text-[0.64rem] text-white/35">
-              <Search className="size-3 text-um-gold-400" strokeWidth={2} />
-              Search Waterloo
-              <span className="um-browse-caret h-3 w-px bg-um-gold-300" />
-            </div>
-            <div className="mt-2.5 flex gap-1.5 overflow-hidden">
-              {['For you', 'Electronics', 'Books'].map((label, index) => (
-                <span
-                  className={
-                    index === 0
-                      ? 'shrink-0 rounded-full bg-um-gold-300 px-2.5 py-1 text-[0.52rem] font-bold text-um-ink-950'
-                      : 'shrink-0 rounded-full border border-white/[0.08] px-2.5 py-1 text-[0.52rem] font-semibold text-white/55'
-                  }
-                  key={label}
-                >
-                  {label}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div className="relative h-[18.25rem] overflow-hidden p-3">
-            <div className="um-browse-grid grid grid-cols-2 gap-2.5">
-              {marketplaceItems.map((item) => (
-                <ListingTile item={item} key={item.title} />
-              ))}
-            </div>
-
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0e1319] to-transparent"
-            />
-          </div>
-
-          <div className="um-browse-cursor pointer-events-none absolute left-1/2 top-1/2 z-20 text-[#f7e5a2] drop-shadow-[0_5px_10px_rgba(0,0,0,0.65)]">
-            <MousePointer2 className="size-5" fill="#f7e5a2" strokeWidth={1.2} />
-          </div>
-        </div>
-      </div>
-    </AmbientStage>
-  );
-}
-
-function ListingTile({ item }: { item: (typeof marketplaceItems)[number] }) {
-  const Icon = item.icon;
-
-  return (
-    <div className="overflow-hidden rounded-xl border border-white/[0.12] bg-[#182025] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_10px_24px_rgba(0,0,0,0.18)]">
-      <div
-        className="relative grid h-[5.1rem] place-items-center overflow-hidden rounded-lg"
-        style={{ backgroundColor: item.color }}
-      >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,rgba(255,255,255,.5),transparent_38%),linear-gradient(145deg,rgba(255,255,255,.18),transparent_48%,rgba(5,7,11,.08))]" />
-        <Icon className="relative size-7 text-[#111720]/80" strokeWidth={1.45} />
-      </div>
-      <div className="px-0.5 pb-1 pt-2">
-        <div className="flex items-start justify-between gap-2">
-          <p className="truncate text-[0.65rem] font-bold text-[#e9e3d8]">{item.title}</p>
-          <p className="text-[0.61rem] font-black text-um-gold-300">{item.price}</p>
-        </div>
-        <p className="mt-1 truncate text-[0.5rem] text-white/35">{item.meta}</p>
-      </div>
-    </div>
-  );
-}
-
-function CampusNetwork({ motionIsLive }: { motionIsLive: boolean }) {
-  return (
-    <AmbientStage motionIsLive={motionIsLive}>
-      <div aria-hidden="true" className="relative mx-auto h-full w-full max-w-[23rem]">
-        <svg
-          className="absolute inset-0 size-full overflow-visible"
-          fill="none"
-          viewBox="0 0 360 420"
-        >
-          <defs>
-            <linearGradient id="networkGold" x1="0" x2="1" y1="0" y2="0">
-              <stop offset="0" stopColor="#745706" stopOpacity="0.28" />
-              <stop offset="0.52" stopColor="#e7bc35" stopOpacity="0.9" />
-              <stop offset="1" stopColor="#f2d56f" stopOpacity="0.34" />
-            </linearGradient>
-          </defs>
-
-          {[
-            'M 40 95 C 86 100 108 176 143 202',
-            'M 36 170 C 89 170 108 194 143 207',
-            'M 43 255 C 92 255 112 226 143 216',
-            'M 66 326 C 110 316 121 248 145 221',
-          ].map((path) => (
-            <path
-              className="um-network-line"
-              d={path}
-              key={path}
-              pathLength="1"
-              stroke="url(#networkGold)"
-              strokeLinecap="round"
-              strokeWidth="1.35"
-            />
-          ))}
-
-          {[
-            'M 205 183 C 250 150 298 76 333 50',
-            'M 214 196 C 264 176 304 142 340 129',
-            'M 218 213 C 265 214 304 217 333 219',
-            'M 205 238 C 250 256 278 290 306 307',
-          ].map((path) => (
-            <path
-              className="um-network-line"
-              d={path}
-              key={path}
-              pathLength="1"
-              stroke="url(#networkGold)"
-              strokeLinecap="round"
-              strokeWidth="1.2"
-            />
-          ))}
-        </svg>
-
-        <div
-          className="um-network-id-link absolute left-1/2 top-[27%] z-[15] h-[16%] w-[2.5px] origin-top -translate-x-1/2 rounded-full bg-[#edc84f] shadow-[0_0_7px_rgba(237,200,79,0.68),0_0_18px_rgba(231,188,53,0.28)]"
-          data-motion="uw-id-link"
+      {loopCoverIsEnabled ? (
+        <span
+          aria-hidden="true"
+          className={`um-motion-loop-cover ${loopIsCovered ? 'um-motion-loop-cover--active' : ''}`}
         />
-
-        <NetworkNode className="left-[2%] top-[12%]" delay={0}>
-          <Monitor className="size-4" />
-        </NetworkNode>
-        <NetworkNode className="left-[1%] top-[31%]" delay={0.06}>
-          <BookOpen className="size-4" />
-        </NetworkNode>
-        <NetworkNode className="left-[3%] top-[52%]" delay={0.12}>
-          <Bike className="size-4" />
-        </NetworkNode>
-        <NetworkNode className="left-[10%] top-[70%]" delay={0.18}>
-          <Shirt className="size-4" />
-        </NetworkNode>
-
-        <div
-          className="um-network-core absolute z-20 grid size-[4.75rem] place-items-center overflow-hidden rounded-[1.6rem] border border-[#fff8d8]/55 bg-[linear-gradient(145deg,#ffeea1,#e7bc35)] text-um-ink-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_22px_58px_rgba(0,0,0,0.5)]"
-          style={{ left: 'calc(50% - 2.375rem)', top: 'calc(50% - 2.375rem)' }}
-        >
-          <GlassSpecular />
-          <span className="relative z-40 text-base font-black tracking-[-0.05em]">UM</span>
-        </div>
-
-        <div
-          className="um-network-id absolute top-[12%] z-30 flex w-[5.5rem] flex-col items-center overflow-hidden rounded-[1.4rem] border border-white/[0.2] bg-[linear-gradient(145deg,#323e33,#0a100d)] px-2 py-3 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_22px_58px_rgba(0,0,0,0.48)]"
-          style={{ left: 'calc(50% - 2.75rem)' }}
-        >
-          <GlassSpecular />
-          <span className="relative z-40 grid size-8 place-items-center rounded-full border border-um-gold-300/12 bg-um-gold-300/12 text-um-gold-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]">
-            <ShieldCheck className="size-4" strokeWidth={1.8} />
-          </span>
-          <span className="relative z-40 mt-2 text-[0.55rem] font-black uppercase tracking-[0.12em] text-[#f0eadf]">
-            UW ID
-          </span>
-        </div>
-
-        <PersonNode className="right-[2%] top-[8%]" delay={0.06} initial="A" />
-        <PersonNode className="right-[-1%] top-[26%]" delay={0.12} initial="M" />
-        <PersonNode className="right-[2%] top-[48%]" delay={0.18} initial="S" />
-        <PersonNode className="right-[10%] top-[69%]" delay={0.24} initial="J" />
-
-        <div className="absolute bottom-[4%] left-[2%] flex items-center gap-2 text-[0.55rem] font-semibold uppercase tracking-[0.14em] text-white/28">
-          <Building2 className="size-3 text-um-gold-400/60" />
-          Waterloo network
-        </div>
-      </div>
-    </AmbientStage>
-  );
-}
-
-function NetworkNode({
-  children,
-  className,
-  delay,
-}: {
-  children: React.ReactNode;
-  className: string;
-  delay: number;
-}) {
-  return (
-    <span
-      className={`um-network-node absolute z-10 grid size-10 place-items-center overflow-hidden rounded-xl border border-um-gold-300/25 bg-[linear-gradient(145deg,#343d31,#090e12)] text-um-gold-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_14px_32px_rgba(0,0,0,0.34)] ${className}`}
-      style={{ animationDelay: `${delay}s` }}
-    >
-      <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.13),transparent_42%)]" />
-      <span className="relative">{children}</span>
-    </span>
-  );
-}
-
-function PersonNode({
-  className,
-  delay,
-  initial,
-}: {
-  className: string;
-  delay: number;
-  initial: string;
-}) {
-  return (
-    <span
-      className={`um-network-node absolute z-10 grid size-9 place-items-center overflow-hidden rounded-full border border-um-gold-300/30 bg-[linear-gradient(145deg,#343d31,#0a0f0d)] text-[0.58rem] font-black text-[#eee7d7] shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_12px_28px_rgba(0,0,0,0.36)] ${className}`}
-      style={{ animationDelay: `${delay}s` }}
-    >
-      <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.13),transparent_48%)]" />
-      <UserRound className="relative size-4 text-um-gold-300/90" strokeWidth={1.55} />
-      <span className="sr-only">Student {initial}</span>
-    </span>
+      ) : null}
+    </div>
   );
 }

@@ -960,129 +960,117 @@ svg {
   translate: 0;
 }
 
-/* Keep the homepage product stories on the compositor and pause them outside the viewport. */
+/* Authored motion films. The compositing is baked into the asset; the browser
+   only handles visibility and playback. */
 .um-motion-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 1.65rem;
+  background: #09100f;
+  box-shadow:
+    0 30px 80px rgb(0 0 0 / 34%),
+    inset 0 1px 0 rgb(255 255 255 / 5.5%);
   contain: layout paint style;
   content-visibility: auto;
-  contain-intrinsic-size: 620px;
+  contain-intrinsic-size: 640px;
 }
 
-.um-access-signin-panel {
-  transform-origin: center;
-  transform: translate3d(0, 0, 0) scale(0.97);
-  backface-visibility: hidden;
+.um-motion-card::before {
+  position: absolute;
+  inset: 1px;
+  z-index: 4;
+  border-radius: inherit;
+  pointer-events: none;
+  content: '';
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 12%),
+    inset 1px 0 0 rgb(255 255 255 / 2.5%),
+    inset -1px 0 0 rgb(255 255 255 / 2.5%);
 }
 
-.um-motion-live .um-access-signin-panel {
-  animation: um-access-signin-panel 9.75s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+.um-motion-card::after {
+  position: absolute;
+  top: 0;
+  right: 8%;
+  left: 8%;
+  z-index: 5;
+  height: 1px;
+  pointer-events: none;
+  content: '';
+  background: linear-gradient(90deg, transparent, rgb(255 247 216 / 70%), transparent);
 }
 
-.um-motion-live .um-access-signin-button {
-  animation: um-access-signin-button 9.75s cubic-bezier(0.22, 1, 0.36, 1) infinite;
-}
-
-.um-access-click-ripple {
-  opacity: 0;
-}
-
-.um-motion-live .um-access-click-ripple {
-  animation: um-access-click-ripple 9.75s cubic-bezier(0.22, 1, 0.36, 1) infinite;
-}
-
-.um-access-cursor {
-  opacity: 0;
-}
-
-.um-motion-live .um-access-cursor {
-  animation: um-access-cursor 9.75s cubic-bezier(0.22, 1, 0.36, 1) infinite;
-}
-
-.um-access-welcome-panel {
-  opacity: 0;
-  transform-origin: center;
-  backface-visibility: hidden;
-}
-
-.um-motion-live .um-access-welcome-panel {
-  animation: um-access-welcome-panel 9.75s cubic-bezier(0.22, 1, 0.36, 1) infinite;
-}
-
-.um-network-line {
-  opacity: 0.62;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 0;
-}
-
-.um-motion-live .um-network-line {
-  animation: um-network-line 7.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
-}
-
-.um-network-id-link {
-  opacity: 1;
-  transform: scaleY(1);
-}
-
-.um-motion-live .um-network-id-link {
-  animation: um-network-id-link 7.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
-}
-
-.um-network-core,
-.um-network-id,
-.um-network-node {
-  transform-origin: center;
-  backface-visibility: hidden;
-}
-
-.um-motion-live .um-network-core,
-.um-motion-live .um-network-id,
-.um-motion-live .um-network-node {
-  animation: um-network-node 7.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
-}
-
-.um-browse-device {
+.um-motion-film-frame {
+  position: relative;
+  isolation: isolate;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: #020508;
   transform: translateZ(0);
-  backface-visibility: hidden;
 }
 
-.um-browse-grid {
-  transform: translate3d(0, -42px, 0);
+.um-motion-film-frame::before {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  content: '';
+  box-shadow: inset 0 -60px 90px rgb(0 0 0 / 10%);
 }
 
-.um-browse-cursor {
-  opacity: 0.9;
-  transform: translate3d(8px, 84px, 0);
+.um-motion-film-poster {
+  z-index: 0;
+  opacity: 1;
+  transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.um-browse-caret {
-  opacity: 0.6;
+.um-motion-film-poster--video-ready {
+  opacity: 0;
 }
 
-.um-motion-live .um-browse-grid {
-  animation: um-browse-scroll 10.9s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+.um-motion-film {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  background: #020508;
+  transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.um-motion-live .um-browse-cursor {
-  animation: um-browse-cursor 10.9s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+.um-motion-film--ready {
+  opacity: 1;
 }
 
-.um-motion-live .um-browse-caret {
-  animation: um-browse-caret 1.2s ease-in-out infinite;
+.um-motion-loop-cover {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(circle at 16% 7%, rgb(77 57 12 / 15%), transparent 38%),
+    radial-gradient(circle at 85% 78%, rgb(9 34 54 / 18%), transparent 44%), #020508;
+  transition: opacity 900ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.um-motion-live
-  :is(
-    .um-access-signin-panel,
-    .um-access-signin-button,
-    .um-access-click-ripple,
-    .um-access-cursor,
-    .um-access-welcome-panel,
-    .um-network-core,
-    .um-network-id,
-    .um-network-node,
-    .um-browse-grid,
-    .um-browse-cursor
-  ) {
-  will-change: transform, opacity;
+.um-motion-loop-cover--active {
+  opacity: 1;
+}
+
+.um-motion-caption {
+  display: grid;
+  grid-template-columns: 1.5rem minmax(0, 1fr);
+  min-height: 6.5rem;
+  align-items: center;
+  gap: 0.9rem;
+  border-top: 1px solid rgb(255 255 255 / 9%);
+  background: linear-gradient(145deg, #12181b, #070a0e);
+  padding: 1.25rem 1.5rem;
 }
 
 .um-category-image {
@@ -1111,254 +1099,42 @@ svg {
   }
 }
 
-@keyframes um-access-signin-panel {
-  0% {
-    opacity: 1;
-    transform: perspective(900px) translateY(0) rotateX(0) rotateY(-1.5deg) scale(0.97);
+@media (hover: hover) and (pointer: fine) {
+  .um-motion-card {
+    transition:
+      border-color 440ms var(--um-ease-out),
+      box-shadow 440ms var(--um-ease-out),
+      transform 440ms var(--um-ease-out);
   }
 
-  12% {
-    opacity: 1;
-    transform: perspective(900px) translateY(-2px) rotateX(0) rotateY(1.5deg) scale(1);
-  }
-
-  42% {
-    opacity: 1;
-    transform: perspective(900px) translateY(-4px) rotateX(0) rotateY(1deg) scale(1.01);
-  }
-
-  50% {
-    opacity: 0;
-    transform: perspective(900px) translateY(-28px) rotateX(-8deg) rotateY(-2.5deg) scale(0.94);
-  }
-
-  84%,
-  92% {
-    opacity: 0;
-    transform: perspective(900px) translateY(28px) rotateX(-8deg) rotateY(-2.5deg) scale(0.94);
-  }
-
-  100% {
-    opacity: 1;
-    transform: perspective(900px) translateY(0) rotateX(0) rotateY(-1.5deg) scale(0.97);
+  .um-motion-card:hover {
+    border-color: rgb(255 255 255 / 18%);
+    box-shadow:
+      0 36px 96px rgb(0 0 0 / 40%),
+      inset 0 1px 0 rgb(255 255 255 / 7%);
+    transform: translateY(-0.25rem);
   }
 }
 
-@keyframes um-access-signin-button {
-  0%,
-  30%,
-  100% {
-    transform: scale(1);
+@media (min-width: 640px) {
+  .um-motion-card {
+    border-radius: 2rem;
   }
 
-  35% {
-    transform: scale(1);
-  }
-
-  40% {
-    transform: scale(0.94);
-  }
-
-  46% {
-    transform: scale(1);
+  .um-motion-caption {
+    padding-right: 1.75rem;
+    padding-left: 1.75rem;
   }
 }
 
-@keyframes um-browse-scroll {
-  0%,
-  17% {
-    transform: translate3d(0, 0, 0);
+@media (max-width: 767px) {
+  .um-marketing-ambient__field {
+    animation: none;
+    will-change: auto;
   }
 
-  29%,
-  48% {
-    transform: translate3d(0, -78px, 0);
-  }
-
-  61%,
-  84% {
-    transform: translate3d(0, -150px, 0);
-  }
-
-  100% {
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-@keyframes um-browse-cursor {
-  0% {
-    opacity: 0;
-    transform: translate3d(48px, 132px, 0);
-  }
-
-  20%,
-  42% {
-    opacity: 1;
-    transform: translate3d(8px, 84px, 0);
-  }
-
-  72% {
-    opacity: 0;
-    transform: translate3d(-70px, 190px, 0);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translate3d(48px, 132px, 0);
-  }
-}
-
-@keyframes um-browse-caret {
-  0%,
-  100% {
-    opacity: 0.18;
-  }
-
-  50% {
-    opacity: 0.9;
-  }
-}
-
-@keyframes um-access-click-ripple {
-  0%,
-  35% {
-    opacity: 0;
-    transform: scale(0.1);
-  }
-
-  43% {
-    opacity: 0.48;
-    transform: scale(4.8);
-  }
-
-  49%,
-  100% {
-    opacity: 0;
-    transform: scale(5.4);
-  }
-}
-
-@keyframes um-access-cursor {
-  0%,
-  16% {
-    opacity: 0;
-    transform: translate(48px, 44px) scale(1);
-  }
-
-  25% {
-    opacity: 1;
-    transform: translate(12px, 12px) scale(1);
-  }
-
-  35% {
-    opacity: 1;
-    transform: translate(0, 0) scale(1);
-  }
-
-  40% {
-    opacity: 1;
-    transform: translate(0, 0) scale(0.74);
-  }
-
-  44% {
-    opacity: 1;
-    transform: translate(0, 0) scale(1);
-  }
-
-  49%,
-  100% {
-    opacity: 0;
-    transform: translate(0, 0) scale(1);
-  }
-}
-
-@keyframes um-access-welcome-panel {
-  0%,
-  46% {
-    opacity: 0;
-    transform: perspective(900px) translateY(40px) rotateX(7deg) rotateY(2deg) scale(0.88);
-  }
-
-  56% {
-    opacity: 1;
-    transform: perspective(900px) translateY(0) rotateX(-1deg) rotateY(-1.5deg) scale(1.055);
-  }
-
-  64%,
-  84% {
-    opacity: 1;
-    transform: perspective(900px) translateY(0) rotateX(0) rotateY(0) scale(1);
-  }
-
-  93% {
-    opacity: 0;
-    transform: perspective(900px) translateY(-22px) rotateX(-4deg) rotateY(1deg) scale(0.96);
-  }
-
-  100% {
-    opacity: 0;
-    transform: perspective(900px) translateY(40px) rotateX(7deg) rotateY(2deg) scale(0.88);
-  }
-}
-
-@keyframes um-network-node {
-  0% {
-    opacity: 0.42;
-    transform: translateY(7px) scale(0.74);
-  }
-
-  14% {
-    opacity: 1;
-    transform: translateY(-4px) scale(1.14);
-  }
-
-  24%,
-  82% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-
-  100% {
-    opacity: 0.5;
-    transform: translateY(4px) scale(0.88);
-  }
-}
-
-@keyframes um-network-line {
-  0%,
-  28% {
-    opacity: 0;
-    stroke-dashoffset: 1;
-  }
-
-  50%,
-  82% {
-    opacity: 0.72;
-    stroke-dashoffset: 0;
-  }
-
-  100% {
-    opacity: 0;
-    stroke-dashoffset: 0;
-  }
-}
-
-@keyframes um-network-id-link {
-  0%,
-  28% {
-    opacity: 0;
-    transform: scaleY(0);
-  }
-
-  50%,
-  82% {
-    opacity: 1;
-    transform: scaleY(1);
-  }
-
-  100% {
-    opacity: 0;
-    transform: scaleY(1);
+  .um-marketing-ambient__field--tertiary {
+    display: none;
   }
 }
 
@@ -1379,30 +1155,5 @@ svg {
   .um-marketing-ambient__field {
     animation: none !important;
     transform: none !important;
-  }
-
-  .um-access-signin-panel,
-  .um-access-signin-button,
-  .um-network-core,
-  .um-network-id,
-  .um-network-node {
-    opacity: 1 !important;
-    transform: none !important;
-  }
-
-  .um-access-welcome-panel,
-  .um-access-cursor,
-  .um-access-click-ripple {
-    opacity: 0 !important;
-  }
-
-  .um-network-line {
-    opacity: 0.62 !important;
-    stroke-dashoffset: 0 !important;
-  }
-
-  .um-network-id-link {
-    opacity: 1 !important;
-    transform: scaleY(1) !important;
   }
 }
