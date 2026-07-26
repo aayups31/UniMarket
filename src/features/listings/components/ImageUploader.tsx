@@ -258,7 +258,7 @@ export function ImageUploader({
           await uploadListingImage(file, draftId, item, setImages, cancelledUploadsRef, setMessage);
         } catch {
           setBannerMessage(
-            `${file.name} could not be prepared. Check your connection or try a different image.`,
+            `${file.name} could not be uploaded. If you are using a phone, save your draft and add the photo from a laptop or desktop.`,
           );
         }
       }
@@ -404,7 +404,11 @@ export function ImageUploader({
         </div>
       ) : null}
 
-      {/* crop modal removed — simplified UX: keep item centered when uploading */}
+      <div className="mb-4 rounded-um-sm border border-um-gold-400/30 bg-um-gold-400/10 p-3 text-sm leading-5 text-white sm:hidden">
+  <strong>Mobile upload notice:</strong> Photo uploads may currently be
+  unreliable on phones. For best results, save your draft and add photos
+  from a laptop or desktop. We’re working on a fix.
+</div>
 
       <div
         onDragEnter={(event) => {
