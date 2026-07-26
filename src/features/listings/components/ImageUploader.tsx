@@ -143,32 +143,78 @@ export function ImageUploader({
         return;
       }
 
-      for (const file of files) {
-        let preparedFile: File;
-        try {
-          preparedFile = await compressImageFile(file);
-        } catch {
-          // Likely an unsupported encode/decoding error (e.g. HEIC). Show a clear banner.
-          setBannerMessage(
-            `${file.name} could not be prepared. If this is an iPhone photo, choose "Most Compatible" in Camera settings or export as JPEG/PNG before uploading.`,
-          );
-          continue;
-        }
+      for (const originalFile of files) {
+  console.log('[Image selected]', {
+    name: originalFile.name,
+    type: originalFile.type || '(empty)',
+    sizeMB: Number(
+      (originalFile.size / 1_000_000).toFixed(2),
+    ),
+  });
 
-        if (preparedFile.size < file.size) compressedCount += 1;
+  let preparedFile: File;
 
-        if (!ACCEPTED_TYPES.has(preparedFile.type)) {
-          setBannerMessage(
-            `${file.name} is in an unsupported format (${preparedFile.type}). Use JPEG, PNG, or WebP.`,
-          );
-          continue;
-        }
-        if (preparedFile.size > LISTING_IMAGE_MAX_BYTES) {
-          validationMessage = `${file.name} is larger than 5 MB.`;
-          continue;
-        }
-        supportedFiles.push(preparedFile);
-      }
+  try {
+    preparedFile = await compressImageFile(originalFile, {
+      maxBytes: 1_500_000,
+      maxWidth: 1_600,
+      quality: 0.82,
+    });
+  } catch (error) {
+    console.error('[Image preparation failed]', {
+      name: originalFile.name,
+      type: originalFile.type,
+      size: originalFile.size,
+      error,
+    });
+
+    setBannerMessage(
+      error instanceof Error
+        ? `${originalFile.name}: ${error.message}`
+        : `${originalFile.name} could not be prepared.`,
+    );
+
+    continue;
+  }
+
+  console.log('[Image prepared]', {
+    originalName: originalFile.name,
+    preparedName: preparedFile.name,
+    preparedType: preparedFile.type,
+    originalSizeMB: Number(
+      (originalFile.size / 1_000_000).toFixed(2),
+    ),
+    preparedSizeMB: Number(
+      (preparedFile.size / 1_000_000).toFixed(2),
+    ),
+  });
+
+  if (preparedFile.size < originalFile.size) {
+    compressedCount += 1;
+  }
+
+  if (!ACCEPTED_TYPES.has(preparedFile.type)) {
+    console.error('[Unexpected prepared type]', {
+      name: preparedFile.name,
+      type: preparedFile.type,
+    });
+
+    setBannerMessage(
+      `${originalFile.name} could not be converted to JPEG.`,
+    );
+
+    continue;
+  }
+
+  if (preparedFile.size > LISTING_IMAGE_MAX_BYTES) {
+    validationMessage =
+      `${originalFile.name} could not be reduced below the 5 MB upload limit.`;
+
+    continue;
+  }
+
+  supportedFiles.push(preparedFile);
+}
 
       if (validationMessage) setMessage(validationMessage);
       if (compressedCount > 0 && !validationMessage) {
@@ -433,19 +479,25 @@ export function ImageUploader({
         )}
 
         <input
-          ref={inputRef}
-          aria-describedby="image-upload-help"
-          aria-label="Upload listing photos"
-          className="sr-only"
-          accept="image/*"
-          multiple
-          onChange={(event) => {
-            void uploadFiles(Array.from(event.target.files ?? []));
-            event.target.value = '';
-          }}
-          tabIndex={-1}
-          type="file"
-        />
+  ref={inputRef}
+  aria-describedby="image-upload-help"
+  aria-label="Upload listing photos"
+  className="sr-only"
+  accept="image/*,.jpg,.jpeg,.png,.webp,.avif,.heic,.heif"
+  multiple
+  onChange={(event) => {
+    const selectedFiles = Array.from(
+      event.currentTarget.files ?? [],
+    );
+
+    // Reset immediately so the same photo can be selected again.
+    event.currentTarget.value = '';
+
+    void uploadFiles(selectedFiles);
+  }}
+  tabIndex={-1}
+  type="file"
+/>
       </div>
       <p
         aria-live="polite"
@@ -691,38 +743,73 @@ async function uploadListingImage(
     setMessage(errorMessage ?? `${file.name} did not finish uploading. Remove it and try again.`);
   };
 
-  const session = await supabase.auth.getSession();
-  if (!session.data.session) {
-    failUpload('Your session expired. Sign in again before uploading.');
-    return;
-  }
+const {
+  data: refreshedAuth,
+  error: refreshError,
+} = await supabase.auth.refreshSession();
+
+if (refreshError || !refreshedAuth.session) {
+  console.error('[Image upload auth refresh failed]', {
+    refreshError,
+    listingId,
+    imageId: item.id,
+  });
+
+  failUpload(
+    'Your session could not be refreshed. Sign out, sign in again, and retry the photo.',
+  );
+
+  return;
+}
 
   let lastError: unknown = null;
 
-  for (let attempt = 0; attempt < 2; attempt += 1) {
+for (let attempt = 0; attempt < 3; attempt += 1) {
     if (cancelledUploadsRef.current.has(item.id)) return;
 
     if (attempt > 0) {
       updateProgress(18);
       await supabase.auth.refreshSession().catch(() => undefined);
-      await new Promise((resolve) => setTimeout(resolve, 650));
+      await new Promise((resolve) =>
+  setTimeout(resolve, 700 * 2 ** (attempt - 1)),
+);
     } else {
       updateProgress(10);
     }
 
-    const { error } = await supabase.storage.from('listing-images').upload(item.path, file, {
-      cacheControl: '3600',
-      contentType: file.type,
-      upsert: false,
-    });
+    const { error } = await supabase.storage
+  .from('listing-images')
+  .upload(item.path, file, {
+    cacheControl: '3600',
+    contentType: 'image/jpeg',
+    upsert: false,
+  });
 
-    if (!error) {
-      lastError = null;
-      updateProgress(84);
-      break;
-    }
+if (error) {
+  console.error('[Supabase image upload failed]', {
+    attempt: attempt + 1,
+    listingId,
+    imageId: item.id,
+    path: item.path,
+    fileName: file.name,
+    fileType: file.type,
+    fileSize: file.size,
+    statusCode:
+      'statusCode' in error
+        ? error.statusCode
+        : undefined,
+    message: error.message,
+    error,
+  });
+}
 
-    lastError = error;
+if (!error) {
+  lastError = null;
+  updateProgress(84);
+  break;
+}
+
+lastError = error;
 
     // Mobile connections can drop after Storage accepted the body but before
     // the browser received the response. Reconcile before sending it again.
