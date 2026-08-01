@@ -21,7 +21,14 @@ export type ListingActionResult<T = undefined> =
   { ok: true; data: T } | { ok: false; message: string; fieldErrors?: Record<string, string> };
 
 type SavedDraft = { id: string; version: number };
-type RegisteredImage = { id: string; path: string; position: number };
+type RegisteredImage = {
+  id: string;
+  path: string;
+  position: number;
+  signedUploadUrl: string;
+};
+type ReverifiedImage = { id: string; url: string };
+type ReservedImage = { id: string; storagePath: string; position: number };
 type SupabaseActionError = {
   code?: string;
   message?: string;
@@ -59,6 +66,27 @@ function safeRevalidatePath(path: string) {
     // failure into a failed save that the client may retry as a second draft.
     console.error(`[listings] revalidation failed for ${path}`, error);
   }
+}
+
+function parseReservedImage(value: unknown, expectedId: string): ReservedImage | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+
+  const row = value as Record<string, unknown>;
+  const id = typeof row.id === 'string' ? row.id : '';
+  const storagePath = typeof row.storage_path === 'string' ? row.storage_path : '';
+  const position = typeof row.position === 'number' ? row.position : Number.NaN;
+
+  if (
+    id !== expectedId ||
+    storagePath.length === 0 ||
+    !Number.isInteger(position) ||
+    position < 0 ||
+    position >= LISTING_IMAGE_MAX_COUNT
+  ) {
+    return null;
+  }
+
+  return { id, storagePath, position };
 }
 
 export async function saveListingDraftAction(
@@ -136,7 +164,7 @@ export async function publishListingAction(
 export async function registerListingImageAction(
   input: unknown,
 ): Promise<ListingActionResult<RegisteredImage>> {
-  const viewer = await requireStudentSeller('/listings/new');
+  await requireStudentSeller('/listings/new');
   const parsed = imageRegistrationSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -147,49 +175,55 @@ export async function registerListingImageAction(
   }
 
   const supabase = untyped(await createClient());
-  const { data: listing } = await supabase
-    .from('listings')
-    .select('id,status')
-    .eq('id', parsed.data.listingId)
-    .eq('seller_id', viewer.id)
-    .in('status', ['draft', 'published'])
-    .maybeSingle();
+  const { data: reservationData, error: reservationError } = await supabase
+    .rpc('reserve_listing_image', {
+      p_listing_id: parsed.data.listingId,
+      p_image_id: parsed.data.imageId,
+      p_mime_type: parsed.data.mimeType,
+      p_size_bytes: parsed.data.sizeBytes,
+      p_width: parsed.data.width ?? null,
+      p_height: parsed.data.height ?? null,
+    })
+    .single();
 
-  if (!listing) return { ok: false, message: 'This listing is no longer editable.' };
+  const reserved = parseReservedImage(reservationData, parsed.data.imageId);
 
-  const { data: existing, error: countError } = await supabase
-    .from('listing_images')
-    .select('id,position')
-    .eq('listing_id', parsed.data.listingId)
-    .order('position');
-
-  if (countError) return { ok: false, message: 'The image could not be prepared.' };
-  if ((existing?.length ?? 0) >= LISTING_IMAGE_MAX_COUNT) {
-    return { ok: false, message: 'A listing can include up to six images.' };
+  if (reservationError || !reserved) {
+    const message = reservationError?.message?.toLowerCase() ?? '';
+    if (message.includes('up to six images')) {
+      return { ok: false, message: 'A listing can include up to six images.' };
+    }
+    if (message.includes('no longer editable')) {
+      return { ok: false, message: 'This listing is no longer editable.' };
+    }
+    if (message.includes('cannot be reused')) {
+      return { ok: false, message: 'That image reservation is no longer available.' };
+    }
+    if (reservationError) logSupabaseActionError('reserve image RPC', reservationError);
+    return { ok: false, message: 'The image upload could not be prepared. Please try again.' };
   }
 
-  const id = crypto.randomUUID();
-  const extension = {
-    'image/jpeg': 'jpg',
-    'image/png': 'png',
-    'image/webp': 'webp',
-  }[parsed.data.mimeType];
-  const path = `${viewer.id}/${parsed.data.listingId}/${id}.${extension}`;
-  const position = existing?.length ?? 0;
-  const { error } = await supabase.from('listing_images').insert({
-    id,
-    listing_id: parsed.data.listingId,
-    storage_path: path,
-    position,
-    upload_status: 'pending',
-    mime_type: parsed.data.mimeType,
-    size_bytes: parsed.data.sizeBytes,
-    width: parsed.data.width,
-    height: parsed.data.height,
-  });
+  const path = reserved.storagePath;
+  const { data: signedUpload, error: signedUploadError } = await supabase.storage
+    .from(IMAGE_BUCKET)
+    .createSignedUploadUrl(path, { upsert: false });
 
-  if (error) return { ok: false, message: 'The image could not be prepared for upload.' };
-  return { ok: true, data: { id, path, position } };
+  if (signedUploadError || !signedUpload?.signedUrl) {
+    if (signedUploadError) logSupabaseActionError('create signed image upload', signedUploadError);
+    // The reservation intentionally remains pending. Retrying with the same
+    // image UUID recovers it and produces a fresh short-lived upload token.
+    return { ok: false, message: 'The secure image upload could not be started. Please retry.' };
+  }
+
+  return {
+    ok: true,
+    data: {
+      id: reserved.id,
+      path,
+      position: reserved.position,
+      signedUploadUrl: signedUpload.signedUrl,
+    },
+  };
 }
 
 export async function finalizeListingImageAction(input: {
@@ -198,38 +232,49 @@ export async function finalizeListingImageAction(input: {
 }): Promise<ListingActionResult<{ imageId: string }>> {
   const viewer = await requireStudentSeller('/listings/new');
   const supabase = untyped(await createClient());
-  const { data: image } = await supabase
+  const { data: image, error: imageError } = await supabase
     .from('listing_images')
-    .select('id,storage_path,listings!inner(seller_id)')
+    .select('id,upload_status,listings!inner(seller_id)')
     .eq('id', input.imageId)
     .eq('listing_id', input.listingId)
     .eq('listings.seller_id', viewer.id)
     .maybeSingle();
 
-  if (!image) return { ok: false, message: 'The uploaded image could not be verified.' };
-
-  const path = String(image.storage_path);
-  const segments = path.split('/');
-  const fileName = segments.pop();
-  const folder = segments.join('/');
-  if (!fileName) return { ok: false, message: 'The uploaded image path is invalid.' };
-
-  const { data: objects, error: storageError } = await supabase.storage
-    .from(IMAGE_BUCKET)
-    .list(folder, { search: fileName, limit: 2 });
-
-  if (storageError || !objects?.some((object) => object.name === fileName)) {
-    return { ok: false, message: 'The upload did not finish. Retry this image.' };
+  if (imageError || !image) {
+    if (imageError) logSupabaseActionError('read image before finalization', imageError);
+    return { ok: false, message: 'The uploaded image could not be verified.' };
   }
 
-  const { error } = await supabase
+  // A lost Server Action response must not make an already-committed upload
+  // look like a failure when the client retries finalization.
+  if (image.upload_status === 'uploaded') {
+    safeRevalidatePath('/marketplace');
+    safeRevalidatePath(`/listings/${input.listingId}`);
+    return { ok: true, data: { imageId: input.imageId } };
+  }
+
+  // private.validate_listing_image() is the single source of truth here. It
+  // atomically proves the Storage object exists and that its MIME and byte size
+  // match the contract before accepting the uploaded state.
+  const { data: finalized, error } = await supabase
     .from('listing_images')
     .update({ upload_status: 'uploaded' })
-    .eq('id', input.imageId);
+    .eq('id', input.imageId)
+    .eq('listing_id', input.listingId)
+    .select('id')
+    .maybeSingle();
 
-  if (error) return { ok: false, message: 'The uploaded image could not be finalized.' };
-  revalidatePath('/marketplace');
-  revalidatePath(`/listings/${input.listingId}`);
+  if (error || !finalized) {
+    const message = error?.message?.toLowerCase() ?? '';
+    if (message.includes('storage object is missing or invalid')) {
+      return { ok: false, message: 'The upload did not finish. Retry this image.' };
+    }
+    if (error) logSupabaseActionError('finalize image metadata', error);
+    return { ok: false, message: 'The uploaded image could not be finalized.' };
+  }
+
+  safeRevalidatePath('/marketplace');
+  safeRevalidatePath(`/listings/${input.listingId}`);
   return { ok: true, data: { imageId: input.imageId } };
 }
 
@@ -318,8 +363,8 @@ export async function removeListingImageAction(input: {
     });
   }
 
-  revalidatePath('/marketplace');
-  revalidatePath(`/listings/${input.listingId}`);
+  safeRevalidatePath('/marketplace');
+  safeRevalidatePath(`/listings/${input.listingId}`);
   return { ok: true, data: { imageId: input.imageId } };
 }
 
@@ -341,55 +386,78 @@ export async function reorderListingImagesAction(input: {
     p_image_ids: input.imageIds,
   });
   if (error) return { ok: false, message: 'The image order could not be saved.' };
-  revalidatePath('/marketplace');
-  revalidatePath(`/listings/${input.listingId}`);
+  safeRevalidatePath('/marketplace');
+  safeRevalidatePath(`/listings/${input.listingId}`);
   return { ok: true, data: { imageIds: input.imageIds } };
 }
 
-export async function reverifyListingImagesAction(input: { listingId: string }): Promise<ListingActionResult<{ updated: string[] }>> {
+export async function reverifyListingImagesAction(input: {
+  listingId: string;
+}): Promise<ListingActionResult<{ updated: ReverifiedImage[] }>> {
   const viewer = await requireStudentSeller('/listings/new');
   const parsed = listingIdSchema.safeParse(input.listingId);
   if (!parsed.success) return { ok: false, message: 'Invalid listing id.' };
 
   const supabase = untyped(await createClient());
 
-  const { data: pending } = await supabase
+  const { data: pending, error: pendingError } = await supabase
     .from('listing_images')
-    .select('id,storage_path,upload_status')
+    .select('id,storage_path,upload_status,listings!inner(seller_id)')
     .eq('listing_id', parsed.data)
+    .eq('listings.seller_id', viewer.id)
     .neq('upload_status', 'uploaded');
 
+  if (pendingError) {
+    logSupabaseActionError('read images for reverification', pendingError);
+    return { ok: false, message: 'The image uploads could not be checked. Please try again.' };
+  }
   if (!pending || pending.length === 0) return { ok: true, data: { updated: [] } };
 
-  const updated: string[] = [];
+  const verified: { id: string; path: string }[] = [];
   for (const row of pending) {
     try {
-      const path = String(row.storage_path);
-      const segments = path.split('/');
-      const fileName = segments.pop();
-      const folder = segments.join('/');
-      if (!fileName) continue;
-      const { data: objects, error: storageError } = await supabase.storage
-        .from('listing-images')
-        .list(folder, { search: fileName, limit: 2 });
-      if (!storageError && objects?.some((o) => o.name === fileName)) {
-        const { error } = await supabase
-          .from('listing_images')
-          .update({ upload_status: 'uploaded' })
-          .eq('id', row.id);
-        if (!error) updated.push(row.id);
+      // The database trigger verifies existence, MIME and size atomically. A
+      // concurrent or previously committed finalization is safe to repeat.
+      const { data: finalized, error } = await supabase
+        .from('listing_images')
+        .update({ upload_status: 'uploaded' })
+        .eq('id', row.id)
+        .eq('listing_id', parsed.data)
+        .select('id,storage_path')
+        .maybeSingle();
+
+      if (!error && finalized) {
+        verified.push({ id: String(finalized.id), path: String(finalized.storage_path) });
+      } else if (error && !error.message.toLowerCase().includes('storage object is missing')) {
+        logSupabaseActionError('reverify image metadata', error);
       }
     } catch (err) {
-      // continue with others
-      // eslint-disable-next-line no-console
-      console.warn('reverifyListingImagesAction error', err);
+      // One interrupted object must not prevent recovery of the other images.
+      console.warn('[listings] image reverification failed', err);
     }
   }
 
-  if (updated.length > 0) {
-    revalidatePath('/marketplace');
-    revalidatePath(`/listings/${parsed.data}`);
-  }
+  if (verified.length === 0) return { ok: true, data: { updated: [] } };
+
+  const uniquePaths = [...new Set(verified.map((image) => image.path))];
+  const { data: signedImages, error: signingError } = await supabase.storage
+    .from(IMAGE_BUCKET)
+    .createSignedUrls(uniquePaths, 60 * 60);
+
+  if (signingError) logSupabaseActionError('sign reverified images', signingError);
+
+  const urlByPath = new Map<string, string>();
+  signedImages?.forEach((item, index) => {
+    if (item.signedUrl) urlByPath.set(item.path ?? uniquePaths[index], item.signedUrl);
+  });
+
+  const updated = verified.flatMap((image): ReverifiedImage[] => {
+    const url = urlByPath.get(image.path);
+    return url ? [{ id: image.id, url }] : [];
+  });
+
+  safeRevalidatePath('/marketplace');
+  safeRevalidatePath(`/listings/${parsed.data}`);
 
   return { ok: true, data: { updated } };
 }

@@ -20,7 +20,6 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { CheckCircle2, GripVertical, ImagePlus, Loader2, RotateCcw, Trash2 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import {
   finalizeListingImageAction,
@@ -29,8 +28,9 @@ import {
   reorderListingImagesAction,
   reverifyListingImagesAction,
 } from '../actions';
-import { LISTING_IMAGE_MAX_BYTES, LISTING_IMAGE_MAX_COUNT } from '../schemas';
-import { compressImageFile } from './imageCompression';
+import { LISTING_IMAGE_MAX_COUNT } from '../schemas';
+import { prepareListingImageFile } from './imageUploadFile';
+import { uploadListingImageToSignedUrl } from './imageUploadTransfer';
 
 export type ComposerImage = {
   id: string;
@@ -41,6 +41,17 @@ export type ComposerImage = {
   name: string;
   focusPosition?: string;
 };
+
+type UploadJob = {
+  file: File;
+  listingId: string | null;
+  path: string;
+  queued: boolean;
+  hasAttemptedUpload: boolean;
+  transferController: AbortController | null;
+};
+
+const IMAGE_TRANSFER_TIMEOUT_MS = 90_000;
 
 function toObjectPositionValue(value?: string) {
   if (!value) return '50% 35%';
@@ -63,8 +74,6 @@ type ImageUploaderProps = {
   onImagesChange?: (images: ComposerImage[]) => void;
 };
 
-const ACCEPTED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
-
 export function ImageUploader({
   listingId,
   initialImages = [],
@@ -78,6 +87,9 @@ export function ImageUploader({
   const inputRef = useRef<HTMLInputElement>(null);
   const cancelledUploadsRef = useRef(new Set<string>());
   const imagesRef = useRef(images);
+  const listingIdRef = useRef(listingId);
+  const uploadJobsRef = useRef(new Map<string, UploadJob>());
+  const uploadQueueRef = useRef<Promise<void>>(Promise.resolve());
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -88,10 +100,24 @@ export function ImageUploader({
     onImagesChange?.(images);
   }, [images, onImagesChange]);
 
+  useEffect(() => {
+    listingIdRef.current = listingId;
+  }, [listingId]);
+
+  const updateImages = useCallback((update: (current: ComposerImage[]) => ComposerImage[]) => {
+    const next = update(imagesRef.current);
+    imagesRef.current = next;
+    setImages(next);
+  }, []);
+
   useEffect(
     () => () => {
       imagesRef.current.forEach((image) => {
         if (image.url.startsWith('blob:')) URL.revokeObjectURL(image.url);
+      });
+      uploadJobsRef.current.forEach((job, imageId) => {
+        cancelledUploadsRef.current.add(imageId);
+        job.transferController?.abort('Image uploader closed.');
       });
     },
     [],
@@ -100,40 +126,300 @@ export function ImageUploader({
   // On mount, try to reconcile any pending uploads for this listing.
   useEffect(() => {
     if (!listingId) return;
-    let mounted = true;
+    const controller = new AbortController();
     void (async () => {
-      try {
-        const result = await reverifyListingImagesAction({ listingId });
-        if (!mounted) return;
-        if (result.ok && result.data.updated.length > 0) {
-          setImages((current) =>
-            current.map((img) =>
-              result.data.updated.includes(img.id)
-                ? { ...img, status: 'uploaded', progress: 100 }
-                : img,
-            ),
+      const recoveredIds = new Set<string>();
+      for (const retryDelay of [0, 1_200, 3_000]) {
+        if (retryDelay > 0 && !(await delayUnlessAborted(retryDelay, controller.signal))) return;
+
+        try {
+          const result = await reverifyListingImagesAction({ listingId });
+          if (controller.signal.aborted) return;
+          if (!result.ok || result.data.updated.length === 0) continue;
+
+          const recovered = new Map(
+            result.data.updated.map((image) => [image.id, image.url] as const),
           );
-          setMessage(
-            `Recovered ${result.data.updated.length} uploaded photo${result.data.updated.length > 1 ? 's' : ''}.`,
+          result.data.updated.forEach((image) => recoveredIds.add(image.id));
+          updateImages((current) =>
+            current.map((image) => {
+              const recoveredUrl = recovered.get(image.id);
+              if (!recoveredUrl || uploadJobsRef.current.has(image.id)) return image;
+              if (image.url.startsWith('blob:')) URL.revokeObjectURL(image.url);
+              return { ...image, url: recoveredUrl, status: 'uploaded', progress: 100 };
+            }),
           );
+        } catch {
+          // A later bounded attempt may still recover a delayed Storage object.
         }
-      } catch {
-        // ignore
+      }
+
+      if (!controller.signal.aborted && recoveredIds.size > 0) {
+        setMessage(
+          `Recovered ${recoveredIds.size} uploaded photo${recoveredIds.size > 1 ? 's' : ''}.`,
+        );
       }
     })();
     return () => {
-      mounted = false;
+      controller.abort();
     };
-  }, [listingId]);
+  }, [listingId, updateImages]);
+
+  const runUploadJob = useCallback(
+    async (imageId: string) => {
+      const job = uploadJobsRef.current.get(imageId);
+      if (!job) return;
+
+      const isCancelled = () => cancelledUploadsRef.current.has(imageId);
+      const updateJobImage = (update: (image: ComposerImage) => ComposerImage) => {
+        updateImages((current) =>
+          current.map((image) => (image.id === imageId ? update(image) : image)),
+        );
+      };
+      const markUploaded = () => {
+        updateJobImage((image) => ({
+          ...image,
+          progress: 100,
+          status: 'uploaded',
+        }));
+        uploadJobsRef.current.delete(imageId);
+        setMessage('');
+      };
+      const markFailed = (errorMessage: string) => {
+        if (isCancelled()) return;
+        job.queued = false;
+        updateJobImage((image) => ({
+          ...image,
+          progress: 0,
+          status: 'failed',
+        }));
+        setMessage(errorMessage);
+      };
+      const reconcile = async (draftId: string) => {
+        try {
+          const recovered = await finalizeUploadedImage(draftId, imageId, 1);
+          if (!recovered.ok) return false;
+          markUploaded();
+          return true;
+        } catch {
+          return false;
+        }
+      };
+      const cleanCancelledReservation = async (draftId: string | null) => {
+        // Registration may have committed even if its response never reached
+        // this browser, so cleanup by the stable UUID regardless of whether a
+        // path response was observed.
+        if (draftId) {
+          await removeListingImageAction({ listingId: draftId, imageId }).catch(() => undefined);
+        }
+        uploadJobsRef.current.delete(imageId);
+      };
+
+      try {
+        if (isCancelled()) {
+          await cleanCancelledReservation(job.listingId);
+          return;
+        }
+
+        updateJobImage((image) => ({ ...image, progress: 2, status: 'uploading' }));
+
+        let draftId = job.listingId ?? listingIdRef.current;
+        if (!draftId) draftId = await ensureDraft();
+        if (!draftId) {
+          markFailed('Save the draft before adding images.');
+          return;
+        }
+
+        job.listingId = draftId;
+        listingIdRef.current = draftId;
+
+        if (isCancelled()) {
+          await cleanCancelledReservation(draftId);
+          return;
+        }
+
+        // A mobile browser can lose the upload response after Storage accepted
+        // the body. Always reconcile that ambiguous state before sending again.
+        if (job.hasAttemptedUpload && job.path && (await reconcile(draftId))) return;
+
+        let lastMessage = `${job.file.name} did not finish uploading. Retry the photo.`;
+
+        for (let attempt = 0; attempt < 3; attempt += 1) {
+          if (isCancelled()) {
+            await cleanCancelledReservation(draftId);
+            return;
+          }
+
+          if (attempt > 0) {
+            updateJobImage((image) => ({ ...image, progress: 5 + attempt * 3 }));
+            await delay(700 * 2 ** (attempt - 1) + Math.floor(Math.random() * 180));
+          } else {
+            updateJobImage((image) => ({ ...image, progress: 5 }));
+          }
+
+          const ready = await waitForUploadOpportunity(isCancelled, (waitingMessage) => {
+            setMessage(waitingMessage);
+          });
+          if (!ready) {
+            await cleanCancelledReservation(draftId);
+            return;
+          }
+          setMessage('');
+
+          let registration: Awaited<ReturnType<typeof registerListingImageAction>>;
+          try {
+            registration = await registerListingImageAction({
+              imageId,
+              listingId: draftId,
+              name: job.file.name,
+              mimeType: job.file.type,
+              sizeBytes: job.file.size,
+            });
+          } catch {
+            lastMessage = 'The secure upload could not be prepared. Check your connection.';
+            if (job.path && (await reconcile(draftId))) return;
+            continue;
+          }
+
+          if (!registration.ok) {
+            lastMessage = registration.message;
+            if (job.path && (await reconcile(draftId))) return;
+            continue;
+          }
+
+          job.path = registration.data.path;
+          updateJobImage((image) => ({
+            ...image,
+            path: registration.data.path,
+            progress: 18,
+          }));
+
+          if (isCancelled()) {
+            await cleanCancelledReservation(draftId);
+            return;
+          }
+
+          const readyToTransfer = await waitForUploadOpportunity(isCancelled, (waitingMessage) => {
+            setMessage(waitingMessage);
+          });
+          if (!readyToTransfer || isCancelled()) {
+            await cleanCancelledReservation(draftId);
+            return;
+          }
+          setMessage('');
+
+          let uploadError: unknown = null;
+          job.hasAttemptedUpload = true;
+          const transferController = new AbortController();
+          job.transferController = transferController;
+          const timeoutId = window.setTimeout(
+            () => transferController.abort('Image transfer timed out.'),
+            IMAGE_TRANSFER_TIMEOUT_MS,
+          );
+          try {
+            const transfer = await uploadListingImageToSignedUrl(
+              registration.data.signedUploadUrl,
+              job.file,
+              transferController.signal,
+            );
+            uploadError = transfer.ok ? null : transfer;
+          } catch (error) {
+            // Mobile browsers can throw when changing networks or when the tab
+            // was backgrounded. Reconciliation below distinguishes a lost
+            // response from an upload that genuinely needs another attempt.
+            uploadError = error;
+          } finally {
+            window.clearTimeout(timeoutId);
+            if (job.transferController === transferController) job.transferController = null;
+          }
+
+          if (isCancelled()) {
+            await cleanCancelledReservation(draftId);
+            return;
+          }
+
+          if (uploadError) {
+            lastMessage = `${job.file.name} did not finish uploading. Check your connection and retry.`;
+            if (await reconcile(draftId)) return;
+            continue;
+          }
+
+          updateJobImage((image) => ({ ...image, progress: 84 }));
+          try {
+            const finalized = await finalizeUploadedImage(draftId, imageId, 5);
+            if (finalized.ok) {
+              markUploaded();
+              return;
+            }
+            lastMessage = finalized.message;
+          } catch {
+            lastMessage = `${job.file.name} uploaded but could not be verified. Retry the photo.`;
+          }
+        }
+
+        markFailed(lastMessage);
+      } catch {
+        markFailed(`${job.file.name} could not be uploaded. Check your connection and retry.`);
+      }
+    },
+    [ensureDraft, updateImages],
+  );
+
+  const enqueueUpload = useCallback(
+    (imageId: string) => {
+      const job = uploadJobsRef.current.get(imageId);
+      if (!job || job.queued) return;
+      job.queued = true;
+
+      uploadQueueRef.current = uploadQueueRef.current
+        .catch(() => undefined)
+        .then(() => runUploadJob(imageId))
+        .catch(() => {
+          if (cancelledUploadsRef.current.has(imageId)) return;
+          const failedJob = uploadJobsRef.current.get(imageId);
+          if (failedJob) failedJob.queued = false;
+          updateImages((current) =>
+            current.map((image) =>
+              image.id === imageId ? { ...image, progress: 0, status: 'failed' } : image,
+            ),
+          );
+          setMessage('The photo upload stopped unexpectedly. Retry the photo.');
+        })
+        .finally(() => {
+          const queuedJob = uploadJobsRef.current.get(imageId);
+          if (queuedJob) queuedJob.queued = false;
+          if (cancelledUploadsRef.current.has(imageId)) {
+            uploadJobsRef.current.delete(imageId);
+            cancelledUploadsRef.current.delete(imageId);
+          }
+        });
+    },
+    [runUploadJob, updateImages],
+  );
+
+  const retryImage = useCallback(
+    (image: ComposerImage) => {
+      const job = uploadJobsRef.current.get(image.id);
+      if (!job || job.queued) return;
+      cancelledUploadsRef.current.delete(image.id);
+      setMessage('');
+      updateImages((current) =>
+        current.map((item) =>
+          item.id === image.id ? { ...item, progress: 0, status: 'uploading' } : item,
+        ),
+      );
+      enqueueUpload(image.id);
+    },
+    [enqueueUpload, updateImages],
+  );
 
   const uploadFiles = useCallback(
-    async (selected: File[]) => {
+    (selected: File[]) => {
       setMessage('');
-      const available = LISTING_IMAGE_MAX_COUNT - images.length;
+      const available = LISTING_IMAGE_MAX_COUNT - imagesRef.current.length;
       const files = selected.slice(0, available);
       const supportedFiles: File[] = [];
       let validationMessage = '';
-      let compressedCount = 0;
 
       if (selected.length > available) {
         validationMessage = `You can add ${available} more image${available === 1 ? '' : 's'}.`;
@@ -144,126 +430,46 @@ export function ImageUploader({
       }
 
       for (const originalFile of files) {
-  console.log('[Image selected]', {
-    name: originalFile.name,
-    type: originalFile.type || '(empty)',
-    sizeMB: Number(
-      (originalFile.size / 1_000_000).toFixed(2),
-    ),
-  });
-
-  let preparedFile: File;
-
-  try {
-    preparedFile = await compressImageFile(originalFile, {
-      maxBytes: 1_500_000,
-      maxWidth: 1_600,
-      quality: 0.82,
-    });
-  } catch (error) {
-    console.error('[Image preparation failed]', {
-      name: originalFile.name,
-      type: originalFile.type,
-      size: originalFile.size,
-      error,
-    });
-
-    setBannerMessage(
-      error instanceof Error
-        ? `${originalFile.name}: ${error.message}`
-        : `${originalFile.name} could not be prepared.`,
-    );
-
-    continue;
-  }
-
-  console.log('[Image prepared]', {
-    originalName: originalFile.name,
-    preparedName: preparedFile.name,
-    preparedType: preparedFile.type,
-    originalSizeMB: Number(
-      (originalFile.size / 1_000_000).toFixed(2),
-    ),
-    preparedSizeMB: Number(
-      (preparedFile.size / 1_000_000).toFixed(2),
-    ),
-  });
-
-  if (preparedFile.size < originalFile.size) {
-    compressedCount += 1;
-  }
-
-  if (!ACCEPTED_TYPES.has(preparedFile.type)) {
-    console.error('[Unexpected prepared type]', {
-      name: preparedFile.name,
-      type: preparedFile.type,
-    });
-
-    setBannerMessage(
-      `${originalFile.name} could not be converted to JPEG.`,
-    );
-
-    continue;
-  }
-
-  if (preparedFile.size > LISTING_IMAGE_MAX_BYTES) {
-    validationMessage =
-      `${originalFile.name} could not be reduced below the 5 MB upload limit.`;
-
-    continue;
-  }
-
-  supportedFiles.push(preparedFile);
-}
+        const prepared = prepareListingImageFile(originalFile);
+        if (!prepared.ok) {
+          setBannerMessage(prepared.message);
+          continue;
+        }
+        supportedFiles.push(prepared.file);
+      }
 
       if (validationMessage) setMessage(validationMessage);
-      if (compressedCount > 0 && !validationMessage) {
-        setMessage(
-          `We reduced ${compressedCount} large photo${compressedCount === 1 ? '' : 's'} to keep the upload reliable.`,
-        );
-      }
       if (supportedFiles.length === 0) return;
 
-      const draftId = listingId ?? (await ensureDraft());
-      if (!draftId) {
-        setMessage('Save the draft before adding images.');
-        return;
-      }
+      const queuedImages = supportedFiles.map((file) => {
+        const id = createClientImageId();
+        const item: ComposerImage = {
+          id,
+          path: '',
+          url: URL.createObjectURL(file),
+          progress: 0,
+          status: 'uploading',
+          name: file.name,
+          focusPosition: '50% 35%',
+        };
+        uploadJobsRef.current.set(id, {
+          file,
+          listingId: listingIdRef.current,
+          path: '',
+          queued: false,
+          hasAttemptedUpload: false,
+          transferController: null,
+        });
+        return item;
+      });
 
-      for (const file of supportedFiles) {
-        try {
-          const dimensions = await getImageDimensions(file);
-          const registration = await registerListingImageAction({
-            listingId: draftId,
-            name: file.name,
-            mimeType: file.type,
-            sizeBytes: file.size,
-            ...dimensions,
-          });
-          if (!registration.ok) {
-            setMessage(registration.message);
-            continue;
-          }
-
-          const item: ComposerImage = {
-            id: registration.data.id,
-            path: registration.data.path,
-            url: URL.createObjectURL(file),
-            progress: 0,
-            status: 'uploading',
-            name: file.name,
-            focusPosition: '50% 35%',
-          };
-          setImages((current) => [...current, item]);
-          await uploadListingImage(file, draftId, item, setImages, cancelledUploadsRef, setMessage);
-        } catch {
-          setBannerMessage(
-            `${file.name} could not be uploaded. If you are using a phone, save your draft and add the photo from a laptop or desktop.`,
-          );
-        }
-      }
+      // Show every selected photo immediately. Registration and transfer run
+      // through a small sequential queue so iOS/Android browsers are not asked
+      // to decode and upload several multi-megabyte camera files at once.
+      updateImages((current) => [...current, ...queuedImages]);
+      queuedImages.forEach((image) => enqueueUpload(image.id));
     },
-    [ensureDraft, images.length, listingId],
+    [enqueueUpload, updateImages],
   );
 
   const handleDragEnd = async ({ active, over }: DragEndEvent) => {
@@ -273,28 +479,28 @@ export function ImageUploader({
     const newIndex = currentImages.findIndex((image) => image.id === over.id);
     const previousOrder = currentImages.map((image) => image.id);
     const next = arrayMove(currentImages, oldIndex, newIndex);
-    setImages(next);
-    const draftId = listingId ?? (await ensureDraft());
+    updateImages(() => next);
+    const draftId = listingIdRef.current ?? (await ensureDraft());
     if (!draftId) {
-      setImages((current) => restoreImageOrder(current, previousOrder));
+      updateImages((current) => restoreImageOrder(current, previousOrder));
       return;
     }
+    listingIdRef.current = draftId;
 
-    // If some images failed to upload, exclude them from the server-side reorder
-    // so the RPC only sees valid image rows. The local order still includes
-    // failed placeholders so users can remove or retry them.
-    const imageIdsToSave = next.filter((img) => img.status !== 'failed').map((image) => image.id);
+    // Optimistic previews do not have a database row yet. Exclude only those
+    // local placeholders; registered failed images still belong in the order.
+    const imageIdsToSave = next.filter((image) => Boolean(image.path)).map((image) => image.id);
     try {
       const result = await reorderListingImagesAction({
         listingId: draftId,
         imageIds: imageIdsToSave,
       });
       if (!result.ok) {
-        setImages((current) => restoreImageOrder(current, previousOrder));
+        updateImages((current) => restoreImageOrder(current, previousOrder));
         setMessage(`${result.message} Your previous order was restored.`);
       }
     } catch {
-      setImages((current) => restoreImageOrder(current, previousOrder));
+      updateImages((current) => restoreImageOrder(current, previousOrder));
       setMessage('The image order could not be saved. Your previous order was restored.');
     }
   };
@@ -303,13 +509,42 @@ export function ImageUploader({
 
   const removeImage = async (image: ComposerImage) => {
     cancelledUploadsRef.current.add(image.id);
-    const draftId = listingId ?? (await ensureDraft());
-    if (!draftId) return;
+    const job = uploadJobsRef.current.get(image.id);
+
+    // Stop an active signed request, hide its optimistic preview immediately,
+    // and let the serialized job remove metadata/object after the request has
+    // actually settled. Deleting concurrently could let a late PUT recreate an
+    // orphaned Storage object.
+    if (job?.queued) {
+      job.transferController?.abort('Image removed by user.');
+      if (image.url.startsWith('blob:')) URL.revokeObjectURL(image.url);
+      updateImages((current) => current.filter((item) => item.id !== image.id));
+      return;
+    }
+
+    // A preview is inserted before registration. Removing it during that short
+    // window must stay local rather than creating a draft just to delete it.
+    if (!image.path) {
+      if (image.url.startsWith('blob:')) URL.revokeObjectURL(image.url);
+      updateImages((current) => current.filter((item) => item.id !== image.id));
+      if (!job?.queued) {
+        uploadJobsRef.current.delete(image.id);
+        cancelledUploadsRef.current.delete(image.id);
+      }
+      return;
+    }
+
+    const draftId = job?.listingId ?? listingIdRef.current ?? (await ensureDraft());
+    if (!draftId) {
+      cancelledUploadsRef.current.delete(image.id);
+      setMessage('The image could not be removed until the draft is saved.');
+      return;
+    }
     try {
       const result = await removeListingImageAction({ listingId: draftId, imageId: image.id });
       if (!result.ok) {
         cancelledUploadsRef.current.delete(image.id);
-        setImages((current) =>
+        updateImages((current) =>
           current.map((item) =>
             item.id === image.id && item.status === 'uploading'
               ? { ...item, status: 'failed' }
@@ -320,10 +555,12 @@ export function ImageUploader({
         return;
       }
       if (image.url.startsWith('blob:')) URL.revokeObjectURL(image.url);
-      setImages((current) => current.filter((item) => item.id !== image.id));
+      updateImages((current) => current.filter((item) => item.id !== image.id));
+      uploadJobsRef.current.delete(image.id);
+      cancelledUploadsRef.current.delete(image.id);
     } catch {
       cancelledUploadsRef.current.delete(image.id);
-      setImages((current) =>
+      updateImages((current) =>
         current.map((item) =>
           item.id === image.id && item.status === 'uploading'
             ? { ...item, status: 'failed' }
@@ -346,7 +583,7 @@ export function ImageUploader({
   const uploadHelp = message
     ? message
     : failedCount > 0
-      ? `${failedCount} photo${failedCount === 1 ? ' needs' : 's need'} attention. Remove the failed photo${failedCount === 1 ? '' : 's'} before publishing.`
+      ? `${failedCount} photo${failedCount === 1 ? ' needs' : 's need'} attention. Retry or remove the failed photo${failedCount === 1 ? '' : 's'} before publishing.`
       : isWaitingForUpload
         ? 'Finishing your photo upload… keep this page open until it is ready.'
         : 'JPEG, PNG, or WebP · up to 5 MB each · drag to reorder · the first photo is the cover';
@@ -404,16 +641,6 @@ export function ImageUploader({
         </div>
       ) : null}
 
-      <div className="mb-4 rounded-um-sm border border-um-gold-400/30 bg-um-gold-400/10 p-3 text-sm leading-5 text-white sm:hidden">
-  <strong>Mobile upload notice:</strong> Photo uploads may currently be
-  unreliable on phones. For best results, save your draft and add photos
-  from a laptop or desktop. We’re working on a fix.
-</div>
-      <div className="mb-4 rounded-um-sm border border-white/15 bg-white/[0.05] p-3 text-sm leading-5 text-um-text-muted">
-  <strong className="text-white">Not seeing an uploaded photo?</strong>{' '}
-  Refresh the page once. Your listing inputs will remain saved.
-</div>
-
       <div
         onDragEnter={(event) => {
           event.preventDefault();
@@ -468,7 +695,9 @@ export function ImageUploader({
                     key={image.id}
                     image={image}
                     index={index}
+                    canRetry={image.url.startsWith('blob:')}
                     onRemove={removeImage}
+                    onRetry={retryImage}
                   />
                 ))}
                 {images.length < LISTING_IMAGE_MAX_COUNT ? (
@@ -487,25 +716,23 @@ export function ImageUploader({
         )}
 
         <input
-  ref={inputRef}
-  aria-describedby="image-upload-help"
-  aria-label="Upload listing photos"
-  className="sr-only"
-  accept="image/*,.jpg,.jpeg,.png,.webp,.avif,.heic,.heif"
-  multiple
-  onChange={(event) => {
-    const selectedFiles = Array.from(
-      event.currentTarget.files ?? [],
-    );
+          ref={inputRef}
+          aria-describedby="image-upload-help"
+          aria-label="Upload listing photos"
+          className="sr-only"
+          accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+          multiple
+          onChange={(event) => {
+            const selectedFiles = Array.from(event.currentTarget.files ?? []);
 
-    // Reset immediately so the same photo can be selected again.
-    event.currentTarget.value = '';
+            // Reset immediately so the same photo can be selected again.
+            event.currentTarget.value = '';
 
-    void uploadFiles(selectedFiles);
-  }}
-  tabIndex={-1}
-  type="file"
-/>
+            void uploadFiles(selectedFiles);
+          }}
+          tabIndex={-1}
+          type="file"
+        />
       </div>
       <p
         aria-live="polite"
@@ -524,14 +751,19 @@ export function ImageUploader({
 function SortableImage({
   image,
   index,
+  canRetry,
   onRemove,
+  onRetry,
 }: {
   image: ComposerImage;
   index: number;
+  canRetry: boolean;
   onRemove: (image: ComposerImage) => void;
+  onRetry: (image: ComposerImage) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: image.id,
+    disabled: image.status !== 'uploaded',
   });
   const safeAttributes = {
     ...attributes,
@@ -574,7 +806,7 @@ function SortableImage({
           <span className="rounded-full bg-red-500/90 px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-white">
             Needs attention
           </span>
-        ) : (
+        ) : image.status === 'uploaded' ? (
           <button
             type="button"
             className="grid size-11 touch-none place-items-center rounded-um-sm bg-black/[0.55] transition hover:bg-black/75 focus-visible:ring-2 focus-visible:ring-white"
@@ -582,7 +814,7 @@ function SortableImage({
           >
             <GripVertical aria-hidden="true" className="size-4" />
           </button>
-        )}
+        ) : null}
       </div>
       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent p-2 pt-8">
         {image.status === 'uploading' ? (
@@ -601,21 +833,33 @@ function SortableImage({
             </div>
           </div>
         ) : image.status === 'failed' ? (
-          <div className="flex items-center justify-between gap-2 rounded-um-xs border border-red-300/30 bg-um-ink-950/85 px-2 py-1.5">
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-um-xs border border-red-300/30 bg-um-ink-950/85 px-2 py-1.5">
             <span
               className="inline-flex items-center gap-1 text-xs font-semibold text-red-100"
               role="alert"
             >
               <RotateCcw aria-hidden="true" className="size-3" /> Upload did not finish
             </span>
-            <button
-              type="button"
-              onClick={() => onRemove(image)}
-              aria-label={`Remove failed upload ${image.name}`}
-              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-um-xs bg-red-500 px-2.5 text-xs font-bold text-white transition hover:bg-red-400 focus-visible:ring-2 focus-visible:ring-white"
-            >
-              <Trash2 aria-hidden="true" className="size-3.5" /> Remove
-            </button>
+            <span className="ml-auto flex items-center gap-1.5">
+              {canRetry ? (
+                <button
+                  type="button"
+                  onClick={() => onRetry(image)}
+                  aria-label={`Retry upload ${image.name}`}
+                  className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-um-xs bg-um-gold-400 px-2.5 text-xs font-bold text-um-ink-950 transition hover:bg-um-gold-300 focus-visible:ring-2 focus-visible:ring-white"
+                >
+                  <RotateCcw aria-hidden="true" className="size-3.5" /> Retry
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => onRemove(image)}
+                aria-label={`Remove failed upload ${image.name}`}
+                className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-um-xs bg-red-500 px-2.5 text-xs font-bold text-white transition hover:bg-red-400 focus-visible:ring-2 focus-visible:ring-white"
+              >
+                <Trash2 aria-hidden="true" className="size-3.5" /> Remove
+              </button>
+            </span>
           </div>
         ) : (
           <div className="flex items-center justify-end gap-1">
@@ -632,37 +876,6 @@ function SortableImage({
       </div>
     </div>
   );
-}
-
-async function getImageDimensions(file: File) {
-  // Try fast bitmap API first, but fall back to image element if it fails
-  if (typeof window !== 'undefined' && 'createImageBitmap' in window) {
-    try {
-      const bitmap = await createImageBitmap(file);
-      const dimensions = { width: bitmap.width, height: bitmap.height };
-      bitmap.close();
-      return dimensions;
-    } catch (err) {
-      // Continue to fallback below
-      // Log to help debugging in the wild
-      console.warn('createImageBitmap failed, falling back to Image element', err);
-    }
-  }
-
-  return await new Promise<{ width: number; height: number }>((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const image = new window.Image();
-    image.onload = () => {
-      resolve({ width: image.naturalWidth, height: image.naturalHeight });
-      URL.revokeObjectURL(url);
-    };
-    image.onerror = (e) => {
-      URL.revokeObjectURL(url);
-      console.error('Image failed to load for dimension extraction', e);
-      reject(new Error('Invalid image'));
-    };
-    image.src = url;
-  });
 }
 
 function restoreImageOrder(images: ComposerImage[], orderedIds: string[]) {
@@ -687,12 +900,17 @@ async function finalizeUploadedImage(
   let lastResult: FinalizeImageResult | null = null;
 
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    const result = await finalizeListingImageAction({ listingId, imageId });
-    lastResult = result;
-    if (result.ok) return result;
+    try {
+      const result = await finalizeListingImageAction({ listingId, imageId });
+      lastResult = result;
+      if (result.ok) return result;
 
-    const objectMayStillBeSettling = result.message.toLowerCase().includes('did not finish');
-    if (!objectMayStillBeSettling || attempt === maxAttempts - 1) return result;
+      const objectMayStillBeSettling = result.message.toLowerCase().includes('did not finish');
+      if (!objectMayStillBeSettling || attempt === maxAttempts - 1) return result;
+    } catch {
+      if (attempt === maxAttempts - 1) throw new Error('Image verification request failed.');
+    }
+
     await new Promise((resolve) => setTimeout(resolve, 300 * 2 ** attempt));
   }
 
@@ -704,162 +922,57 @@ async function finalizeUploadedImage(
   );
 }
 
-function getStorageErrorText(error: unknown) {
-  if (!error || typeof error !== 'object') return String(error ?? '');
-  const details = error as {
-    message?: unknown;
-    error?: unknown;
-    statusCode?: unknown;
-    originalError?: unknown;
-  };
-  return [details.statusCode, details.error, details.message, details.originalError]
-    .filter(Boolean)
-    .map(String)
-    .join(' ')
-    .toLowerCase();
+function createClientImageId() {
+  if (typeof globalThis.crypto.randomUUID === 'function') {
+    return globalThis.crypto.randomUUID();
+  }
+
+  // Older iOS WebViews expose getRandomValues without randomUUID.
+  const bytes = globalThis.crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0'));
+  return `${hex.slice(0, 4).join('')}-${hex.slice(4, 6).join('')}-${hex.slice(6, 8).join('')}-${hex.slice(8, 10).join('')}-${hex.slice(10).join('')}`;
 }
 
-function isAuthenticationStorageError(error: unknown) {
-  const text = getStorageErrorText(error);
-  return (
-    text.includes('401') ||
-    text.includes('403') ||
-    text.includes('unauthorized') ||
-    text.includes('jwt') ||
-    text.includes('jws')
-  );
-}
-
-async function uploadListingImage(
-  file: File,
-  listingId: string,
-  item: ComposerImage,
-  setImages: React.Dispatch<React.SetStateAction<ComposerImage[]>>,
-  cancelledUploadsRef: React.MutableRefObject<Set<string>>,
-  setMessage: React.Dispatch<React.SetStateAction<string>>,
+async function waitForUploadOpportunity(
+  isCancelled: () => boolean,
+  onWaiting: (message: string) => void,
 ) {
-  const supabase = createClient();
-  const updateProgress = (progress: number) => {
-    setImages((current) =>
-      current.map((image) => (image.id === item.id ? { ...image, progress } : image)),
+  while (!isCancelled()) {
+    const isOffline = typeof navigator !== 'undefined' && navigator.onLine === false;
+    const isHidden = typeof document !== 'undefined' && document.visibilityState === 'hidden';
+
+    if (!isOffline && !isHidden) return true;
+    onWaiting(
+      isOffline
+        ? 'Upload paused until your connection returns.'
+        : 'Upload paused while this page is in the background.',
     );
-  };
-  const failUpload = (errorMessage?: string) => {
-    setImages((current) =>
-      current.map((image) => (image.id === item.id ? { ...image, status: 'failed' } : image)),
-    );
-    setMessage(errorMessage ?? `${file.name} did not finish uploading. Remove it and try again.`);
-  };
+    await delay(750);
+  }
 
-const {
-  data: refreshedAuth,
-  error: refreshError,
-} = await supabase.auth.refreshSession();
-
-if (refreshError || !refreshedAuth.session) {
-  console.error('[Image upload auth refresh failed]', {
-    refreshError,
-    listingId,
-    imageId: item.id,
-  });
-
-  failUpload(
-    'Your session could not be refreshed. Sign out, sign in again, and retry the photo.',
-  );
-
-  return;
+  return false;
 }
 
-  let lastError: unknown = null;
-
-for (let attempt = 0; attempt < 3; attempt += 1) {
-    if (cancelledUploadsRef.current.has(item.id)) return;
-
-    if (attempt > 0) {
-      updateProgress(18);
-      await supabase.auth.refreshSession().catch(() => undefined);
-      await new Promise((resolve) =>
-  setTimeout(resolve, 700 * 2 ** (attempt - 1)),
-);
-    } else {
-      updateProgress(10);
-    }
-
-    const { error } = await supabase.storage
-  .from('listing-images')
-  .upload(item.path, file, {
-    cacheControl: '3600',
-    contentType: file.type,
-    upsert: false,
-  });
-
-if (error) {
-  console.error('[Supabase image upload failed]', {
-    attempt: attempt + 1,
-    listingId,
-    imageId: item.id,
-    path: item.path,
-    fileName: file.name,
-    fileType: file.type,
-    fileSize: file.size,
-    statusCode:
-      'statusCode' in error
-        ? error.statusCode
-        : undefined,
-    message: error.message,
-    error,
+function delay(milliseconds: number) {
+  return new Promise<void>((resolve) => {
+    window.setTimeout(resolve, milliseconds);
   });
 }
 
-if (!error) {
-  lastError = null;
-  updateProgress(84);
-  break;
-}
+function delayUnlessAborted(milliseconds: number, signal: AbortSignal) {
+  if (signal.aborted) return Promise.resolve(false);
 
-lastError = error;
-
-    // Mobile connections can drop after Storage accepted the body but before
-    // the browser received the response. Reconcile before sending it again.
-    try {
-      const recovered = await finalizeUploadedImage(listingId, item.id, 1);
-      if (recovered.ok) {
-        lastError = null;
-        break;
-      }
-    } catch {
-      // The normal retry below is still safe because every image path is unique.
-    }
-  }
-
-  if (cancelledUploadsRef.current.has(item.id)) {
-    await removeListingImageAction({ listingId, imageId: item.id }).catch(() => undefined);
-    return;
-  }
-
-  if (lastError) {
-    failUpload(
-      isAuthenticationStorageError(lastError)
-        ? 'Your session could not be verified. Sign out, sign in again, and retry the photo.'
-        : undefined,
-    );
-    return;
-  }
-
-  try {
-    const finalized = await finalizeUploadedImage(listingId, item.id, 5);
-    if (!finalized.ok) {
-      failUpload(finalized.message);
-      return;
-    }
-
-    setImages((current) =>
-      current.map((image) =>
-        image.id === item.id ? { ...image, progress: 100, status: 'uploaded' } : image,
-      ),
-    );
-    setMessage('');
-  } catch {
-    failUpload(`${file.name} uploaded but could not be verified. Remove it and try again.`);
-  }
+  return new Promise<boolean>((resolve) => {
+    const timeoutId = window.setTimeout(() => {
+      signal.removeEventListener('abort', handleAbort);
+      resolve(true);
+    }, milliseconds);
+    const handleAbort = () => {
+      window.clearTimeout(timeoutId);
+      resolve(false);
+    };
+    signal.addEventListener('abort', handleAbort, { once: true });
+  });
 }

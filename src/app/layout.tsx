@@ -74,7 +74,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html data-university={waterlooTheme.id} lang="en">
+    <html data-scroll-behavior="smooth" data-university={waterlooTheme.id} lang="en">
       <body className={`${barlow.variable} ${sourceSerif.variable}`}>{children}</body>
     </html>
   );

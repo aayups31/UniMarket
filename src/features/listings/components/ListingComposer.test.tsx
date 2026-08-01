@@ -28,13 +28,14 @@ vi.mock('../client-persistence', () => ({
 
 vi.mock('./ImageUploader', async () => {
   const React = await import('react');
-  const uploadedImages = [
+  type MockImageStatus = 'uploading' | 'uploaded' | 'failed';
+  const imageForStatus = (status: MockImageStatus) => [
     {
       id: 'image-one',
       url: '/images/test-listing.jpg',
       path: 'seller/listing/image-one.jpg',
-      progress: 100,
-      status: 'uploaded' as const,
+      progress: status === 'uploaded' ? 100 : 0,
+      status,
       name: 'test-listing.jpg',
     },
   ];
@@ -43,10 +44,26 @@ vi.mock('./ImageUploader', async () => {
     ImageUploader: ({
       onImagesChange,
     }: {
-      onImagesChange?: (images: typeof uploadedImages) => void;
+      onImagesChange?: (images: ReturnType<typeof imageForStatus>) => void;
     }) => {
-      React.useEffect(() => onImagesChange?.(uploadedImages), [onImagesChange]);
-      return <section id="images">One uploaded photo</section>;
+      React.useEffect(() => onImagesChange?.(imageForStatus('uploaded')), [onImagesChange]);
+      return (
+        <section id="images">
+          One uploaded photo
+          <button type="button" onClick={() => onImagesChange?.(imageForStatus('uploading'))}>
+            Mock image uploading
+          </button>
+          <button type="button" onClick={() => onImagesChange?.(imageForStatus('uploaded'))}>
+            Mock image uploaded
+          </button>
+          <button type="button" onClick={() => onImagesChange?.(imageForStatus('failed'))}>
+            Mock image failed
+          </button>
+          <button type="button" onClick={() => onImagesChange?.([])}>
+            Mock image removed
+          </button>
+        </section>
+      );
     },
   };
 });
@@ -184,6 +201,52 @@ describe('ListingComposer listing actions', () => {
       2,
       expect.objectContaining({ listingId: reservedId, title: 'Desk lamp' }),
     );
+  });
+
+  it('defers the edit URL until a newly-created draft image finishes uploading', async () => {
+    const replaceState = vi
+      .spyOn(window.history, 'replaceState')
+      .mockImplementation(() => undefined);
+    const user = userEvent.setup();
+    renderComposer();
+
+    await user.click(screen.getByRole('button', { name: 'Mock image uploading' }));
+    await user.click(screen.getAllByRole('button', { name: 'Save draft' })[0]);
+
+    await waitFor(() => expect(mocks.saveListingDraftAction).toHaveBeenCalledOnce());
+    await waitFor(() =>
+      expect(screen.getAllByText('Draft saved privately.').length).toBeGreaterThan(0),
+    );
+    const reservedId = mocks.saveListingDraftAction.mock.calls[0][0].listingId;
+    expect(replaceState).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: 'Mock image uploaded' }));
+
+    await waitFor(() => expect(replaceState).toHaveBeenCalledOnce());
+    expect(replaceState.mock.calls[0]?.slice(1)).toEqual(['', `/listings/${reservedId}/edit`]);
+  });
+
+  it('keeps a failed image on the new URL until the failed image is removed', async () => {
+    const replaceState = vi
+      .spyOn(window.history, 'replaceState')
+      .mockImplementation(() => undefined);
+    const user = userEvent.setup();
+    renderComposer();
+
+    await user.click(screen.getByRole('button', { name: 'Mock image failed' }));
+    await user.click(screen.getAllByRole('button', { name: 'Save draft' })[0]);
+
+    await waitFor(() => expect(mocks.saveListingDraftAction).toHaveBeenCalledOnce());
+    await waitFor(() =>
+      expect(screen.getAllByText('Draft saved privately.').length).toBeGreaterThan(0),
+    );
+    const reservedId = mocks.saveListingDraftAction.mock.calls[0][0].listingId;
+    expect(replaceState).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: 'Mock image removed' }));
+
+    await waitFor(() => expect(replaceState).toHaveBeenCalledOnce());
+    expect(replaceState.mock.calls[0]?.slice(1)).toEqual(['', `/listings/${reservedId}/edit`]);
   });
 
   it('saves a complete new listing before publishing it with the returned id', async () => {

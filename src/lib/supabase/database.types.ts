@@ -517,6 +517,17 @@ export type Database = {
         Args: { p_listing_id: string };
         Returns: Listing;
       };
+      reserve_listing_image: {
+        Args: {
+          p_listing_id: string;
+          p_image_id: string;
+          p_mime_type: string;
+          p_size_bytes: number;
+          p_width?: number | null;
+          p_height?: number | null;
+        };
+        Returns: ListingImage;
+      };
       save_listing_draft: {
         Args: {
           p_listing_id?: string | null;

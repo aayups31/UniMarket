@@ -85,6 +85,7 @@ describe('listing schemas', () => {
     expect(LISTING_IMAGE_MAX_BYTES).toBe(5 * 1024 * 1024);
 
     const registration = {
+      imageId: 'a43e817a-20bc-47d8-86c3-a55f3c839486',
       listingId: validDraft.listingId,
       name: 'monitor.jpg',
       mimeType: 'image/jpeg' as const,
@@ -96,8 +97,23 @@ describe('listing schemas', () => {
     expect(imageRegistrationSchema.safeParse(registration).success).toBe(true);
     expect(
       imageRegistrationSchema.safeParse({
+        imageId: registration.imageId,
+        listingId: registration.listingId,
+        name: registration.name,
+        mimeType: registration.mimeType,
+        sizeBytes: registration.sizeBytes,
+      }).success,
+    ).toBe(true);
+    expect(
+      imageRegistrationSchema.safeParse({
         ...registration,
         sizeBytes: LISTING_IMAGE_MAX_BYTES + 1,
+      }).success,
+    ).toBe(false);
+    expect(
+      imageRegistrationSchema.safeParse({
+        ...registration,
+        imageId: undefined,
       }).success,
     ).toBe(false);
   });

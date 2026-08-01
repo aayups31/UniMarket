@@ -53,12 +53,13 @@ export const listingPublishSchema = listingDraftBaseSchema.extend({
 });
 
 export const imageRegistrationSchema = z.object({
+  imageId: z.uuid(),
   listingId: z.uuid(),
   name: z.string().trim().min(1).max(255),
   mimeType: z.enum(['image/jpeg', 'image/png', 'image/webp']),
   sizeBytes: z.number().int().positive().max(LISTING_IMAGE_MAX_BYTES),
-  width: z.number().int().positive().max(20_000),
-  height: z.number().int().positive().max(20_000),
+  width: z.number().int().positive().max(20_000).nullable().optional(),
+  height: z.number().int().positive().max(20_000).nullable().optional(),
 });
 
 export const listingIdSchema = z.uuid();

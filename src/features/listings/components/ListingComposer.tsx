@@ -110,6 +110,7 @@ export function ListingComposer({ sellerName, categories, initial }: ListingComp
   const [noticeKind, setNoticeKind] = useState<'success' | 'error'>('success');
   const [isAutosaving, setIsAutosaving] = useState(false);
   const [pendingAction, setPendingAction] = useState<'save' | 'publish' | null>(null);
+  const [pendingCanonicalPath, setPendingCanonicalPath] = useState<string | null>(null);
   const [isSaving, startSaving] = useTransition();
   const listingIdRef = useRef(initial?.id ?? null);
   const hasPersistedListingRef = useRef(Boolean(initial?.id));
@@ -118,6 +119,7 @@ export function ListingComposer({ sellerName, categories, initial }: ListingComp
   const lastAutosaveAttemptRevisionRef = useRef<number | null>(null);
   const manualOperationRef = useRef(false);
   const publishCompletedRef = useRef(false);
+  const canonicalizedPathRef = useRef<string | null>(null);
   const {
     register,
     getValues,
@@ -142,7 +144,8 @@ export function ListingComposer({ sellerName, categories, initial }: ListingComp
   const values = useWatch({ control }) as FormValues;
   const canAutosave = !isPublished;
   const hasUploadingImages = images.some((image) => image.status === 'uploading');
-  const hasPendingWork = isDirty || hasUploadingImages;
+  const hasFailedImages = images.some((image) => image.status === 'failed');
+  const hasPendingWork = isDirty || hasUploadingImages || hasFailedImages;
   const hasDraftSafePrice =
     values.price.trim().length === 0 || dollarsToCents(values.price) !== null;
 
@@ -217,7 +220,13 @@ export function ListingComposer({ sellerName, categories, initial }: ListingComp
           hasPersistedListingRef.current = true;
           listingIdRef.current = savedId;
           setListingId(savedId);
-          window.history.replaceState(null, '', `/listings/${savedId}/edit`);
+          // Next.js observes native history changes. Moving from `/listings/new`
+          // to the dynamic edit route remounts this composer, so changing the URL
+          // here used to cancel and delete the very first image upload between
+          // registration and transfer. Canonicalize only after all local work is
+          // safely persisted; failed images must keep their in-memory File so the
+          // user can retry them without selecting the photo again.
+          setPendingCanonicalPath(`/listings/${savedId}/edit`);
         }
 
         // Only clear the dirty state when the fields still match the exact payload
@@ -248,6 +257,33 @@ export function ListingComposer({ sellerName, categories, initial }: ListingComp
     );
     return queuedSave;
   }, [getValues, reset, setError, toPayload]);
+
+  useEffect(() => {
+    if (
+      !pendingCanonicalPath ||
+      canonicalizedPathRef.current === pendingCanonicalPath ||
+      isDirty ||
+      hasUploadingImages ||
+      hasFailedImages ||
+      isAutosaving ||
+      isSaving ||
+      pendingAction !== null
+    ) {
+      return;
+    }
+
+    const canonicalPath = pendingCanonicalPath;
+    canonicalizedPathRef.current = canonicalPath;
+    window.history.replaceState(window.history.state, '', canonicalPath);
+  }, [
+    hasFailedImages,
+    hasUploadingImages,
+    isAutosaving,
+    isDirty,
+    isSaving,
+    pendingAction,
+    pendingCanonicalPath,
+  ]);
 
   useEffect(() => {
     autosaveRevisionRef.current += 1;
@@ -355,8 +391,8 @@ export function ListingComposer({ sellerName, categories, initial }: ListingComp
 
       if (
         !window.confirm(
-          hasUploadingImages
-            ? 'Photos are still uploading. Leave this page anyway?'
+          hasUploadingImages || hasFailedImages
+            ? 'Photos have not finished. Leave this page anyway?'
             : 'You have unsaved listing changes. Leave this page anyway?',
         )
       ) {
@@ -371,7 +407,7 @@ export function ListingComposer({ sellerName, categories, initial }: ListingComp
       window.removeEventListener('beforeunload', handleBeforeUnload);
       document.removeEventListener('click', handleLinkClick, true);
     };
-  }, [hasPendingWork, hasUploadingImages]);
+  }, [hasFailedImages, hasPendingWork, hasUploadingImages]);
 
   const saveDraft = () => {
     manualOperationRef.current = true;
